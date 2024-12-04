@@ -1,10 +1,15 @@
 package com.barter.domain.trade.donationtrade.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.repository.RegisteredProductRepository;
-import com.barter.domain.trade.donationtrade.dto.CreateDonationTradeReqDto;
+import com.barter.domain.trade.donationtrade.dto.request.CreateDonationTradeReqDto;
+import com.barter.domain.trade.donationtrade.dto.response.FindDonationTradeResDto;
 import com.barter.domain.trade.donationtrade.entity.DonationTrade;
 import com.barter.domain.trade.donationtrade.repository.DonationTradeRepository;
 
@@ -30,5 +35,19 @@ public class DonationTradeService {
 
 		donationTrade.validateIsExceededMaxEndDate();
 		donationTradeRepository.save(donationTrade);
+	}
+
+	@Transactional(readOnly = true)
+	public PagedModel<FindDonationTradeResDto> findDonationTrades(Pageable pageable) {
+		Page<FindDonationTradeResDto> trades = donationTradeRepository.findAll(pageable)
+			.map(FindDonationTradeResDto::from);
+		return new PagedModel<>(trades);
+	}
+
+	@Transactional(readOnly = true)
+	public FindDonationTradeResDto findDonationTrade(Long tradeId) {
+		return donationTradeRepository.findById(tradeId)
+			.map(FindDonationTradeResDto::from)
+			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 나눔 교환 입니다."));
 	}
 }

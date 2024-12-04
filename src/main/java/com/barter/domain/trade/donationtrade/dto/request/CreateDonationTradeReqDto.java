@@ -1,4 +1,4 @@
-package com.barter.domain.trade.donationtrade.dto;
+package com.barter.domain.trade.donationtrade.dto.request;
 
 import java.time.LocalDateTime;
 
