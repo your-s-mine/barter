@@ -1,4 +1,4 @@
-package com.barter.domain.trade.entity;
+package com.barter.domain.trade.donationtrade.entity;
 
 import com.barter.domain.member.entity.Member;
 
