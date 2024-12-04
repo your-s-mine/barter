@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.trade.enums.TradeStatus;
-import com.barter.domain.trade.immediatetrade.dto.request.CreateImmediateTradeRequestDto;
+import com.barter.domain.trade.immediatetrade.dto.request.CreateImmediateTradeReqDto;
 import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
 
@@ -17,7 +17,7 @@ public class ImmediateTradeService {
 
 	private final ImmediateTradeRepository immediateTradeRepository;
 
-	public String create(CreateImmediateTradeRequestDto requestDto) {
+	public String create(CreateImmediateTradeReqDto requestDto) {
 		// todo: 등록 물품 레포지토리에서 물품이 있는지 확인 findById() `registeredProduct.getId()`
 		RegisteredProduct registeredProduct = requestDto.getRegisteredProduct();
 

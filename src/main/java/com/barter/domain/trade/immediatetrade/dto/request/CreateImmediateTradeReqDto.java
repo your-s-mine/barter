@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 @Getter
-public class CreateImmediateTradeRequestDto {
+public class CreateImmediateTradeReqDto {
 	RegisteredProduct registeredProduct;
 	@NotBlank
 	@Size(min = 5)
