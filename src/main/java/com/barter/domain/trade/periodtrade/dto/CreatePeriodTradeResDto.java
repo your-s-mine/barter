@@ -8,9 +8,10 @@ import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
-@Builder
+@NoArgsConstructor
 public class CreatePeriodTradeResDto {
 	private Long periodTradesId;
 	private String title;
@@ -21,6 +22,22 @@ public class CreatePeriodTradeResDto {
 	private TradeStatus tradeStatus;
 	private int viewCount;
 	private LocalDateTime endedAt;
+
+	@Builder
+	public CreatePeriodTradeResDto(Long periodTradesId, String title, String description, RegisteredProduct product,
+		LocalDateTime createdAt, LocalDateTime updatedAt, TradeStatus tradeStatus, int viewCount, LocalDateTime endedAt
+	) {
+		this.periodTradesId = periodTradesId;
+		this.title = title;
+		this.description = description;
+		this.product = product;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
+		this.tradeStatus = tradeStatus;
+		this.viewCount = viewCount;
+		this.endedAt = endedAt;
+
+	}
 
 	public static CreatePeriodTradeResDto from(PeriodTrade periodTrade) {
 		return CreatePeriodTradeResDto.builder()
