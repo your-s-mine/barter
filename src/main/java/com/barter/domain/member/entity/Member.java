@@ -43,4 +43,8 @@ public class Member extends BaseTimeStampEntity {
 		this.profileImage = profileImage;
 		this.joinPath = joinPath;
 	}
+
+	public boolean isEqualsId(Long userId) {
+		return id.equals(userId);
+	}
 }
