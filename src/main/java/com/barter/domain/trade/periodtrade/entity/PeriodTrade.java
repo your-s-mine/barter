@@ -74,5 +74,10 @@ public class PeriodTrade extends BaseTimeStampEntity {
 	public void addViewCount() {
 		this.viewCount++;
 	}
+
+	public void update(String title, String description) {
+		this.title = title;
+		this.description = description;
+	}
 }
 

@@ -6,6 +6,7 @@ import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.barter.domain.trade.periodtrade.dto.CreatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.CreatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.FindPeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.UpdatePeriodTradeReqDto;
+import com.barter.domain.trade.periodtrade.dto.UpdatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.service.PeriodTradeService;
 
 import jakarta.validation.Valid;
@@ -45,6 +48,15 @@ public class PeriodTradeController {
 	public ResponseEntity<FindPeriodTradeResDto> findPeriodTrade(@PathVariable Long id) {
 		return ResponseEntity.status(HttpStatus.OK).body(
 			periodTradeService.findPeriodTradeById(id)
+		);
+	}
+
+	@PatchMapping("/period-trades/{id}")
+	public ResponseEntity<UpdatePeriodTradeResDto> updatePeriodTrade(
+		@PathVariable Long id,
+		@Valid @RequestBody UpdatePeriodTradeReqDto reqDto) {
+		return ResponseEntity.status(HttpStatus.OK).body(
+			periodTradeService.updatePeriodTrade(id, reqDto)
 		);
 	}
 
