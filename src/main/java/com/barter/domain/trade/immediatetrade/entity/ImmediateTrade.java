@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -25,9 +26,21 @@ public class ImmediateTrade extends BaseTimeStampEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	private String title;
+	private String description;
 	@ManyToOne
 	private RegisteredProduct product;
 	@Enumerated(EnumType.STRING)
 	private TradeStatus status;
 	private int viewCount;
+
+	@Builder
+	public ImmediateTrade(String title, String description, RegisteredProduct product, TradeStatus status,
+		int viewCount) {
+		this.title = title;
+		this.description = description;
+		this.product = product;
+		this.status = status;
+		this.viewCount = viewCount;
+	}
 }
