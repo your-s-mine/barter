@@ -26,6 +26,7 @@ import lombok.NoArgsConstructor;
 public class DonationTrade extends BaseTimeStampEntity {
 
 	private static final int MAX_AFTER_DAY = 7;
+	private static final int MIN_LENGTH = 5;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -84,10 +85,10 @@ public class DonationTrade extends BaseTimeStampEntity {
 	}
 
 	public void update(String title, String description) {
-		if (!title.isEmpty()) {
+		if (title.length() >= MIN_LENGTH) {
 			this.title = title;
 		}
-		if (!description.isEmpty()) {
+		if (description.length() >= MIN_LENGTH) {
 			this.description = description;
 		}
 	}
