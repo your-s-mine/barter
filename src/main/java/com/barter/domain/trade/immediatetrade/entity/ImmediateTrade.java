@@ -43,4 +43,8 @@ public class ImmediateTrade extends BaseTimeStampEntity {
 		this.status = status;
 		this.viewCount = viewCount;
 	}
+
+	public void addViewCount() {
+		this.viewCount += 1;
+	}
 }
