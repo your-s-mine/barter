@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.barter.domain.member.repository.MemberRepository;
-import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.trade.periodtrade.PeriodTradeRepository;
 import com.barter.domain.trade.periodtrade.dto.CreatePeriodTradeReqDto;
@@ -17,7 +16,6 @@ import com.barter.domain.trade.periodtrade.dto.UpdatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.UpdatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -63,20 +61,13 @@ public class PeriodTradeService {
 	}
 
 	@Transactional
-	public UpdatePeriodTradeResDto updatePeriodTrade(Long id, @Valid UpdatePeriodTradeReqDto reqDto) {
+	public UpdatePeriodTradeResDto updatePeriodTrade(Long id, UpdatePeriodTradeReqDto reqDto) {
 
-		RegisteredProduct product = registeredProductRepository.findById(reqDto.getProductId()).orElseThrow(
-			() -> new IllegalArgumentException("등록된 상품이 존재하지 않습니다.")
-		);
-
-		if (product.getMember().getId() != 1) {// 현재 인증된 멤버 아이디가 1 이라고 일단 가정
-			throw new IllegalArgumentException("해당 물품에 대한 수정 권한이 없습니다.");
-		}
-
+		Long userId = 1L;
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
-
+		periodTrade.validateAuthority(userId);
 		periodTrade.validateIsCompleted();
 		periodTrade.update(reqDto.getTitle(), reqDto.getDescription());
 
