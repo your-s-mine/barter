@@ -8,6 +8,7 @@ import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.trade.enums.TradeStatus;
 import com.barter.domain.trade.immediatetrade.dto.FindImmediateTradeResDto;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateImmediateTradeReqDto;
+import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeReqDto;
 import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
 
@@ -19,15 +20,15 @@ public class ImmediateTradeService {
 	private final ImmediateTradeRepository immediateTradeRepository;
 	private final RegisteredProductRepository registeredProductRepository;
 
-	public FindImmediateTradeResDto create(CreateImmediateTradeReqDto requestDto) {
+	public FindImmediateTradeResDto create(CreateImmediateTradeReqDto reqDto) {
 		RegisteredProduct registeredProduct = registeredProductRepository
-			.findById(requestDto.getRegisteredProduct().getId()).orElseThrow(
+			.findById(reqDto.getRegisteredProduct().getId()).orElseThrow(
 				() -> new IllegalArgumentException("등록 물품을 찾을 수 없습니다.")
 			);
 
 		ImmediateTrade immediateTrade = ImmediateTrade.builder()
-			.title(requestDto.getTitle())
-			.description(requestDto.getDescription())
+			.title(reqDto.getTitle())
+			.description(reqDto.getDescription())
 			.product(registeredProduct)
 			.status(TradeStatus.PENDING)
 			.viewCount(0)
@@ -38,12 +39,32 @@ public class ImmediateTradeService {
 	}
 
 	@Transactional
-	public FindImmediateTradeResDto find(Long id) {
-		ImmediateTrade immediateTrade = immediateTradeRepository.findById(id)
+	public FindImmediateTradeResDto find(Long tradeId) {
+		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
 
 		immediateTrade.addViewCount();
 
 		return FindImmediateTradeResDto.from(immediateTrade);
+	}
+
+	public FindImmediateTradeResDto update(Long tradeId, UpdateImmediateTradeReqDto reqDto) throws
+		IllegalAccessException {
+		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
+
+		RegisteredProduct registeredProduct = registeredProductRepository
+			.findById(reqDto.getRegisteredProductId()).orElseThrow(
+				() -> new IllegalArgumentException("등록 물품을 찾을 수 없습니다.")
+			);
+
+		if (registeredProduct.getMember().getId() == immediateTrade.getProduct().getMember().getId()) {
+			throw new IllegalAccessException("등록한 사람만이 수정할 수 있습니다");
+		}
+
+		immediateTrade.update(reqDto);
+
+		ImmediateTrade updatedTrade = immediateTradeRepository.save(immediateTrade);
+		return FindImmediateTradeResDto.from(updatedTrade);
 	}
 }
