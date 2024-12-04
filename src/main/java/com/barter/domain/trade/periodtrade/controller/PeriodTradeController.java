@@ -1,7 +1,8 @@
 package com.barter.domain.trade.periodtrade.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,9 +34,9 @@ public class PeriodTradeController {
 	}
 
 	@GetMapping("/period-trades")
-	public ResponseEntity<List<FindPeriodTradeResDto>> findPeriodTrades() {
+	public ResponseEntity<PagedModel<FindPeriodTradeResDto>> findPeriodTrades(@PageableDefault Pageable pageable) {
 		return ResponseEntity.status(HttpStatus.OK).body(
-			periodTradeService.findPeriodTrades()
+			periodTradeService.findPeriodTrades(pageable)
 		);
 
 	}

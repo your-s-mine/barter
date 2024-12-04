@@ -1,7 +1,6 @@
 package com.barter.domain.trade.periodtrade.dto;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.trade.enums.TradeStatus;
@@ -51,12 +50,6 @@ public class FindPeriodTradeResDto {
 			.viewCount(periodTrade.getViewCount())
 			.endedAt(periodTrade.getEndedAt())
 			.build();
-	}
-
-	public static List<FindPeriodTradeResDto> from(List<PeriodTrade> periodTrades) {
-		return periodTrades.stream()
-			.map(FindPeriodTradeResDto::from)
-			.toList();
 	}
 
 }

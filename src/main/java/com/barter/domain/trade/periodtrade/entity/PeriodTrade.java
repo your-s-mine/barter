@@ -70,5 +70,9 @@ public class PeriodTrade extends BaseTimeStampEntity {
 			throw new IllegalArgumentException("종료일자는 오늘로부터 7일 이내만 가능합니다.");
 		}
 	}
+
+	public void addViewCount() {
+		this.viewCount++;
+	}
 }
 

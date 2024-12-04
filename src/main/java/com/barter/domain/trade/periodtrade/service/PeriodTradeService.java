@@ -1,10 +1,13 @@
 package com.barter.domain.trade.periodtrade.service;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.barter.domain.member.repository.MemberRepository;
+import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.trade.periodtrade.PeriodTradeRepository;
 import com.barter.domain.trade.periodtrade.dto.CreatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.CreatePeriodTradeResDto;
@@ -18,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class PeriodTradeService {
 
 	private final PeriodTradeRepository periodTradeRepository;
-	// private final RegisteredProductRepository registeredProductRepository;
+	private final RegisteredProductRepository registeredProductRepository;
 	private final MemberRepository memberRepository;
 
 	public CreatePeriodTradeResDto createPeriodTrades(CreatePeriodTradeReqDto reqDto) {
@@ -35,14 +38,20 @@ public class PeriodTradeService {
 		return CreatePeriodTradeResDto.from(periodTradeRepository.save(periodTrade));
 	}
 
-	public List<FindPeriodTradeResDto> findPeriodTrades() {
-		return FindPeriodTradeResDto.from(periodTradeRepository.findAll());
+	@Transactional(readOnly = true)
+	public PagedModel<FindPeriodTradeResDto> findPeriodTrades(Pageable pageable) {
+		Page<FindPeriodTradeResDto> trades = periodTradeRepository.findAll(pageable)
+			.map(FindPeriodTradeResDto::from);
+		return new PagedModel<>(trades);
 	}
 
+	@Transactional(readOnly = true)
 	public FindPeriodTradeResDto findPeriodTradeById(Long id) {
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
+
+		periodTrade.addViewCount();
 
 		return FindPeriodTradeResDto.from(periodTrade);
 	}
