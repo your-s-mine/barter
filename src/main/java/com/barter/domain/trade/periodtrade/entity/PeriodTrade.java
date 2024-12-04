@@ -79,5 +79,11 @@ public class PeriodTrade extends BaseTimeStampEntity {
 		this.title = title;
 		this.description = description;
 	}
+
+	public void validateIsCompleted() {
+		if (this.status.equals(TradeStatus.COMPLETED)) {
+			throw new IllegalArgumentException("이미 성사된 기간 거래는 취소 할 수 없습니다.");
+		}
+	}
 }
 

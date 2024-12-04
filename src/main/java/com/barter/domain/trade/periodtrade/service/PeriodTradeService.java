@@ -64,11 +64,7 @@ public class PeriodTradeService {
 
 	@Transactional
 	public UpdatePeriodTradeResDto updatePeriodTrade(Long id, @Valid UpdatePeriodTradeReqDto reqDto) {
-
-		/*
-		TODO : * 제안 수락한 경우, 수정 불가
-		* */
-
+		
 		RegisteredProduct product = registeredProductRepository.findById(reqDto.getProductId()).orElseThrow(
 			() -> new IllegalArgumentException("해당 맴버의 등록된 상품이 존재하지 않습니다.")
 		);
@@ -81,6 +77,7 @@ public class PeriodTradeService {
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
 
+		periodTrade.validateIsCompleted();
 		periodTrade.update(reqDto.getTitle(), reqDto.getDescription());
 
 		return UpdatePeriodTradeResDto.from(periodTrade); // save 써도 되고 안써도 되고
