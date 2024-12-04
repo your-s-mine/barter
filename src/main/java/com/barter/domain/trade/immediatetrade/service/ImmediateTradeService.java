@@ -1,4 +1,4 @@
-package com.barter.domain.trade.service;
+package com.barter.domain.trade.immediatetrade.service;
 
 import org.springframework.stereotype.Service;
 

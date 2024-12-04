@@ -1,6 +1,4 @@
-package com.barter.domain.trade.entity;
-
-import java.time.LocalDateTime;
+package com.barter.domain.trade.immediatetrade.entity;
 
 import com.barter.domain.BaseTimeStampEntity;
 import com.barter.domain.product.entity.RegisteredProduct;
@@ -21,8 +19,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "PERIOD_TRADES")
-public class PeriodTrade extends BaseTimeStampEntity {
+@Table(name = "IMMEDIATE_TRADES")
+public class ImmediateTrade extends BaseTimeStampEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,6 +30,4 @@ public class PeriodTrade extends BaseTimeStampEntity {
 	@Enumerated(EnumType.STRING)
 	private TradeStatus status;
 	private int viewCount;
-	private LocalDateTime endedAt;
 }
-
