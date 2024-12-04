@@ -85,11 +85,7 @@ public class DonationTrade extends BaseTimeStampEntity {
 	}
 
 	public void update(String title, String description) {
-		if (title.length() >= MIN_LENGTH) {
-			this.title = title;
-		}
-		if (description.length() >= MIN_LENGTH) {
-			this.description = description;
-		}
+		this.title = title;
+		this.description = description;
 	}
 }
