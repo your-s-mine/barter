@@ -49,7 +49,7 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 	}
 
 	public void validateOwner(Long userId) {
-		if (member.isEqualsId(userId)) {
+		if (!member.isEqualsId(userId)) {
 			throw new IllegalArgumentException("권한이 없습니다.");
 		}
 	}

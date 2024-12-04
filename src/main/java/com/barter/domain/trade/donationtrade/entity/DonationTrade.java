@@ -75,4 +75,20 @@ public class DonationTrade extends BaseTimeStampEntity {
 			throw new IllegalArgumentException("종료일자는 오늘로부터 7일 이내만 가능합니다.");
 		}
 	}
+
+	public void validateUpdate(Long userId) {
+		product.validateOwner(userId);
+		if (currentAmount > 0) {
+			throw new IllegalArgumentException("이미 요청한 유저가 존재합니다.");
+		}
+	}
+
+	public void update(String title, String description) {
+		if (!title.isEmpty()) {
+			this.title = title;
+		}
+		if (!description.isEmpty()) {
+			this.description = description;
+		}
+	}
 }
