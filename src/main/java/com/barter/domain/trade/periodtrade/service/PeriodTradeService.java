@@ -12,6 +12,8 @@ import com.barter.domain.trade.periodtrade.PeriodTradeRepository;
 import com.barter.domain.trade.periodtrade.dto.CreatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.CreatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.FindPeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.UpdatePeriodTradeReqDto;
+import com.barter.domain.trade.periodtrade.dto.UpdatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 
 import lombok.RequiredArgsConstructor;
@@ -56,5 +58,20 @@ public class PeriodTradeService {
 		periodTrade.addViewCount();
 
 		return FindPeriodTradeResDto.from(periodTrade);
+	}
+
+	@Transactional
+	public UpdatePeriodTradeResDto updatePeriodTrade(Long id, UpdatePeriodTradeReqDto reqDto) {
+
+		Long userId = 1L;
+		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
+			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
+		);
+		periodTrade.validateAuthority(userId);
+		periodTrade.validateIsCompleted();
+		periodTrade.update(reqDto.getTitle(), reqDto.getDescription());
+
+		return UpdatePeriodTradeResDto.from(periodTrade); // save 써도 되고 안써도 되고
+
 	}
 }
