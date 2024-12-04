@@ -65,8 +65,12 @@ public class PeriodTradeService {
 	@Transactional
 	public UpdatePeriodTradeResDto updatePeriodTrade(Long id, @Valid UpdatePeriodTradeReqDto reqDto) {
 
+		/*
+		TODO : * 제안 수락한 경우, 수정 불가
+		* */
+
 		RegisteredProduct product = registeredProductRepository.findById(reqDto.getProductId()).orElseThrow(
-			() -> new IllegalArgumentException("해당 맴베의 등록된 상품이 존재하지 않습니다.")
+			() -> new IllegalArgumentException("해당 맴버의 등록된 상품이 존재하지 않습니다.")
 		);
 
 		if (product.getMember().getId() != 1) {// 현재 인증된 멤버 아이디가 1 이라고 일단 가정
