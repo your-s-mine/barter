@@ -38,6 +38,8 @@ public class PeriodTradeService {
 		return CreatePeriodTradeResDto.from(periodTradeRepository.save(periodTrade));
 	}
 
+	// TODO : (PeriodTrade 조회) : 멤버 구현 시 멤버정보를 받아서 해당 멤버가 참여한 PeriodTrade 만 조회 가능하도록 하기
+
 	@Transactional(readOnly = true)
 	public PagedModel<FindPeriodTradeResDto> findPeriodTrades(Pageable pageable) {
 		Page<FindPeriodTradeResDto> trades = periodTradeRepository.findAll(pageable)
