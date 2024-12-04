@@ -3,6 +3,7 @@ package com.barter.domain.trade.immediatetrade.entity;
 import com.barter.domain.BaseTimeStampEntity;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.trade.enums.TradeStatus;
+import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeReqDto;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -34,17 +35,12 @@ public class ImmediateTrade extends BaseTimeStampEntity {
 	private TradeStatus status;
 	private int viewCount;
 
-	@Builder
-	public ImmediateTrade(String title, String description, RegisteredProduct product, TradeStatus status,
-		int viewCount) {
-		this.title = title;
-		this.description = description;
-		this.product = product;
-		this.status = status;
-		this.viewCount = viewCount;
-	}
-
 	public void addViewCount() {
 		this.viewCount += 1;
+	}
+
+	public void update(UpdateImmediateTradeReqDto reqDto) {
+		this.title = reqDto.getTitle();
+		this.description = reqDto.getDescription();
 	}
 }
