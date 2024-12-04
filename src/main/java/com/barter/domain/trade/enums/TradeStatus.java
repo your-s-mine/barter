@@ -1,5 +1,8 @@
 package com.barter.domain.trade.enums;
 
 public enum TradeStatus {
-	PENDING
+	PENDING,
+	IN_PROGRESS,
+	COMPLETED;
+
 }

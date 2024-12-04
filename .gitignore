@@ -43,3 +43,4 @@ out/
 
 application.properties
 application.yml
+docker-compose.yml
