@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.barter.domain.trade.periodtrade.dto.CreatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.CreatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.FindPeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.SuggestedPeriodTradeReqDto;
+import com.barter.domain.trade.periodtrade.dto.SuggestedPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.UpdatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.UpdatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.service.PeriodTradeService;
@@ -65,6 +67,15 @@ public class PeriodTradeController {
 	public ResponseEntity<Void> deletePeriodTrade(@PathVariable Long id) {
 		periodTradeService.deletePeriodTrade(id);
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+	}
+
+	@PostMapping("/period-trades/{id}/suggest") // 등록된 기간 교환에 대한 타 유저의 제안 요청 (최대 제안 물품은 일단 3개)
+	public ResponseEntity<SuggestedPeriodTradeResDto> suggestPeriodTrade(
+		@PathVariable Long id,
+		@Valid @RequestBody SuggestedPeriodTradeReqDto reqDto) {
+		return ResponseEntity.status(HttpStatus.OK).body(
+			periodTradeService.suggestPeriodTrade(id, reqDto)
+		);
 	}
 
 }

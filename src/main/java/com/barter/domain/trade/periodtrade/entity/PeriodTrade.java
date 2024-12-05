@@ -82,7 +82,13 @@ public class PeriodTrade extends BaseTimeStampEntity {
 
 	public void validateIsCompleted() {
 		if (this.status.equals(TradeStatus.COMPLETED)) {
-			throw new IllegalArgumentException("이미 성사된 기간 거래는 취소 할 수 없습니다.");
+			throw new IllegalArgumentException("이미 성사된 기간 거래입니다.");
+		}
+	}
+
+	public void validateIsPending() {
+		if (this.status.equals(TradeStatus.PENDING)) {
+			throw new IllegalArgumentException("아직 시작되지 않은 기간 거래 입니다.");
 		}
 	}
 
@@ -91,6 +97,12 @@ public class PeriodTrade extends BaseTimeStampEntity {
 			throw new IllegalArgumentException("해당 물품에 대한 수정 권한이 없습니다.");
 		}
 
+	}
+
+	public void validateSuggestAuthority(Long userId) {
+		if (this.product.getMember().getId().equals(userId)) {
+			throw new IllegalArgumentException("자신의 교환에 제안 할 수 없습니다.");
+		}
 	}
 }
 
