@@ -97,7 +97,7 @@ public class ImmediateTradeService {
 	}
 
 	// 즉시 교환 제안 생성 - in-progress, completed 상태에선 불가능
-	public String createSuggest(Long tradeId, CreateTradeSuggestProductReqDto reqDto) {
+	public String createTradeSuggest(Long tradeId, CreateTradeSuggestProductReqDto reqDto) {
 		// todo: 유저 정보를 받아와 권한 확인 로직 추가 및 수정 ex - 본인이 등록한 교환에 제안 불가
 
 		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
@@ -125,11 +125,27 @@ public class ImmediateTradeService {
 				.build();
 
 			tradeProducts.add(tradeProduct);
-			tradeProductRepository.save(tradeProduct);
 		}
 
 		tradeProductRepository.saveAll(tradeProducts);
 		return "제안 완료";
+	}
+
+	public String acceptTradeSuggest(Long tradeId) {
+		// todo: 유저 정보를 받아와 권한 확인 로직 추가 및 수정
+		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeId(tradeId);
+
+		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
+
+		for (TradeProduct tradeProduct : tradeProducts) {
+			SuggestedProduct suggestedProduct = tradeProduct.getSuggestedProduct();
+			suggestedProduct.changStatusAccepted();
+		}
+
+		immediateTrade.changStatusInProgress();
+
+		return "제안 승락 완료";
 	}
 
 	// 제안 거절 시 `교환_제안_물품` 테이블에서 삭제. 기준 "tradeId - 교환 Id"

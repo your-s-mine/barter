@@ -58,4 +58,10 @@ public class SuggestedProduct extends BaseTimeStampEntity {
 	public boolean validateProductStatus(SuggestedStatus status) {
 		return status.equals(SuggestedStatus.PENDING);
 	}
+
+
+
+	public void changStatusAccepted() {
+		this.status = SuggestedStatus.ACCEPTED;
+	}
 }
