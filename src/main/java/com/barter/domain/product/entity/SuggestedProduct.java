@@ -77,4 +77,8 @@ public class SuggestedProduct extends BaseTimeStampEntity {
 		this.description = request.getDescription();
 		this.images = request.getImages();
 	}
+
+	public void updateStatus(String status) {
+		this.status = SuggestedStatus.findSuggestedStatus(status);
+	}
 }
