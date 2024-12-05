@@ -5,6 +5,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.barter.domain.product.dto.request.CreateSuggestedProductReqDto;
+import com.barter.domain.product.dto.request.DeleteSuggestedProductReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductInfoReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductStatusReqDto;
 import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
@@ -64,12 +66,20 @@ public class SuggestedProductController {
 
 		suggestedProductService.updateSuggestedProductInfo(request);
 	}
-	
+
 	@PatchMapping("/status")
 	@ResponseStatus(HttpStatus.OK)
 	public void updateSuggestedProductStatus(@RequestBody @Valid UpdateSuggestedProductStatusReqDto request) {
 		// 현재 인증/인가 파트의 구현이 완료되지 않아 요청 회원의 정보가 전달된다는 가정하에 작성하여 추후 수정이 필요함
 
 		suggestedProductService.updateSuggestedProductStatus(request);
+	}
+
+	// 제안 물품을 삭제하는 API 의 경우, 현재 RequestBody 로 요청 파라미터를 전달 받습니다.
+	// 하지만 인증/인가 구현이후 RequestBody 가 아닌 Path Parameter 로 대상 제안 물품의 ID 를 전달 받도록 수정할 생각입니다.
+	@DeleteMapping
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void deleteSuggestedProduct(@RequestBody @Valid DeleteSuggestedProductReqDto request) {
+		suggestedProductService.deleteSuggestedProduct(request);
 	}
 }
