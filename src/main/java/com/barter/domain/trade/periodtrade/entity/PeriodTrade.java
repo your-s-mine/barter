@@ -126,5 +126,9 @@ public class PeriodTrade extends BaseTimeStampEntity {
 		 */
 
 	}
+
+	public void updatePeriodTradeStatusCompleted() {
+		this.status = TradeStatus.COMPLETED;
+	}
 }
 

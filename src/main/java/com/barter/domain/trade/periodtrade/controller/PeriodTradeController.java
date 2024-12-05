@@ -13,10 +13,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.barter.domain.trade.periodtrade.dto.request.AcceptPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.CreatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.StatusUpdateReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.SuggestedPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.UpdatePeriodTradeReqDto;
+import com.barter.domain.trade.periodtrade.dto.response.AcceptPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.CreatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.StatusUpdateResDto;
@@ -89,6 +91,15 @@ public class PeriodTradeController {
 			periodTradeService.updatePeriodTradeStatus(id, reqDto)
 		);
 
+	}
+
+	@PatchMapping("/period-trades/{id}/acceptance")
+	public ResponseEntity<AcceptPeriodTradeResDto> acceptPeriodTrade(
+		@PathVariable Long id,
+		@Valid @RequestBody AcceptPeriodTradeReqDto reqDto) {
+		return ResponseEntity.status(HttpStatus.OK).body(
+			periodTradeService.acceptPeriodTrade(id, reqDto)
+		);
 	}
 
 }

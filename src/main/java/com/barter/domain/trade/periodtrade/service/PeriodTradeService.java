@@ -16,10 +16,12 @@ import com.barter.domain.product.enums.TradeType;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.repository.SuggestedProductRepository;
 import com.barter.domain.product.repository.TradeProductRepository;
+import com.barter.domain.trade.periodtrade.dto.request.AcceptPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.CreatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.StatusUpdateReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.SuggestedPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.UpdatePeriodTradeReqDto;
+import com.barter.domain.trade.periodtrade.dto.response.AcceptPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.CreatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.StatusUpdateResDto;
@@ -149,6 +151,36 @@ public class PeriodTradeService {
 		// TODO : PeriodTrade 엔티티의 endedAt 이 현재 시간과 비교시 이후인 경우 CLOSED 되도록 하는 기능 구현 필요
 
 		return StatusUpdateResDto.from(periodTrade);
+	}
+
+	@Transactional
+	public AcceptPeriodTradeResDto acceptPeriodTrade(Long id, AcceptPeriodTradeReqDto reqDto) {
+
+		Long userId = 1L;
+
+		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
+			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
+		);
+		periodTrade.validateAuthority(userId);
+		periodTrade.validateIsCompleted();
+
+		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(id, TradeType.PERIOD);
+
+		for (TradeProduct tradeProduct : tradeProducts) {
+			SuggestedProduct suggestedProduct = tradeProduct.getSuggestedProduct();
+
+			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId())) {
+				suggestedProduct.changStatusAccepted();
+			}
+
+			// 한 교환에 대해서 여러번의 교환은 불가능 (회의 때 말한 같은 물건으로 여러번 다른 교환 시도 방지 위함)
+
+		}
+
+		periodTrade.updatePeriodTradeStatusCompleted();
+
+		return AcceptPeriodTradeResDto.from(periodTrade);
+
 	}
 
 	private List<SuggestedProduct> findRegisteredProductByIds(List<Long> productIds) {
