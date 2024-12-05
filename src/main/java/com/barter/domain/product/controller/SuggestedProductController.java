@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.barter.domain.product.dto.request.CreateSuggestedProductReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductInfoReqDto;
+import com.barter.domain.product.dto.request.UpdateSuggestedProductStatusReqDto;
 import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
 import com.barter.domain.product.service.SuggestedProductService;
 
@@ -62,5 +63,13 @@ public class SuggestedProductController {
 		// 현재 인증/인가 파트의 구현이 완료되지 않아 요청 회원의 정보가 전달된다는 가정하에 작성하여 추후 수정이 필요함
 
 		suggestedProductService.updateSuggestedProductInfo(request);
+	}
+	
+	@PatchMapping("/status")
+	@ResponseStatus(HttpStatus.OK)
+	public void updateSuggestedProductStatus(@RequestBody @Valid UpdateSuggestedProductStatusReqDto request) {
+		// 현재 인증/인가 파트의 구현이 완료되지 않아 요청 회원의 정보가 전달된다는 가정하에 작성하여 추후 수정이 필요함
+
+		suggestedProductService.updateSuggestedProductStatus(request);
 	}
 }
