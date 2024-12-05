@@ -3,6 +3,7 @@ package com.barter.domain.product.entity;
 import com.barter.domain.BaseTimeStampEntity;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateSuggestedProductReqDto;
+import com.barter.domain.product.dto.request.UpdateSuggestedProductInfoReqDto;
 import com.barter.domain.product.enums.SuggestedStatus;
 
 import jakarta.persistence.Entity;
@@ -65,5 +66,15 @@ public class SuggestedProduct extends BaseTimeStampEntity {
 
 	public void changStatusAccepted() {
 		this.status = SuggestedStatus.ACCEPTED;
+	}
+
+	public void updateInfo(UpdateSuggestedProductInfoReqDto request) {
+		if (this.status == SuggestedStatus.ACCEPTED) {
+			throw new IllegalArgumentException("이미 제안이 승낙된 물품은 수정할 수 없습니다");
+		}
+
+		this.name = request.getName();
+		this.description = request.getDescription();
+		this.images = request.getImages();
 	}
 }
