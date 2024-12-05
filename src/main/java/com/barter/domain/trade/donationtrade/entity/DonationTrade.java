@@ -95,4 +95,15 @@ public class DonationTrade extends BaseTimeStampEntity {
 			throw new IllegalArgumentException("이미 마감된 나눔입니다.");
 		}
 	}
+
+	public boolean isDonationCompleted() {
+		return status == TradeStatus.COMPLETED || maxAmount == currentAmount;
+	}
+
+	public void suggestDonation() {
+		currentAmount++;
+		if (currentAmount == maxAmount) {
+			status = TradeStatus.COMPLETED;
+		}
+	}
 }
