@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.barter.domain.trade.periodtrade.dto.CreatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.CreatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.FindPeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.StatusUpdateReqDto;
+import com.barter.domain.trade.periodtrade.dto.StatusUpdateResDto;
 import com.barter.domain.trade.periodtrade.dto.SuggestedPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.SuggestedPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.UpdatePeriodTradeReqDto;
@@ -76,6 +78,17 @@ public class PeriodTradeController {
 		return ResponseEntity.status(HttpStatus.OK).body(
 			periodTradeService.suggestPeriodTrade(id, reqDto)
 		);
+	}
+
+	@PatchMapping("/period-trades/{id}/status")
+	public ResponseEntity<StatusUpdateResDto> updatePeriodTradeStatus(
+		@PathVariable Long id,
+		@Valid @RequestBody StatusUpdateReqDto reqDto
+	) {
+		return ResponseEntity.status(HttpStatus.OK).body(
+			periodTradeService.updatePeriodTradeStatus(id, reqDto)
+		);
+
 	}
 
 }

@@ -19,6 +19,8 @@ import com.barter.domain.product.repository.TradeProductRepository;
 import com.barter.domain.trade.periodtrade.dto.CreatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.CreatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.FindPeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.StatusUpdateReqDto;
+import com.barter.domain.trade.periodtrade.dto.StatusUpdateResDto;
 import com.barter.domain.trade.periodtrade.dto.SuggestedPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.SuggestedPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.UpdatePeriodTradeReqDto;
@@ -127,6 +129,26 @@ public class PeriodTradeService {
 
 		return SuggestedPeriodTradeResDto.from(id, suggestedProduct);
 
+	}
+
+	@Transactional
+	public StatusUpdateResDto updatePeriodTradeStatus(Long id, StatusUpdateReqDto reqDto) {
+		Long userId = 1L;
+
+		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
+			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
+		);
+
+		periodTrade.validateAuthority(userId); // 교환 (게시글)의 주인만 변경 가능
+		periodTrade.validateIsCompleted(); // 이미 완료된 교환 건은 수정 불가
+		boolean isStatusUpdatable = periodTrade.updatePeriodTradeStatus(reqDto.getTradeStatus());
+		if (!isStatusUpdatable) {
+			throw new IllegalArgumentException("불가능한 상태 변경 입니다.");
+		}
+
+		// TODO : PeriodTrade 엔티티의 endedAt 이 현재 시간과 비교시 이후인 경우 CLOSED 되도록 하는 기능 구현 필요
+
+		return StatusUpdateResDto.from(periodTrade);
 	}
 
 	private List<SuggestedProduct> findRegisteredProductByIds(List<Long> productIds) {
