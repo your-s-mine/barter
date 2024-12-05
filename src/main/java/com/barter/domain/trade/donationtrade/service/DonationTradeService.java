@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.trade.donationtrade.dto.request.CreateDonationTradeReqDto;
+import com.barter.domain.trade.donationtrade.dto.request.UpdateDonationTradeReqDto;
 import com.barter.domain.trade.donationtrade.dto.response.FindDonationTradeResDto;
 import com.barter.domain.trade.donationtrade.entity.DonationTrade;
 import com.barter.domain.trade.donationtrade.repository.DonationTradeRepository;
@@ -49,5 +50,15 @@ public class DonationTradeService {
 		return donationTradeRepository.findById(tradeId)
 			.map(FindDonationTradeResDto::from)
 			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 나눔 교환 입니다."));
+	}
+
+	@Transactional
+	public void updateDonationTrade(Long userId, Long tradeId, UpdateDonationTradeReqDto req) {
+		DonationTrade donationTrade = donationTradeRepository.findById(tradeId)
+			.orElseThrow(() -> new IllegalStateException("존재하지 않는 나눔 교환 입니다."));
+
+		donationTrade.validateUpdate(userId);
+		donationTrade.update(req.getTitle(), req.getDescription());
+		donationTradeRepository.save(donationTrade);
 	}
 }

@@ -26,6 +26,7 @@ import lombok.NoArgsConstructor;
 public class DonationTrade extends BaseTimeStampEntity {
 
 	private static final int MAX_AFTER_DAY = 7;
+	private static final int MIN_LENGTH = 5;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -74,5 +75,17 @@ public class DonationTrade extends BaseTimeStampEntity {
 		if (endedAt.minusDays(MAX_AFTER_DAY).isAfter(LocalDateTime.now())) {
 			throw new IllegalArgumentException("종료일자는 오늘로부터 7일 이내만 가능합니다.");
 		}
+	}
+
+	public void validateUpdate(Long userId) {
+		product.validateOwner(userId);
+		if (currentAmount > 0) {
+			throw new IllegalArgumentException("이미 요청한 유저가 존재합니다.");
+		}
+	}
+
+	public void update(String title, String description) {
+		this.title = title;
+		this.description = description;
 	}
 }
