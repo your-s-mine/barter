@@ -1,4 +1,4 @@
-package com.barter.domain.trade.periodtrade.dto;
+package com.barter.domain.trade.periodtrade.dto.response;
 
 import java.time.LocalDateTime;
 
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class CreatePeriodTradeResDto {
+public class FindPeriodTradeResDto {
 	private Long periodTradesId;
 	private String title;
 	private String description;
@@ -24,7 +24,7 @@ public class CreatePeriodTradeResDto {
 	private LocalDateTime endedAt;
 
 	@Builder
-	public CreatePeriodTradeResDto(Long periodTradesId, String title, String description, RegisteredProduct product,
+	public FindPeriodTradeResDto(Long periodTradesId, String title, String description, RegisteredProduct product,
 		LocalDateTime createdAt, LocalDateTime updatedAt, TradeStatus tradeStatus, int viewCount, LocalDateTime endedAt
 	) {
 		this.periodTradesId = periodTradesId;
@@ -39,8 +39,8 @@ public class CreatePeriodTradeResDto {
 
 	}
 
-	public static CreatePeriodTradeResDto from(PeriodTrade periodTrade) {
-		return CreatePeriodTradeResDto.builder()
+	public static FindPeriodTradeResDto from(PeriodTrade periodTrade) {
+		return FindPeriodTradeResDto.builder()
 			.periodTradesId(periodTrade.getId())
 			.title(periodTrade.getTitle())
 			.description(periodTrade.getDescription())
