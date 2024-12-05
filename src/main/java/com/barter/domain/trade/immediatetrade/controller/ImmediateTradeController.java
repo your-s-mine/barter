@@ -61,7 +61,7 @@ public class ImmediateTradeController {
 		return new ResponseEntity<>(immediateTradeService.acceptTradeSuggest(tradeId), HttpStatus.ACCEPTED);
 	}
 
-	@DeleteMapping("/{tradeId}/dinal")
+	@DeleteMapping("/{tradeId}/denial")
 	public ResponseEntity<String> denyTradeSuggest(@PathVariable Long tradeId) {
 		return new ResponseEntity<>(immediateTradeService.denyTradeSuggest(tradeId), HttpStatus.NO_CONTENT);
 	}
