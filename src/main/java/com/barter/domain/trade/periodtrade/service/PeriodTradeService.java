@@ -8,13 +8,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.barter.domain.member.repository.MemberRepository;
 import com.barter.domain.product.repository.RegisteredProductRepository;
-import com.barter.domain.trade.periodtrade.PeriodTradeRepository;
 import com.barter.domain.trade.periodtrade.dto.CreatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.CreatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.FindPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.UpdatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.UpdatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
+import com.barter.domain.trade.periodtrade.repository.PeriodTradeRepository;
 
 import lombok.RequiredArgsConstructor;
 
