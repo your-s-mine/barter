@@ -104,5 +104,27 @@ public class PeriodTrade extends BaseTimeStampEntity {
 			throw new IllegalArgumentException("자신의 교환에 제안 할 수 없습니다.");
 		}
 	}
+
+	public boolean updatePeriodTradeStatus(TradeStatus status) {
+
+		if (status.equals(TradeStatus.CLOSED)) {
+			this.status = status;
+			return true;
+		}
+		if (status.equals(TradeStatus.IN_PROGRESS) && this.status.equals(TradeStatus.PENDING)) {
+			this.status = status;
+			return true;
+		}
+		return status.equals(this.status); // 같은 경우는 일단 통과
+
+		/*
+		가능한 status 업데이트 목록
+		: PENDING -> IN_PROGRESS
+		: PENDING -> CLOSED
+		: IN_PROGRESS -> CLOSED
+		: PENDING -> CLOSED
+		 */
+
+	}
 }
 
