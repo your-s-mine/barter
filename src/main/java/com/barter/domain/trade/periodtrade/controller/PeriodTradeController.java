@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.barter.domain.trade.periodtrade.dto.request.AcceptPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.CreatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.StatusUpdateReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.SuggestedPeriodTradeReqDto;
@@ -93,9 +94,11 @@ public class PeriodTradeController {
 	}
 
 	@PatchMapping("/period-trades/{id}/accept")
-	public ResponseEntity<AcceptPeriodTradeResDto> acceptPeriodTrade(@PathVariable Long id) {
+	public ResponseEntity<AcceptPeriodTradeResDto> acceptPeriodTrade(
+		@PathVariable Long id,
+		@Valid @RequestBody AcceptPeriodTradeReqDto reqDto) {
 		return ResponseEntity.status(HttpStatus.OK).body(
-			periodTradeService.acceptPeriodTrade(id)
+			periodTradeService.acceptPeriodTrade(id, reqDto)
 		);
 	}
 

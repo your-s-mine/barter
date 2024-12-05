@@ -16,6 +16,7 @@ import com.barter.domain.product.enums.TradeType;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.repository.SuggestedProductRepository;
 import com.barter.domain.product.repository.TradeProductRepository;
+import com.barter.domain.trade.periodtrade.dto.request.AcceptPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.CreatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.StatusUpdateReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.SuggestedPeriodTradeReqDto;
@@ -153,7 +154,7 @@ public class PeriodTradeService {
 	}
 
 	@Transactional
-	public AcceptPeriodTradeResDto acceptPeriodTrade(Long id) {
+	public AcceptPeriodTradeResDto acceptPeriodTrade(Long id, AcceptPeriodTradeReqDto reqDto) {
 
 		Long userId = 1L;
 
@@ -163,11 +164,17 @@ public class PeriodTradeService {
 		periodTrade.validateAuthority(userId);
 		periodTrade.validateIsCompleted();
 
-		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeId(id);
+		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(id, TradeType.PERIOD);
 
 		for (TradeProduct tradeProduct : tradeProducts) {
 			SuggestedProduct suggestedProduct = tradeProduct.getSuggestedProduct();
-			suggestedProduct.changStatusAccepted();
+
+			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId())) {
+				suggestedProduct.changStatusAccepted();
+			}
+
+			// 한 교환에 대해서 여러번의 교환은 불가능 (회의 때 말한 같은 물건으로 여러번 다른 교환 시도 방지 위함)
+
 		}
 
 		periodTrade.updatePeriodTradeStatusCompleted();
