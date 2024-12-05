@@ -1,4 +1,4 @@
-package com.barter.domain.trade.periodtrade.dto;
+package com.barter.domain.trade.periodtrade.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

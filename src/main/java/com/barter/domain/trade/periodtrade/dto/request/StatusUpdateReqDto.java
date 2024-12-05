@@ -1,4 +1,4 @@
-package com.barter.domain.trade.periodtrade.dto;
+package com.barter.domain.trade.periodtrade.dto.request;
 
 import com.barter.domain.trade.enums.TradeStatus;
 

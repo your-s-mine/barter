@@ -13,15 +13,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.barter.domain.trade.periodtrade.dto.CreatePeriodTradeReqDto;
-import com.barter.domain.trade.periodtrade.dto.CreatePeriodTradeResDto;
-import com.barter.domain.trade.periodtrade.dto.FindPeriodTradeResDto;
-import com.barter.domain.trade.periodtrade.dto.StatusUpdateReqDto;
-import com.barter.domain.trade.periodtrade.dto.StatusUpdateResDto;
-import com.barter.domain.trade.periodtrade.dto.SuggestedPeriodTradeReqDto;
-import com.barter.domain.trade.periodtrade.dto.SuggestedPeriodTradeResDto;
-import com.barter.domain.trade.periodtrade.dto.UpdatePeriodTradeReqDto;
-import com.barter.domain.trade.periodtrade.dto.UpdatePeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.request.CreatePeriodTradeReqDto;
+import com.barter.domain.trade.periodtrade.dto.request.StatusUpdateReqDto;
+import com.barter.domain.trade.periodtrade.dto.request.SuggestedPeriodTradeReqDto;
+import com.barter.domain.trade.periodtrade.dto.request.UpdatePeriodTradeReqDto;
+import com.barter.domain.trade.periodtrade.dto.response.CreatePeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.response.StatusUpdateResDto;
+import com.barter.domain.trade.periodtrade.dto.response.SuggestedPeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.response.UpdatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.service.PeriodTradeService;
 
 import jakarta.validation.Valid;
