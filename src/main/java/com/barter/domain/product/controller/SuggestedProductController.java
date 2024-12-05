@@ -6,6 +6,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.barter.domain.product.dto.request.CreateSuggestedProductReqDto;
+import com.barter.domain.product.dto.request.UpdateSuggestedProductInfoReqDto;
 import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
 import com.barter.domain.product.service.SuggestedProductService;
 
@@ -52,5 +54,13 @@ public class SuggestedProductController {
 		// 인증/인가 파트 구현이 끝난다면, 'SUGGESTED_PRODUCTS' 테이블에서 요청 회원이 생성한 등록 물품들을 조회하도록 할 것 같습니다.
 
 		return suggestedProductService.findSuggestedProducts(pageable);
+	}
+
+	@PatchMapping
+	@ResponseStatus(HttpStatus.OK)
+	public void updateSuggestedProductInfo(@RequestBody @Valid UpdateSuggestedProductInfoReqDto request) {
+		// 현재 인증/인가 파트의 구현이 완료되지 않아 요청 회원의 정보가 전달된다는 가정하에 작성하여 추후 수정이 필요함
+
+		suggestedProductService.updateSuggestedProductInfo(request);
 	}
 }
