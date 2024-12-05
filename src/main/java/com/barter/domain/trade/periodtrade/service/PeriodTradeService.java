@@ -118,13 +118,12 @@ public class PeriodTradeService {
 
 		List<SuggestedProduct> suggestedProduct = findRegisteredProductByIds(reqDto.getProductIds());
 
-		suggestedProduct.forEach(product -> {
-			TradeProduct tradeProduct = TradeProduct.createTradeProduct(
+		List<TradeProduct> tradeProducts = suggestedProduct.stream()
+			.map(product -> TradeProduct.createTradeProduct(
 				id, TradeType.PERIOD, product
-			);
+			)).toList();
 
-			tradeProductRepository.save(tradeProduct);
-		});
+		tradeProductRepository.saveAll(tradeProducts);
 
 		return SuggestedPeriodTradeResDto.from(id, suggestedProduct);
 
