@@ -2,6 +2,7 @@ package com.barter.domain.trade.immediatetrade.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +26,8 @@ public class ImmediateTradeController {
 
 	private final ImmediateTradeService immediateTradeService;
 
+	// todo: 맴버 받아오면 변수에 추가하기
+
 	@PostMapping("")
 	public ResponseEntity<FindImmediateTradeResDto> create(@RequestBody @Valid CreateImmediateTradeReqDto reqDto) {
 		return new ResponseEntity<>(immediateTradeService.create(reqDto), HttpStatus.CREATED);
@@ -39,5 +42,10 @@ public class ImmediateTradeController {
 	public ResponseEntity<FindImmediateTradeResDto> update(@PathVariable Long tradeId,
 		@RequestBody @Valid UpdateImmediateTradeReqDto reqDto) throws IllegalAccessException {
 		return new ResponseEntity<>(immediateTradeService.update(tradeId, reqDto), HttpStatus.OK);
+	}
+
+	@DeleteMapping("/{tradeId}")
+	public ResponseEntity<String> delete(@PathVariable Long tradeId) {
+		return new ResponseEntity<>(immediateTradeService.delete(tradeId), HttpStatus.OK);
 	}
 }
