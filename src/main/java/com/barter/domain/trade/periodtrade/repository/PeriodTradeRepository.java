@@ -1,4 +1,4 @@
-package com.barter.domain.trade.periodtrade;
+package com.barter.domain.trade.periodtrade.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
