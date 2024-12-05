@@ -82,7 +82,15 @@ public class SuggestedProduct extends BaseTimeStampEntity {
 		this.status = SuggestedStatus.findSuggestedStatus(status);
 	}
 
+
 	public void changStatusPending() {
-		this.status = SuggestedStatus.PENDING;
+		this.status = SuggestedStatus.PENDING; 
+  }
+  
+	public void checkPossibleDelete() {
+		if (this.status == SuggestedStatus.ACCEPTED) {
+			throw new IllegalArgumentException("이미 제안이 승낙된 물품은 삭제할 수 없습니다.");
+		}
 	}
+  
 }
