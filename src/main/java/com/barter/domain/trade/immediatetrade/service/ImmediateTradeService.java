@@ -98,6 +98,7 @@ public class ImmediateTradeService {
 
 	@Transactional
 	public String createTradeSuggest(Long tradeId, CreateTradeSuggestProductReqDto reqDto) {
+
 		// todo: 유저 정보를 받아와 권한 확인 로직 추가 및 수정 ex - 본인이 등록한 교환에 제안 불가
 
 		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
@@ -134,22 +135,44 @@ public class ImmediateTradeService {
 
 	@Transactional
 	public String acceptTradeSuggest(Long tradeId) {
-		// todo: 유저 정보를 받아와 권한 확인 로직 추가 및 수정
-		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeId(tradeId);
+		// todo: 유저 정보를 받아와 권한 확인 로직 추가 및 수정 - 교환을 생성한 맴버만이 승낙할 수 있음
 
 		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
+
+		immediateTrade.changeStatusInProgress();
+
+		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeId(tradeId);
 
 		for (TradeProduct tradeProduct : tradeProducts) {
 			SuggestedProduct suggestedProduct = tradeProduct.getSuggestedProduct();
 			suggestedProduct.changStatusAccepted();
 		}
 
-		immediateTrade.changStatusInProgress();
-
 		return "제안 승락 완료";
-	}
+	}	
+
 
 	// 제안 거절 시 `교환_제안_물품` 테이블에서 삭제. 기준 "tradeId - 교환 Id"
+	@Transactional
+	public String denyTradeSuggest(Long tradeId) {
 
+		// todo: 유저 정보를 받아와 권한 확인 로직 추가 및 수정 - 교환을 생성한 맴버만이 거절할 수 있음
+
+		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
+
+		immediateTrade.changeStatusPending();
+
+		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeId(tradeId);
+
+		for (TradeProduct tradeProduct : tradeProducts) {
+			SuggestedProduct suggestedProduct = tradeProduct.getSuggestedProduct();
+			suggestedProduct.changStatusPending();
+		}
+
+		tradeProductRepository.deleteAll(tradeProducts);
+
+		return "제안 거절";
+	}
 }
