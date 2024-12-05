@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductInfoReqDto;
+import com.barter.domain.product.dto.request.UpdateRegisteredProductStatusReqDto;
 import com.barter.domain.product.dto.response.FindRegisteredProductResDto;
 import com.barter.domain.product.service.RegisteredProductService;
 
@@ -62,5 +63,13 @@ public class RegisteredProductController {
 		// 현재 인증/인가 파트의 구현이 완료되지 않아 요청 회원의 정보가 전달된다는 가정하에 작성하여 추후 수정이 필요함
 
 		registeredProductService.updateRegisteredProductInfo(request);
+	}
+
+	@PatchMapping("/status")
+	@ResponseStatus(HttpStatus.OK)
+	public void updateRegisteredProductStatus(@RequestBody @Valid UpdateRegisteredProductStatusReqDto request) {
+		// 현재 인증/인가 파트의 구현이 완료되지 않아 요청 회원의 정보가 전달된다는 가정하에 작성하여 추후 수정이 필요함
+
+		registeredProductService.updateRegisteredProductStatus(request);
 	}
 }
