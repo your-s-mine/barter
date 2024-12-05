@@ -26,6 +26,8 @@ public class ImmediateTradeController {
 
 	private final ImmediateTradeService immediateTradeService;
 
+	// todo: 맴버 받아오면 변수에 추가하기
+
 	@PostMapping("")
 	public ResponseEntity<FindImmediateTradeResDto> create(@RequestBody @Valid CreateImmediateTradeReqDto reqDto) {
 		return new ResponseEntity<>(immediateTradeService.create(reqDto), HttpStatus.CREATED);
