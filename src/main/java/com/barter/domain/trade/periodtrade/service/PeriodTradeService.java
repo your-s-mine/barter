@@ -20,6 +20,7 @@ import com.barter.domain.trade.periodtrade.dto.request.CreatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.StatusUpdateReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.SuggestedPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.UpdatePeriodTradeReqDto;
+import com.barter.domain.trade.periodtrade.dto.response.AcceptPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.CreatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.StatusUpdateResDto;
@@ -149,6 +150,30 @@ public class PeriodTradeService {
 		// TODO : PeriodTrade 엔티티의 endedAt 이 현재 시간과 비교시 이후인 경우 CLOSED 되도록 하는 기능 구현 필요
 
 		return StatusUpdateResDto.from(periodTrade);
+	}
+
+	@Transactional
+	public AcceptPeriodTradeResDto acceptPeriodTrade(Long id) {
+
+		Long userId = 1L;
+
+		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
+			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
+		);
+		periodTrade.validateAuthority(userId);
+		periodTrade.validateIsCompleted();
+
+		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeId(id);
+
+		for (TradeProduct tradeProduct : tradeProducts) {
+			SuggestedProduct suggestedProduct = tradeProduct.getSuggestedProduct();
+			suggestedProduct.changStatusAccepted();
+		}
+
+		periodTrade.updatePeriodTradeStatusCompleted();
+
+		return AcceptPeriodTradeResDto.from(periodTrade);
+
 	}
 
 	private List<SuggestedProduct> findRegisteredProductByIds(List<Long> productIds) {

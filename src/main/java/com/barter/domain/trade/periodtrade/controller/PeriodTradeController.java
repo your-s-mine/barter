@@ -17,6 +17,7 @@ import com.barter.domain.trade.periodtrade.dto.request.CreatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.StatusUpdateReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.SuggestedPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.UpdatePeriodTradeReqDto;
+import com.barter.domain.trade.periodtrade.dto.response.AcceptPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.CreatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.StatusUpdateResDto;
@@ -89,6 +90,13 @@ public class PeriodTradeController {
 			periodTradeService.updatePeriodTradeStatus(id, reqDto)
 		);
 
+	}
+
+	@PatchMapping("/period-trades/{id}/accept")
+	public ResponseEntity<AcceptPeriodTradeResDto> acceptPeriodTrade(@PathVariable Long id) {
+		return ResponseEntity.status(HttpStatus.OK).body(
+			periodTradeService.acceptPeriodTrade(id)
+		);
 	}
 
 }
