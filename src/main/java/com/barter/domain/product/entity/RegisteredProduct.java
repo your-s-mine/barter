@@ -63,6 +63,10 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 	}
 
 	public void updateInfo(UpdateRegisteredProductInfoReqDto request) {
+		if (this.status == RegisteredStatus.ACCEPTED) {
+			throw new IllegalArgumentException("이미 제안이 승낙된 물품은 수정할 수 없습니다.");
+		}
+
 		this.name = request.getName();
 		this.description = request.getDescription();
 		this.images = request.getImages();
