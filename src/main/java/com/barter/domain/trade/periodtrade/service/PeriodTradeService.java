@@ -74,4 +74,17 @@ public class PeriodTradeService {
 		return UpdatePeriodTradeResDto.from(periodTrade); // save 써도 되고 안써도 되고
 
 	}
+
+	@Transactional
+	public void deletePeriodTrade(Long id) {
+		Long userId = 1L;
+		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
+			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
+		);
+
+		periodTrade.validateAuthority(userId);
+		periodTrade.validateIsCompleted();
+		periodTradeRepository.delete(periodTrade);
+
+	}
 }
