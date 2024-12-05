@@ -9,10 +9,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.barter.domain.member.repository.MemberRepository;
-import com.barter.domain.product.entity.RegisteredProduct;
+import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.entity.TradeProduct;
+import com.barter.domain.product.enums.SuggestedStatus;
 import com.barter.domain.product.enums.TradeType;
 import com.barter.domain.product.repository.RegisteredProductRepository;
+import com.barter.domain.product.repository.SuggestedProductRepository;
 import com.barter.domain.product.repository.TradeProductRepository;
 import com.barter.domain.trade.periodtrade.dto.CreatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.CreatePeriodTradeResDto;
@@ -34,6 +36,7 @@ public class PeriodTradeService {
 
 	private final PeriodTradeRepository periodTradeRepository;
 	private final RegisteredProductRepository registeredProductRepository;
+	private final SuggestedProductRepository suggestedProductRepository;
 	private final MemberRepository memberRepository;
 	private final TradeProductRepository tradeProductRepository;
 
@@ -113,9 +116,9 @@ public class PeriodTradeService {
 		periodTrade.validateIsPending();
 		periodTrade.validateIsCompleted();
 
-		List<RegisteredProduct> registeredProduct = findRegisteredProductByIds(reqDto.getProductIds());
+		List<SuggestedProduct> suggestedProduct = findRegisteredProductByIds(reqDto.getProductIds());
 
-		registeredProduct.forEach(product -> {
+		suggestedProduct.forEach(product -> {
 			TradeProduct tradeProduct = TradeProduct.createTradeProduct(
 				id, TradeType.PERIOD, product
 			);
@@ -123,14 +126,22 @@ public class PeriodTradeService {
 			tradeProductRepository.save(tradeProduct);
 		});
 
-		return SuggestedPeriodTradeResDto.from(id, registeredProduct);
+		return SuggestedPeriodTradeResDto.from(id, suggestedProduct);
 
 	}
 
-	private List<RegisteredProduct> findRegisteredProductByIds(List<Long> productIds) {
+	private List<SuggestedProduct> findRegisteredProductByIds(List<Long> productIds) {
 		return productIds.stream()
-			.map(id -> registeredProductRepository.findById(id)
-				.orElseThrow(() -> new IllegalArgumentException("해당 id 의 등록된 제품이 없습니다.")))
+			.map(id -> {
+					SuggestedProduct product = suggestedProductRepository.findById(id)
+						.orElseThrow(() -> new IllegalArgumentException("해당 id 의 등록된 제품이 없습니다."));
+					if (!product.getStatus().equals(SuggestedStatus.PENDING)) {
+						throw new IllegalArgumentException("다른 교환에 제안된 상품은 제안 할 수 없습니다.");
+					}
+
+					return product;
+				}
+			)
 			.toList();
 	}
 }

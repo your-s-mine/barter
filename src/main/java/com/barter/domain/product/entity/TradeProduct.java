@@ -29,21 +29,21 @@ public class TradeProduct {
 	private TradeType tradeType;
 
 	@ManyToOne
-	private RegisteredProduct registeredProduct;
+	private SuggestedProduct suggestedProduct;
 
 	@Builder
-	protected TradeProduct(Long tradeId, TradeType tradeType, RegisteredProduct registeredProduct) {
+	protected TradeProduct(Long tradeId, TradeType tradeType, SuggestedProduct suggestedProduct) {
 		this.tradeId = tradeId;
 		this.tradeType = tradeType;
-		this.registeredProduct = registeredProduct;
+		this.suggestedProduct = suggestedProduct;
 	}
 
 	public static TradeProduct createTradeProduct(Long tradeId, TradeType tradeType,
-		RegisteredProduct registeredProduct) {
+		SuggestedProduct suggestedProduct) {
 		return TradeProduct.builder()
 			.tradeId(tradeId)
 			.tradeType(tradeType)
-			.registeredProduct(registeredProduct)
+			.suggestedProduct(suggestedProduct)
 			.build();
 	}
 }
