@@ -1,14 +1,17 @@
 package com.barter.domain.trade.immediatetrade.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.entity.TradeProduct;
-import com.barter.domain.product.enums.SuggestedStatus;
 import com.barter.domain.product.enums.TradeType;
 import com.barter.domain.product.repository.RegisteredProductRepository;
+import com.barter.domain.product.repository.SuggestedProductRepository;
 import com.barter.domain.product.repository.TradeProductRepository;
 import com.barter.domain.trade.enums.TradeStatus;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateImmediateTradeReqDto;
@@ -26,6 +29,7 @@ public class ImmediateTradeService {
 	private final ImmediateTradeRepository immediateTradeRepository;
 	private final RegisteredProductRepository registeredProductRepository;
 	private final TradeProductRepository tradeProductRepository;
+	private final SuggestedProductRepository suggestedProductRepository;
 
 	// todo: 유저 정보를 받아와 권한 확인 로직 추가 및 수정
 
@@ -103,19 +107,28 @@ public class ImmediateTradeService {
 			throw new IllegalStateException("해당 교환에 제안할 수 없습니다.");
 		}
 
-		for (SuggestedProduct product : reqDto.getSuggestedProductList()) {
-			if (!product.validateProductStatus(product.getStatus())) { // PENDING 상태인 물품으로만 제안 가능
+		List<TradeProduct> tradeProducts = new ArrayList<>();
+
+		for (Long productId : reqDto.getSuggestedProductIds()) {
+			SuggestedProduct suggestedProduct = suggestedProductRepository.findById(productId).orElseThrow(
+				() -> new IllegalArgumentException("제안 상품을 찾을 수 없습니다.")
+			);
+
+
+			if (!suggestedProduct.validateProductStatus(suggestedProduct.getStatus())) { // PENDING 상태인 물품으로만 제안 가능
 				throw new IllegalArgumentException("해당 상품으로 제안하실 수 없습니다.");
 			}
 
 			TradeProduct tradeProduct = TradeProduct.builder()
-				.suggestedProduct(product)
+				.suggestedProduct(suggestedProduct)
 				.tradeType(TradeType.IMMEDIATE)
 				.build();
 
+			tradeProducts.add(tradeProduct);
 			tradeProductRepository.save(tradeProduct);
 		}
 
+		tradeProductRepository.saveAll(tradeProducts);
 		return "제안 완료";
 	}
 

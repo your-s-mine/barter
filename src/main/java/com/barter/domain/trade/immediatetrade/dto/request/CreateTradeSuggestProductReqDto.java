@@ -11,5 +11,5 @@ import lombok.Getter;
 @Getter
 public class CreateTradeSuggestProductReqDto {
 	@NotBlank
-	List<SuggestedProduct> suggestedProductList = new ArrayList<>();
+	List<Long> suggestedProductIds = new ArrayList<>();
 }
