@@ -3,6 +3,7 @@ package com.barter.domain.auth.model;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "member") // member 테이블과 매핑
 public class Member {
 
     @Id
@@ -19,7 +20,6 @@ public class Member {
     private final String username;
 
     protected Member() {
-        // JPA 기본 생성자 (필수)
         this.email = null;
         this.password = null;
         this.username = null;
