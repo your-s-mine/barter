@@ -4,11 +4,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.barter.domain.product.entity.RegisteredProduct;
+import com.barter.domain.product.entity.SuggestedProduct;
+import com.barter.domain.product.entity.TradeProduct;
+import com.barter.domain.product.enums.SuggestedStatus;
+import com.barter.domain.product.enums.TradeType;
 import com.barter.domain.product.repository.RegisteredProductRepository;
+import com.barter.domain.product.repository.TradeProductRepository;
 import com.barter.domain.trade.enums.TradeStatus;
-import com.barter.domain.trade.immediatetrade.dto.FindImmediateTradeResDto;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateImmediateTradeReqDto;
+import com.barter.domain.trade.immediatetrade.dto.request.CreateTradeSuggestProductReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeReqDto;
+import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeResDto;
 import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
 
@@ -19,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class ImmediateTradeService {
 	private final ImmediateTradeRepository immediateTradeRepository;
 	private final RegisteredProductRepository registeredProductRepository;
+	private final TradeProductRepository tradeProductRepository;
 
 	// todo: 유저 정보를 받아와 권한 확인 로직 추가 및 수정
 
@@ -83,5 +90,42 @@ public class ImmediateTradeService {
 		immediateTradeRepository.delete(immediateTrade);
 
 		return "교환 삭제 완료";
+	}
+
+	// 즉시 교환 제안 생성 - in-progress, completed 상태에선 불가능
+	public String createSuggest(Long tradeId, CreateTradeSuggestProductReqDto reqDto) {
+		// todo: 유저 정보를 받아와 권한 확인 로직 추가 및 수정 ex - 본인이 등록한 교환에 제안 불가
+
+		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
+
+		if (!validateTradeStatus(immediateTrade.getStatus())) { // PENDING 상태인 거래에만 제안 가능
+			throw new IllegalStateException("해당 교환에 제안할 수 없습니다.");
+		}
+
+		for (SuggestedProduct product : reqDto.getSuggestedProductList()) {
+			if (!validateProductStatus(product.getStatus())) { // PENDING 상태인 물품으로만 제안 가능
+				throw new IllegalArgumentException("해당 상품으로 제안하실 수 없습니다.");
+			}
+
+			TradeProduct tradeProduct = TradeProduct.builder()
+				.suggestedProduct(product)
+				.tradeType(TradeType.IMMEDIATE)
+				.build();
+
+			tradeProductRepository.save(tradeProduct);
+		}
+
+		return "제안 완료";
+	}
+
+	// 제안 거절 시 `교환_제안_물품` 테이블에서 삭제. 기준 "tradeId - 교환 Id"
+
+	private boolean validateTradeStatus(TradeStatus status) {
+		return status.equals(TradeStatus.PENDING);
+	}
+
+	private boolean validateProductStatus(SuggestedStatus status) {
+		return status.equals(SuggestedStatus.PENDING);
 	}
 }

@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.barter.domain.trade.immediatetrade.dto.FindImmediateTradeResDto;
+import com.barter.domain.product.dto.request.CreateSuggestedProductReqDto;
+import com.barter.domain.trade.immediatetrade.dto.request.CreateTradeSuggestProductReqDto;
+import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeResDto;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateImmediateTradeReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeReqDto;
 import com.barter.domain.trade.immediatetrade.service.ImmediateTradeService;
@@ -47,5 +49,11 @@ public class ImmediateTradeController {
 	@DeleteMapping("/{tradeId}")
 	public ResponseEntity<String> delete(@PathVariable Long tradeId) {
 		return new ResponseEntity<>(immediateTradeService.delete(tradeId), HttpStatus.OK);
+	}
+
+	@PostMapping("/{tradeId}/suggest")
+	public ResponseEntity<String> createSuggest(@PathVariable Long tradeId,
+		@RequestBody @Valid CreateTradeSuggestProductReqDto reqDto) {
+		return new ResponseEntity<>(immediateTradeService.createSuggest(tradeId, reqDto), HttpStatus.CREATED);
 	}
 }
