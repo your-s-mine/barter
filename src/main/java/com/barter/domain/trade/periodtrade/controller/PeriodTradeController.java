@@ -93,7 +93,7 @@ public class PeriodTradeController {
 
 	}
 
-	@PatchMapping("/period-trades/{id}/accept")
+	@PatchMapping("/period-trades/{id}/acceptance")
 	public ResponseEntity<AcceptPeriodTradeResDto> acceptPeriodTrade(
 		@PathVariable Long id,
 		@Valid @RequestBody AcceptPeriodTradeReqDto reqDto) {
