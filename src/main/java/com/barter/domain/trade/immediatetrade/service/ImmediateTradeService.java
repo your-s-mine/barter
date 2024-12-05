@@ -20,6 +20,8 @@ public class ImmediateTradeService {
 	private final ImmediateTradeRepository immediateTradeRepository;
 	private final RegisteredProductRepository registeredProductRepository;
 
+	// todo: 유저 정보를 받아와 권한 확인 로직 추가 및 수정
+
 	public FindImmediateTradeResDto create(CreateImmediateTradeReqDto reqDto) {
 		RegisteredProduct registeredProduct = registeredProductRepository
 			.findById(reqDto.getRegisteredProduct().getId()).orElseThrow(
@@ -50,6 +52,9 @@ public class ImmediateTradeService {
 
 	public FindImmediateTradeResDto update(Long tradeId, UpdateImmediateTradeReqDto reqDto) throws
 		IllegalAccessException {
+
+		// todo: 유저 정보를 받아와 권한 확인 로직 추가 및 수정
+
 		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
 
@@ -66,5 +71,17 @@ public class ImmediateTradeService {
 
 		ImmediateTrade updatedTrade = immediateTradeRepository.save(immediateTrade);
 		return FindImmediateTradeResDto.from(updatedTrade);
+	}
+
+	public String delete(Long tradeId) {
+
+		// todo: 유저 정보를 받아와 권한 확인 로직 추가 및 수정
+
+		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
+
+		immediateTradeRepository.delete(immediateTrade);
+
+		return "교환 삭제 완료";
 	}
 }

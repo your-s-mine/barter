@@ -3,8 +3,11 @@ package com.barter.domain.product.entity;
 import com.barter.domain.BaseTimeStampEntity;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
+import com.barter.domain.product.enums.RegisteredStatus;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -28,15 +31,18 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 	private String name;
 	private String description;
 	private String images;
+	@Enumerated(EnumType.STRING)
+	private RegisteredStatus status;
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Member member;
 
 	@Builder
-	public RegisteredProduct(String name, String description, String images, Member member) {
+	public RegisteredProduct(String name, String description, String images, Member member, RegisteredStatus status) {
 		this.name = name;
 		this.description = description;
 		this.images = images;
 		this.member = member;
+		this.status = status;
 	}
 
 	public static RegisteredProduct create(CreateRegisteredProductReqDto request, Member member) {
@@ -45,6 +51,7 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 			.description(request.getDescription())
 			.images(request.getImages())
 			.member(member)
+			.status(RegisteredStatus.PENDING)
 			.build();
 	}
 

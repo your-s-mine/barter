@@ -16,6 +16,7 @@ public class FindRegisteredProductResDto {
 	private String description;
 	private String images;
 	private LocalDateTime createdAt;
+	private String status;
 
 	public static FindRegisteredProductResDto from(RegisteredProduct product) {
 		return FindRegisteredProductResDto.builder()
@@ -24,6 +25,7 @@ public class FindRegisteredProductResDto {
 			.description(product.getDescription())
 			.images(product.getImages())
 			.createdAt(product.getCreatedAt())
+			.status(product.getStatus().name())
 			.build();
 	}
 }

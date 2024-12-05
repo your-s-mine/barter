@@ -5,6 +5,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -62,6 +63,18 @@ public class DonationTradeController {
 		// TODO: 인증된 Member 받아오는 기능 추가 필요
 		Long userId = 1L;
 		donationTradeService.updateDonationTrade(userId, tradeId, req);
+		return ResponseEntity
+			.status(HttpStatus.NO_CONTENT)
+			.build();
+	}
+
+	@DeleteMapping("/{tradeId}")
+	public ResponseEntity<Void> deleteDonationTrade(
+		@PathVariable("tradeId") Long tradeId
+	) {
+		// TODO: 인증된 Member 받아오는 기능 추가 필요
+		Long userId = 1L;
+		donationTradeService.deleteDonationTrade(userId, tradeId);
 		return ResponseEntity
 			.status(HttpStatus.NO_CONTENT)
 			.build();

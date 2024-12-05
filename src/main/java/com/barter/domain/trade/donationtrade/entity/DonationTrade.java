@@ -88,4 +88,11 @@ public class DonationTrade extends BaseTimeStampEntity {
 		this.title = title;
 		this.description = description;
 	}
+
+	public void validateDelete(Long userId) {
+		product.validateOwner(userId);
+		if (status.equals(TradeStatus.COMPLETED) || maxAmount == currentAmount) {
+			throw new IllegalArgumentException("이미 마감된 나눔입니다.");
+		}
+	}
 }

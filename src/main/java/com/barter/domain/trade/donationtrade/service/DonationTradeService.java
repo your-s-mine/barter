@@ -61,4 +61,13 @@ public class DonationTradeService {
 		donationTrade.update(req.getTitle(), req.getDescription());
 		donationTradeRepository.save(donationTrade);
 	}
+
+	@Transactional
+	public void deleteDonationTrade(Long userId, Long tradeId) {
+		DonationTrade donationTrade = donationTradeRepository.findById(tradeId)
+			.orElseThrow(() -> new IllegalStateException("존재하지 않는 나눔 교환 입니다."));
+
+		donationTrade.validateDelete(userId);
+		donationTradeRepository.delete(donationTrade);
+	}
 }
