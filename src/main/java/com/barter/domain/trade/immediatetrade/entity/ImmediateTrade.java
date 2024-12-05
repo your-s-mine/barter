@@ -53,4 +53,8 @@ public class ImmediateTrade extends BaseTimeStampEntity {
 		this.title = reqDto.getTitle();
 		this.description = reqDto.getDescription();
 	}
+
+	public boolean validateTradeStatus(TradeStatus status) {
+		return status.equals(TradeStatus.PENDING);
+	}
 }

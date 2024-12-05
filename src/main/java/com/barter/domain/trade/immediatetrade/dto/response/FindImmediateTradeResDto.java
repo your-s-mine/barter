@@ -1,4 +1,4 @@
-package com.barter.domain.trade.immediatetrade.dto;
+package com.barter.domain.trade.immediatetrade.dto.response;
 
 import java.time.LocalDateTime;
 
