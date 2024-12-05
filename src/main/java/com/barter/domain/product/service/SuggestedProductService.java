@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.member.repository.MemberRepository;
 import com.barter.domain.product.dto.request.CreateSuggestedProductReqDto;
+import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.repository.SuggestedProductRepository;
 
@@ -24,5 +25,13 @@ public class SuggestedProductService {
 
 		SuggestedProduct createdProduct = SuggestedProduct.create(request, requestMember);
 		suggestedProductRepository.save(createdProduct);
+	}
+
+	// 인증/인가가 구현되면 요청 회원 정보를 파라미터로 전달받아 요청한 '등록 물품' 등록자가 요청 회원인지 확인하는 로직을 추가 작성할 것 입니다.
+	public FindSuggestedProductResDto findSuggestedProduct(Long suggestedProductId) {
+		SuggestedProduct foundProduct = suggestedProductRepository.findById(suggestedProductId)
+			.orElseThrow(() -> new IllegalArgumentException("Suggested product not found"));
+
+		return FindSuggestedProductResDto.from(foundProduct);
 	}
 }
