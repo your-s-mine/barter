@@ -114,6 +114,7 @@ public class ImmediateTradeService {
 				() -> new IllegalArgumentException("제안 상품을 찾을 수 없습니다.")
 			);
 
+			suggestedProduct.changStatusSuggesting();
 
 			if (!suggestedProduct.validateProductStatus(suggestedProduct.getStatus())) { // PENDING 상태인 물품으로만 제안 가능
 				throw new IllegalArgumentException("해당 상품으로 제안하실 수 없습니다.");
