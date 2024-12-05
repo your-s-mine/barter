@@ -99,12 +99,12 @@ public class ImmediateTradeService {
 		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
 
-		if (!validateTradeStatus(immediateTrade.getStatus())) { // PENDING 상태인 거래에만 제안 가능
+		if (!immediateTrade.validateTradeStatus(immediateTrade.getStatus())) { // PENDING 상태인 거래에만 제안 가능
 			throw new IllegalStateException("해당 교환에 제안할 수 없습니다.");
 		}
 
 		for (SuggestedProduct product : reqDto.getSuggestedProductList()) {
-			if (!validateProductStatus(product.getStatus())) { // PENDING 상태인 물품으로만 제안 가능
+			if (!product.validateProductStatus(product.getStatus())) { // PENDING 상태인 물품으로만 제안 가능
 				throw new IllegalArgumentException("해당 상품으로 제안하실 수 없습니다.");
 			}
 
@@ -121,11 +121,4 @@ public class ImmediateTradeService {
 
 	// 제안 거절 시 `교환_제안_물품` 테이블에서 삭제. 기준 "tradeId - 교환 Id"
 
-	private boolean validateTradeStatus(TradeStatus status) {
-		return status.equals(TradeStatus.PENDING);
-	}
-
-	private boolean validateProductStatus(SuggestedStatus status) {
-		return status.equals(SuggestedStatus.PENDING);
-	}
 }
