@@ -64,6 +64,10 @@ public class SuggestedProduct extends BaseTimeStampEntity {
 		this.status = SuggestedStatus.SUGGESTING;
 	}
 
+	public void changStatusAccepted() {
+		this.status = SuggestedStatus.ACCEPTED;
+	}
+
 	public void updateInfo(UpdateSuggestedProductInfoReqDto request) {
 		if (this.status == SuggestedStatus.ACCEPTED) {
 			throw new IllegalArgumentException("이미 제안이 승낙된 물품은 수정할 수 없습니다");
@@ -74,8 +78,8 @@ public class SuggestedProduct extends BaseTimeStampEntity {
 		this.images = request.getImages();
 	}
 
-	public void changStatusAccepted() {
-		this.status = SuggestedStatus.ACCEPTED;
+	public void updateStatus(String status) {
+		this.status = SuggestedStatus.findSuggestedStatus(status);
 	}
 
 	public void changStatusPending() {
