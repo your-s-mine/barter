@@ -136,6 +136,12 @@ public class ImmediateTradeService {
 	@Transactional
 	public String acceptTradeSuggest(Long tradeId) {
 		// todo: 유저 정보를 받아와 권한 확인 로직 추가 및 수정 - 교환을 생성한 맴버만이 승낙할 수 있음
+
+		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
+
+		immediateTrade.changStatusInProgress();
+
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeId(tradeId);
 
 		for (TradeProduct tradeProduct : tradeProducts) {
