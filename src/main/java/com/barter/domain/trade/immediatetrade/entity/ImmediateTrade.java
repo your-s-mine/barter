@@ -58,11 +58,11 @@ public class ImmediateTrade extends BaseTimeStampEntity {
 		return status.equals(TradeStatus.PENDING);
 	}
 
-	public void changStatusInProgress() {
+	public void changeStatusInProgress() {
 		this.status = TradeStatus.IN_PROGRESS;
 	}
 
-	public void changStatusPending() {
+	public void changeStatusPending() {
 		this.status = TradeStatus.PENDING;
 	}
 }

@@ -140,7 +140,7 @@ public class ImmediateTradeService {
 		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
 
-		immediateTrade.changStatusInProgress();
+		immediateTrade.changeStatusInProgress();
 
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeId(tradeId);
 
@@ -150,7 +150,7 @@ public class ImmediateTradeService {
 		}
 
 		return "제안 승락 완료";
-	}
+	}	
 
 
 	// 제안 거절 시 `교환_제안_물품` 테이블에서 삭제. 기준 "tradeId - 교환 Id"
@@ -162,7 +162,7 @@ public class ImmediateTradeService {
 		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
 
-		immediateTrade.changStatusPending();
+		immediateTrade.changeStatusPending();
 
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeId(tradeId);
 
