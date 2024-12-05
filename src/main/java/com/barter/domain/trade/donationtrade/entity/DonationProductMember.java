@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -25,4 +26,11 @@ public class DonationProductMember {
 	private Member member;
 	@ManyToOne
 	private DonationTrade donationTrade;
+
+	@Builder
+	public DonationProductMember(Long id, Member member, DonationTrade donationTrade) {
+		this.id = id;
+		this.member = member;
+		this.donationTrade = donationTrade;
+	}
 }
