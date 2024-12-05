@@ -1,5 +1,9 @@
 package com.barter.domain.product.controller;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,5 +43,14 @@ public class SuggestedProductController {
 		// 구현 이후 해당 메서드의 파라미터로 요청 회원 정보를 전달받아 활용하는 쪽으로 수정할 계획입니다.
 
 		return suggestedProductService.findSuggestedProduct(suggestedProductId);
+	}
+
+	@GetMapping
+	@ResponseStatus(HttpStatus.OK)
+	public PagedModel<FindSuggestedProductResDto> findSuggestedProducts(
+		@PageableDefault(sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
+		// 인증/인가 파트 구현이 끝난다면, 'SUGGESTED_PRODUCTS' 테이블에서 요청 회원이 생성한 등록 물품들을 조회하도록 할 것 같습니다.
+
+		return suggestedProductService.findSuggestedProducts(pageable);
 	}
 }
