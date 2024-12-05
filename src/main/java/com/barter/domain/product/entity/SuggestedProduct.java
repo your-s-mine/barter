@@ -54,4 +54,8 @@ public class SuggestedProduct extends BaseTimeStampEntity {
 			.status(SuggestedStatus.PENDING)
 			.build();
 	}
+
+	public boolean validateProductStatus(SuggestedStatus status) {
+		return status.equals(SuggestedStatus.PENDING);
+	}
 }
