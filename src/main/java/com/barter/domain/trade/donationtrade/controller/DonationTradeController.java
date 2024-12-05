@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.barter.domain.trade.donationtrade.dto.request.CreateDonationTradeReqDto;
 import com.barter.domain.trade.donationtrade.dto.request.UpdateDonationTradeReqDto;
 import com.barter.domain.trade.donationtrade.dto.response.FindDonationTradeResDto;
+import com.barter.domain.trade.donationtrade.dto.response.SuggestDonationTradeResDto;
 import com.barter.domain.trade.donationtrade.service.DonationTradeService;
 
 import jakarta.validation.Valid;
@@ -53,6 +54,17 @@ public class DonationTradeController {
 		return ResponseEntity
 			.status(HttpStatus.CREATED)
 			.build();
+	}
+
+	@PostMapping("/{tradeId}/suggest")
+	public ResponseEntity<SuggestDonationTradeResDto> suggestDonationTrade(
+		@PathVariable("tradeId") Long tradeId
+	) {
+		// TODO: 인증된 Member 받아오는 기능 추가 필요.
+		Long userId = 2L;
+		return ResponseEntity
+			.status(HttpStatus.OK)
+			.body(donationTradeService.suggestDonationTrade(userId, tradeId));
 	}
 
 	@PatchMapping("/{tradeId}")

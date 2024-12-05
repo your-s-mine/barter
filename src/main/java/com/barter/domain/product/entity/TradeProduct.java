@@ -38,7 +38,8 @@ public class TradeProduct {
 		this.suggestedProduct = suggestedProduct;
 	}
 
-	public TradeProduct createTradeProduct(Long tradeId, TradeType tradeType, SuggestedProduct suggestedProduct) {
+	public static TradeProduct createTradeProduct(Long tradeId, TradeType tradeType,
+		SuggestedProduct suggestedProduct) {
 		return TradeProduct.builder()
 			.tradeId(tradeId)
 			.tradeType(tradeType)

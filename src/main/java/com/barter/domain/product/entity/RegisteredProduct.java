@@ -3,6 +3,7 @@ package com.barter.domain.product.entity;
 import com.barter.domain.BaseTimeStampEntity;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
+import com.barter.domain.product.dto.request.UpdateRegisteredProductInfoReqDto;
 import com.barter.domain.product.enums.RegisteredStatus;
 
 import jakarta.persistence.Entity;
@@ -59,6 +60,20 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 		if (!member.isEqualsId(userId)) {
 			throw new IllegalArgumentException("권한이 없습니다.");
 		}
+	}
+
+	public void updateInfo(UpdateRegisteredProductInfoReqDto request) {
+		if (this.status == RegisteredStatus.ACCEPTED) {
+			throw new IllegalArgumentException("이미 제안이 승낙된 물품은 수정할 수 없습니다.");
+		}
+
+		this.name = request.getName();
+		this.description = request.getDescription();
+		this.images = request.getImages();
+	}
+
+	public void updateStatus(String status) {
+		this.status = RegisteredStatus.findRegisteredStatus(status);
 	}
 }
 
