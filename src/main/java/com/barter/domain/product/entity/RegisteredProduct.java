@@ -75,6 +75,13 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 	public void updateStatus(String status) {
 		this.status = RegisteredStatus.findRegisteredStatus(status);
 	}
+
+	public void checkPossibleDelete() {
+		if (this.status == RegisteredStatus.ACCEPTED) {
+			throw new IllegalArgumentException("이미 교환이 승낙된 물품은 삭제할 수 없습니다.");
+		}
+	}
+
 }
 
 
