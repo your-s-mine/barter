@@ -1,13 +1,17 @@
 package com.barter.domain.product.service;
 
+import java.util.Objects;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.member.repository.MemberRepository;
 import com.barter.domain.product.dto.request.CreateSuggestedProductReqDto;
+import com.barter.domain.product.dto.request.UpdateSuggestedProductInfoReqDto;
 import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.repository.SuggestedProductRepository;
@@ -44,5 +48,19 @@ public class SuggestedProductService {
 			.map(FindSuggestedProductResDto::from);
 
 		return new PagedModel<>(foundProducts);
+	}
+
+	// SuggestedProductController 와 마찬가지로 요청 회원의 정보가 넘어와야 하므로 인증/인가 구현 완료 이후 수정이 필요함
+	@Transactional
+	public void updateSuggestedProductInfo(UpdateSuggestedProductInfoReqDto request) {
+		SuggestedProduct foundProduct = suggestedProductRepository.findById(request.getId())
+			.orElseThrow(() -> new IllegalArgumentException("Suggested product not found"));
+
+		if (!Objects.equals(foundProduct.getMember().getId(), request.getMemberId())) {
+			throw new IllegalArgumentException("수정 권한이 없습니다");
+		}
+
+		foundProduct.updateInfo(request);
+		suggestedProductRepository.save(foundProduct);
 	}
 }
