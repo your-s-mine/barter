@@ -60,6 +60,14 @@ public class SuggestedProduct extends BaseTimeStampEntity {
 		return status.equals(SuggestedStatus.PENDING);
 	}
 
+	public void changStatusSuggesting() {
+		this.status = SuggestedStatus.SUGGESTING;
+	}
+
+	public void changStatusAccepted() {
+		this.status = SuggestedStatus.ACCEPTED;
+	}
+
 	public void updateInfo(UpdateSuggestedProductInfoReqDto request) {
 		if (this.status == SuggestedStatus.ACCEPTED) {
 			throw new IllegalArgumentException("이미 제안이 승낙된 물품은 수정할 수 없습니다");

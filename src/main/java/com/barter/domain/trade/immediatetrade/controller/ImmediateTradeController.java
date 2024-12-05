@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.barter.domain.product.dto.request.CreateSuggestedProductReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateTradeSuggestProductReqDto;
 import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeResDto;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateImmediateTradeReqDto;
@@ -43,17 +42,23 @@ public class ImmediateTradeController {
 	@PatchMapping("/{tradeId}")
 	public ResponseEntity<FindImmediateTradeResDto> update(@PathVariable Long tradeId,
 		@RequestBody @Valid UpdateImmediateTradeReqDto reqDto) throws IllegalAccessException {
-		return new ResponseEntity<>(immediateTradeService.update(tradeId, reqDto), HttpStatus.OK);
+		return new ResponseEntity<>(immediateTradeService.update(tradeId, reqDto), HttpStatus.NO_CONTENT);
 	}
 
 	@DeleteMapping("/{tradeId}")
 	public ResponseEntity<String> delete(@PathVariable Long tradeId) {
-		return new ResponseEntity<>(immediateTradeService.delete(tradeId), HttpStatus.OK);
+		return new ResponseEntity<>(immediateTradeService.delete(tradeId), HttpStatus.NO_CONTENT);
 	}
 
 	@PostMapping("/{tradeId}/suggest")
 	public ResponseEntity<String> createSuggest(@PathVariable Long tradeId,
 		@RequestBody @Valid CreateTradeSuggestProductReqDto reqDto) {
-		return new ResponseEntity<>(immediateTradeService.createSuggest(tradeId, reqDto), HttpStatus.CREATED);
+		return new ResponseEntity<>(immediateTradeService.createTradeSuggest(tradeId, reqDto), HttpStatus.CREATED);
 	}
+
+	@PatchMapping("/{tradeId}/acceptance")
+	public ResponseEntity<String> acceptTradeSuggest(@PathVariable Long tradeId) {
+		return new ResponseEntity<>(immediateTradeService.acceptTradeSuggest(tradeId), HttpStatus.ACCEPTED);
+	}
+
 }
