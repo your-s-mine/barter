@@ -120,7 +120,7 @@ public class PeriodTradeService {
 		periodTrade.validateIsPending();
 		periodTrade.validateIsCompleted();
 
-		List<SuggestedProduct> suggestedProduct = findRegisteredProductByIds(reqDto.getProductIds());
+		List<SuggestedProduct> suggestedProduct = findSuggestedProductByIds(reqDto.getProductIds());
 
 		List<TradeProduct> tradeProducts = suggestedProduct.stream()
 			.map(product -> TradeProduct.createTradeProduct(
@@ -150,6 +150,8 @@ public class PeriodTradeService {
 
 		// TODO : PeriodTrade 엔티티의 endedAt 이 현재 시간과 비교시 이후인 경우 CLOSED 되도록 하는 기능 구현 필요
 
+		// TODO : 완료 상태 시에 REGISTERED_PRODUCT 완료 상태 변경 필요
+
 		return StatusUpdateResDto.from(periodTrade);
 	}
 
@@ -171,6 +173,8 @@ public class PeriodTradeService {
 
 			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId())) {
 				suggestedProduct.changStatusAccepted();
+				periodTrade.getRegisteredProduct()
+					.updateStatus("ACCEPTED");// enum 타입이 아니어도 검증 로직이 구현되어 있기 때문에 일단 이렇게 구현함
 			}
 
 			// 한 교환에 대해서 여러번의 교환은 불가능 (회의 때 말한 같은 물건으로 여러번 다른 교환 시도 방지 위함)
@@ -183,7 +187,7 @@ public class PeriodTradeService {
 
 	}
 
-	private List<SuggestedProduct> findRegisteredProductByIds(List<Long> productIds) {
+	private List<SuggestedProduct> findSuggestedProductByIds(List<Long> productIds) {
 		return productIds.stream()
 			.map(id -> {
 					SuggestedProduct product = suggestedProductRepository.findById(id)

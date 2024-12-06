@@ -9,6 +9,7 @@ import com.barter.domain.trade.enums.TradeStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -32,8 +33,8 @@ public class PeriodTrade extends BaseTimeStampEntity {
 	private Long id;
 	private String title;
 	private String description;
-	@ManyToOne
-	private RegisteredProduct product;
+	@ManyToOne(fetch = FetchType.LAZY)
+	private RegisteredProduct registeredProduct;
 	@Enumerated(EnumType.STRING)
 	private TradeStatus status;
 	private int viewCount;
@@ -45,7 +46,7 @@ public class PeriodTrade extends BaseTimeStampEntity {
 
 		this.title = title;
 		this.description = description;
-		this.product = product;
+		this.registeredProduct = product;
 		this.status = status;
 		this.viewCount = viewCount;
 		this.endedAt = endedAt;
@@ -93,26 +94,29 @@ public class PeriodTrade extends BaseTimeStampEntity {
 	}
 
 	public void validateAuthority(Long userId) {
-		if (!this.product.getMember().getId().equals(userId)) {
+		if (!this.registeredProduct.getMember().getId().equals(userId)) {
 			throw new IllegalArgumentException("해당 물품에 대한 수정 권한이 없습니다.");
 		}
 
 	}
 
 	public void validateSuggestAuthority(Long userId) {
-		if (this.product.getMember().getId().equals(userId)) {
+		if (this.registeredProduct.getMember().getId().equals(userId)) {
 			throw new IllegalArgumentException("자신의 교환에 제안 할 수 없습니다.");
 		}
 	}
 
 	public boolean updatePeriodTradeStatus(TradeStatus status) {
 
-		if (status.equals(TradeStatus.CLOSED)) {
+		if (status.equals(TradeStatus.CLOSED)) { // CLOSED : 교환 등록자의 물품이 만료되거나 취소된 경우
 			this.status = status;
+			this.registeredProduct.updateStatus("PENDING");
 			return true;
 		}
 		if (status.equals(TradeStatus.IN_PROGRESS) && this.status.equals(TradeStatus.PENDING)) {
 			this.status = status;
+			this.registeredProduct.updateStatus("REGISTERING");
+
 			return true;
 		}
 		return status.equals(this.status); // 같은 경우는 일단 통과
