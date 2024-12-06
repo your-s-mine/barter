@@ -59,6 +59,7 @@ public class DonationTrade extends BaseTimeStampEntity {
 	public static DonationTrade createInitDonationTrade(RegisteredProduct product, Integer maxAmount, String title,
 		String description, LocalDateTime endedAt
 	) {
+		product.changStatusRegistering();
 		return DonationTrade.builder()
 			.title(title)
 			.description(description)
@@ -103,6 +104,7 @@ public class DonationTrade extends BaseTimeStampEntity {
 	public void suggestDonation() {
 		currentAmount++;
 		if (currentAmount == maxAmount) {
+			product.changeStatusAccepted();
 			status = TradeStatus.COMPLETED;
 		}
 	}
