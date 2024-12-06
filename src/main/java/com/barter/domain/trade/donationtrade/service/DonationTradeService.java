@@ -77,6 +77,7 @@ public class DonationTradeService {
 			.orElseThrow(() -> new IllegalStateException("존재하지 않는 나눔 교환 입니다."));
 
 		donationTrade.validateDelete(userId);
+		donationTrade.changeProductStatusPending();
 		donationTradeRepository.delete(donationTrade);
 	}
 
