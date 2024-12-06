@@ -108,4 +108,8 @@ public class DonationTrade extends BaseTimeStampEntity {
 			status = TradeStatus.COMPLETED;
 		}
 	}
+
+	public void changeProductStatusPending() {
+		product.changeStatusPending();
+	}
 }
