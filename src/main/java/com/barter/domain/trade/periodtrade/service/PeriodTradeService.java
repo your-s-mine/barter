@@ -18,11 +18,13 @@ import com.barter.domain.product.repository.SuggestedProductRepository;
 import com.barter.domain.product.repository.TradeProductRepository;
 import com.barter.domain.trade.periodtrade.dto.request.AcceptPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.CreatePeriodTradeReqDto;
+import com.barter.domain.trade.periodtrade.dto.request.DenyPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.StatusUpdateReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.SuggestedPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.UpdatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.response.AcceptPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.CreatePeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.response.DenyPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.StatusUpdateResDto;
 import com.barter.domain.trade.periodtrade.dto.response.SuggestedPeriodTradeResDto;
@@ -150,8 +152,6 @@ public class PeriodTradeService {
 
 		// TODO : PeriodTrade 엔티티의 endedAt 이 현재 시간과 비교시 이후인 경우 CLOSED 되도록 하는 기능 구현 필요
 
-		// TODO : 완료 상태 시에 REGISTERED_PRODUCT 완료 상태 변경 필요
-
 		return StatusUpdateResDto.from(periodTrade);
 	}
 
@@ -185,6 +185,32 @@ public class PeriodTradeService {
 
 		return AcceptPeriodTradeResDto.from(periodTrade);
 
+	}
+
+	// TODO : Deny 부분이 Accept 랑 구조가 비슷해서 단순화 시킬 필요 있다.
+	@Transactional
+	public DenyPeriodTradeResDto denyPeriodTrade(Long id, DenyPeriodTradeReqDto reqDto) {
+		Long userId = 1L;
+
+		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
+			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
+		);
+		periodTrade.validateAuthority(userId);
+		periodTrade.validateIsCompleted();
+
+		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(id, TradeType.PERIOD);
+
+		for (TradeProduct tradeProduct : tradeProducts) {
+			SuggestedProduct suggestedProduct = tradeProduct.getSuggestedProduct();
+
+			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId())) {
+				suggestedProduct.changStatusPending();
+				periodTrade.getRegisteredProduct()
+					.updateStatus("IN_PROGRESS");
+			}
+
+		}
+		return DenyPeriodTradeResDto.from(periodTrade);
 	}
 
 	private List<SuggestedProduct> findSuggestedProductByIds(List<Long> productIds) {

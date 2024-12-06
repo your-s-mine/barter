@@ -3,6 +3,9 @@ package com.barter.domain.trade.immediatetrade.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,10 +16,12 @@ import com.barter.domain.product.enums.TradeType;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.repository.SuggestedProductRepository;
 import com.barter.domain.product.repository.TradeProductRepository;
+import com.barter.domain.trade.donationtrade.dto.response.FindDonationTradeResDto;
 import com.barter.domain.trade.enums.TradeStatus;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateImmediateTradeReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateTradeSuggestProductReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeReqDto;
+import com.barter.domain.trade.immediatetrade.dto.request.UpdateStatusReqDto;
 import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeResDto;
 import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
@@ -31,8 +36,8 @@ public class ImmediateTradeService {
 	private final TradeProductRepository tradeProductRepository;
 	private final SuggestedProductRepository suggestedProductRepository;
 
-	// todo: 유저 정보를 받아와 권한 확인 로직 추가 및 수정
 
+	// todo: 유저 정보를 받아와 권한 확인 로직 추가 및 수정
 	public FindImmediateTradeResDto create(CreateImmediateTradeReqDto reqDto) {
 		RegisteredProduct registeredProduct = registeredProductRepository
 			.findById(reqDto.getRegisteredProduct().getId()).orElseThrow(
@@ -60,6 +65,15 @@ public class ImmediateTradeService {
 
 		return FindImmediateTradeResDto.from(immediateTrade);
 	}
+
+	@Transactional(readOnly = true)
+	public PagedModel<FindImmediateTradeResDto> findImmediateTrades(Pageable pageable) {
+		Page<FindImmediateTradeResDto> trades = immediateTradeRepository.findAll(pageable)
+			.map(trade -> FindImmediateTradeResDto.from(trade));
+
+		return new PagedModel<>(trades);
+	}
+
 
 	public FindImmediateTradeResDto update(Long tradeId, UpdateImmediateTradeReqDto reqDto) throws
 		IllegalAccessException {
@@ -150,10 +164,10 @@ public class ImmediateTradeService {
 		}
 
 		return "제안 승락 완료";
-	}	
-
+	}
 
 	// 제안 거절 시 `교환_제안_물품` 테이블에서 삭제. 기준 "tradeId - 교환 Id"
+
 	@Transactional
 	public String denyTradeSuggest(Long tradeId) {
 
@@ -174,5 +188,23 @@ public class ImmediateTradeService {
 		tradeProductRepository.deleteAll(tradeProducts);
 
 		return "제안 거절";
+	}
+
+	@Transactional
+	public FindImmediateTradeResDto updateStatus(Long tradeId, UpdateStatusReqDto reqDto) {
+
+		// todo: 유저 정보를 받아와 권한 확인 로직 추가 및 수정
+
+		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
+
+		if (!(immediateTrade.isCompleted())) {
+			throw new IllegalStateException("교환이 완료된 건에 대해서는 상태 변경을 할 수 없습니다.");
+		}
+
+		immediateTrade.changeStatus(reqDto.getTradeStatus());
+
+		ImmediateTrade updatedTrade = immediateTradeRepository.save(immediateTrade);
+		return FindImmediateTradeResDto.from(updatedTrade);
 	}
 }

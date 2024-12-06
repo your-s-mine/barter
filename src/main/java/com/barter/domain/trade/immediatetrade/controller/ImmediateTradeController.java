@@ -1,5 +1,8 @@
 package com.barter.domain.trade.immediatetrade.controller;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,10 +14,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.barter.domain.trade.immediatetrade.dto.request.CreateTradeSuggestProductReqDto;
-import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeResDto;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateImmediateTradeReqDto;
+import com.barter.domain.trade.immediatetrade.dto.request.CreateTradeSuggestProductReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeReqDto;
+import com.barter.domain.trade.immediatetrade.dto.request.UpdateStatusReqDto;
+import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeResDto;
 import com.barter.domain.trade.immediatetrade.service.ImmediateTradeService;
 
 import jakarta.validation.Valid;
@@ -42,7 +46,12 @@ public class ImmediateTradeController {
 	@PatchMapping("/{tradeId}")
 	public ResponseEntity<FindImmediateTradeResDto> update(@PathVariable Long tradeId,
 		@RequestBody @Valid UpdateImmediateTradeReqDto reqDto) throws IllegalAccessException {
-		return new ResponseEntity<>(immediateTradeService.update(tradeId, reqDto), HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(immediateTradeService.update(tradeId, reqDto), HttpStatus.OK);
+	}
+
+	@GetMapping("")
+	public ResponseEntity<PagedModel<FindImmediateTradeResDto>> findImmediateTrades(@PageableDefault Pageable pageable) {
+		return new ResponseEntity<>(immediateTradeService.findImmediateTrades(pageable), HttpStatus.OK);
 	}
 
 	@DeleteMapping("/{tradeId}")
@@ -64,5 +73,12 @@ public class ImmediateTradeController {
 	@DeleteMapping("/{tradeId}/denial")
 	public ResponseEntity<String> denyTradeSuggest(@PathVariable Long tradeId) {
 		return new ResponseEntity<>(immediateTradeService.denyTradeSuggest(tradeId), HttpStatus.NO_CONTENT);
+	}
+
+	@PatchMapping("/status/{tradeId}")
+	public ResponseEntity<FindImmediateTradeResDto> updateStatus(@PathVariable Long tradeId,
+		@Valid @RequestBody UpdateStatusReqDto reqDto) {
+		return new ResponseEntity<>(immediateTradeService.updateStatus(tradeId, reqDto),
+			HttpStatus.OK);
 	}
 }
