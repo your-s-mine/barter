@@ -87,8 +87,8 @@ public class SuggestedProduct extends BaseTimeStampEntity {
 	}
 
 	public void checkPossibleDelete() {
-		if (this.status == SuggestedStatus.ACCEPTED) {
-			throw new IllegalArgumentException("이미 제안이 승낙된 물품은 삭제할 수 없습니다.");
+		if (this.status != SuggestedStatus.PENDING) {
+			throw new IllegalArgumentException("PENDING 상태인 경우에만 제안 물품을 삭제할 수 있습니다.");
 		}
 	}
 

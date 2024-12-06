@@ -17,9 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.barter.domain.product.dto.request.CreateSuggestedProductReqDto;
 import com.barter.domain.product.dto.request.DeleteSuggestedProductReqDto;
+import com.barter.domain.product.dto.request.SwitchSuggestedProductReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductInfoReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductStatusReqDto;
 import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
+import com.barter.domain.product.service.ProductSwitchService;
 import com.barter.domain.product.service.SuggestedProductService;
 
 import jakarta.validation.Valid;
@@ -31,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 public class SuggestedProductController {
 
 	private final SuggestedProductService suggestedProductService;
+	private final ProductSwitchService productSwitchService;
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
@@ -81,5 +84,15 @@ public class SuggestedProductController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteSuggestedProduct(@RequestBody @Valid DeleteSuggestedProductReqDto request) {
 		suggestedProductService.deleteSuggestedProduct(request);
+	}
+
+	@PostMapping("/switch")
+	@ResponseStatus(HttpStatus.CREATED)
+	public void createdSuggestedProductFromRegisteredProduct(
+		@RequestBody @Valid SwitchSuggestedProductReqDto request
+	) {
+		// 현재 인증/인가 파트의 구현이 완료되지 않아 요청 회원의 정보가 전돨된다는 가정하에 작성하여 추후 수정이 필요함
+
+		productSwitchService.createSuggestedProductFromRegisteredProduct(request);
 	}
 }
