@@ -15,11 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.barter.domain.trade.periodtrade.dto.request.AcceptPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.CreatePeriodTradeReqDto;
+import com.barter.domain.trade.periodtrade.dto.request.DenyPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.StatusUpdateReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.SuggestedPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.UpdatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.response.AcceptPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.CreatePeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.response.DenyPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.StatusUpdateResDto;
 import com.barter.domain.trade.periodtrade.dto.response.SuggestedPeriodTradeResDto;
@@ -99,6 +101,15 @@ public class PeriodTradeController {
 		@Valid @RequestBody AcceptPeriodTradeReqDto reqDto) {
 		return ResponseEntity.status(HttpStatus.OK).body(
 			periodTradeService.acceptPeriodTrade(id, reqDto)
+		);
+	}
+
+	@PatchMapping("/period-trades/{id}/denial")
+	public ResponseEntity<DenyPeriodTradeResDto> denyPeriodTrade(
+		@PathVariable Long id,
+		@Valid @RequestBody DenyPeriodTradeReqDto reqDto) {
+		return ResponseEntity.status(HttpStatus.OK).body(
+			periodTradeService.denyPeriodTrade(id, reqDto)
 		);
 	}
 
