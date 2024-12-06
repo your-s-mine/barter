@@ -70,4 +70,8 @@ public class ImmediateTrade extends BaseTimeStampEntity {
 	public void changeStatus(TradeStatus tradeStatus) {
 		this.status = tradeStatus;
 	}
+
+	public boolean isCompleted() {
+		return this.status == TradeStatus.COMPLETED;
+	}
 }
