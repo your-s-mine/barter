@@ -206,7 +206,7 @@ public class PeriodTradeService {
 			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId())) {
 				suggestedProduct.changStatusPending();
 				periodTrade.getRegisteredProduct()
-					.updateStatus("PENDING");
+					.updateStatus("IN_PROGRESS");
 			}
 
 		}
