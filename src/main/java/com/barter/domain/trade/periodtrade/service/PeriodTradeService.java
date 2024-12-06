@@ -169,7 +169,7 @@ public class PeriodTradeService {
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
 		periodTrade.validateAuthority(userId);
-		periodTrade.validateIsCompleted();
+		periodTrade.validateInProgress();
 
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(id, TradeType.PERIOD);
 
@@ -201,7 +201,7 @@ public class PeriodTradeService {
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
 		periodTrade.validateAuthority(userId);
-		periodTrade.validateIsCompleted();
+		periodTrade.validateInProgress();
 
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(id, TradeType.PERIOD);
 
