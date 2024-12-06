@@ -43,7 +43,7 @@ public class ImmediateTradeController {
 	@PatchMapping("/{tradeId}")
 	public ResponseEntity<FindImmediateTradeResDto> update(@PathVariable Long tradeId,
 		@RequestBody @Valid UpdateImmediateTradeReqDto reqDto) throws IllegalAccessException {
-		return new ResponseEntity<>(immediateTradeService.update(tradeId, reqDto), HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(immediateTradeService.update(tradeId, reqDto), HttpStatus.OK);
 	}
 
 	@DeleteMapping("/{tradeId}")
@@ -71,6 +71,6 @@ public class ImmediateTradeController {
 	public ResponseEntity<FindImmediateTradeResDto> updateStatus(@PathVariable Long tradeId,
 		@Valid @RequestBody UpdateStatusReqDto reqDto) {
 		return new ResponseEntity<>(immediateTradeService.updateStatus(tradeId, reqDto),
-			HttpStatus.NO_CONTENT);
+			HttpStatus.OK);
 	}
 }
