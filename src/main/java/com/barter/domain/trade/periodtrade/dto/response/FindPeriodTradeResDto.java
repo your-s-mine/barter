@@ -44,7 +44,7 @@ public class FindPeriodTradeResDto {
 			.periodTradesId(periodTrade.getId())
 			.title(periodTrade.getTitle())
 			.description(periodTrade.getDescription())
-			.product(periodTrade.getProduct())
+			.product(periodTrade.getRegisteredProduct())
 			.createdAt(periodTrade.getCreatedAt())
 			.updatedAt(periodTrade.getUpdatedAt())
 			.viewCount(periodTrade.getViewCount())
