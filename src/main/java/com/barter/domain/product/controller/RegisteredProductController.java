@@ -17,9 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.DeleteRegisteredProductReqDto;
+import com.barter.domain.product.dto.request.SwitchRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductInfoReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductStatusReqDto;
 import com.barter.domain.product.dto.response.FindRegisteredProductResDto;
+import com.barter.domain.product.service.ProductSwitchService;
 import com.barter.domain.product.service.RegisteredProductService;
 
 import jakarta.validation.Valid;
@@ -31,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 public class RegisteredProductController {
 
 	private final RegisteredProductService registeredProductService;
+	private final ProductSwitchService productSwitchService;
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
@@ -81,5 +84,15 @@ public class RegisteredProductController {
 		// 현재 인증/인가 파트의 구현이 완료되지 않아 요청 회원의 정보가 전달된다는 가정하에 작성하여 추후 수정이 필요함
 
 		registeredProductService.deleteRegisteredProduct(request);
+	}
+
+	@PostMapping("/switch")
+	@ResponseStatus(HttpStatus.CREATED)
+	public void createRegisteredProductFromSuggestedProduct(
+		@RequestBody @Valid SwitchRegisteredProductReqDto request
+	) {
+		// 현재 인증/인가 파트의 구현이 완료되지 않아 요청 회원의 정보가 전달된다는 가정하에 작성하여 추후 수정이 필요함
+
+		productSwitchService.createRegisteredProductFromSuggestedProduct(request);
 	}
 }
