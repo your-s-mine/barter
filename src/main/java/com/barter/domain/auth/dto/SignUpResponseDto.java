@@ -9,5 +9,5 @@ public class SignUpResponseDto {
 
     private final Long id;
     private final String email;
-    private final String username;
+    private final String nickname;
 }
