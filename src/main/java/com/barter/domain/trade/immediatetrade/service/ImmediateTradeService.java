@@ -17,6 +17,7 @@ import com.barter.domain.trade.enums.TradeStatus;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateImmediateTradeReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateTradeSuggestProductReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeReqDto;
+import com.barter.domain.trade.immediatetrade.dto.request.UpdateStatusReqDto;
 import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeResDto;
 import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
@@ -174,5 +175,23 @@ public class ImmediateTradeService {
 		tradeProductRepository.deleteAll(tradeProducts);
 
 		return "제안 거절";
+	}
+
+	@Transactional
+	public FindImmediateTradeResDto updateStatus(Long tradeId, UpdateStatusReqDto reqDto) {
+
+		// todo: 유저 정보를 받아와 권한 확인 로직 추가 및 수정
+
+		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
+
+		if (!(immediateTrade.isCompleted())) {
+			throw new IllegalStateException("교환이 완료된 건에 대해서는 상태 변경을 할 수 없습니다.");
+		}
+
+		immediateTrade.changeStatus(reqDto.getTradeStatus());
+
+		ImmediateTrade updatedTrade = immediateTradeRepository.save(immediateTrade);
+		return FindImmediateTradeResDto.from(updatedTrade);
 	}
 }
