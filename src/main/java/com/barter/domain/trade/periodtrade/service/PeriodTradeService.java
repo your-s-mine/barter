@@ -74,7 +74,7 @@ public class PeriodTradeService {
 		return new PagedModel<>(trades);
 	}
 
-	@Transactional(readOnly = true)
+	@Transactional
 	public FindPeriodTradeResDto findPeriodTradeById(Long id) {
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
