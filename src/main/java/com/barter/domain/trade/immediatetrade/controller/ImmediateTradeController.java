@@ -11,10 +11,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.barter.domain.trade.immediatetrade.dto.request.CreateTradeSuggestProductReqDto;
-import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeResDto;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateImmediateTradeReqDto;
+import com.barter.domain.trade.immediatetrade.dto.request.CreateTradeSuggestProductReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeReqDto;
+import com.barter.domain.trade.immediatetrade.dto.request.UpdateStatusReqDto;
+import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeResDto;
 import com.barter.domain.trade.immediatetrade.service.ImmediateTradeService;
 
 import jakarta.validation.Valid;
@@ -64,5 +65,12 @@ public class ImmediateTradeController {
 	@DeleteMapping("/{tradeId}/denial")
 	public ResponseEntity<String> denyTradeSuggest(@PathVariable Long tradeId) {
 		return new ResponseEntity<>(immediateTradeService.denyTradeSuggest(tradeId), HttpStatus.NO_CONTENT);
+	}
+
+	@PatchMapping("/status/{tradeId}")
+	public ResponseEntity<FindImmediateTradeResDto> updateStatus(@PathVariable Long tradeId,
+		@Valid @RequestBody UpdateStatusReqDto reqDto) {
+		return new ResponseEntity<>(immediateTradeService.updateStatus(tradeId, reqDto),
+			HttpStatus.NO_CONTENT);
 	}
 }

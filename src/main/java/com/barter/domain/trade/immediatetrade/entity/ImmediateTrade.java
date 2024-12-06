@@ -13,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -64,5 +65,9 @@ public class ImmediateTrade extends BaseTimeStampEntity {
 
 	public void changeStatusPending() {
 		this.status = TradeStatus.PENDING;
+	}
+
+	public void changeStatus(TradeStatus tradeStatus) {
+		this.status = tradeStatus;
 	}
 }
