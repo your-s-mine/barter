@@ -81,6 +81,12 @@ public class SearchService {
 
 		List<SearchKeyword> searchKeywords = searchKeywordRepository.findTop10ByOrderByCountDesc();
 
+		if (searchKeywords.isEmpty()) {
+			searchKeywords.add(SearchKeyword.builder()
+				.word("인기 검색어를 찾을 수 없습니다")
+				.build());
+		}
+
 		return searchKeywords.stream().map(topKeyword -> topKeyword.getWord()).toList();
 	}
 
