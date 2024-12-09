@@ -10,4 +10,5 @@ public class LoginResponseDto {
     private String email;
     private String nickname;
     private String message;
+    private String token;
 }
