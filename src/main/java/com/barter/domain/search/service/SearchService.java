@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,6 +82,16 @@ public class SearchService {
 		List<SearchKeyword> searchKeywords = searchKeywordRepository.findTop10ByOrderByCountDesc();
 
 		return searchKeywords.stream().map(topKeyword -> topKeyword.getWord()).toList();
+	}
+
+	@Scheduled(cron = "0 30 * * * *")
+	@Transactional
+	public void deleteHistoryOver24hours() {
+		LocalDateTime time = LocalDateTime.now().minusHours(24);
+
+		List<SearchHistory> searchHistories = searchHistoryRepository.findAllBySearchedAt(time);
+
+		searchHistoryRepository.deleteAll(searchHistories);
 	}
 
 	private List<SearchTradeResDto> mapDonationTradesToSearchTradeRes(List<DonationTrade> trades) {
