@@ -1,5 +1,6 @@
 package com.barter.domain.trade.donationtrade.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,4 +16,6 @@ public interface DonationTradeRepository extends JpaRepository<DonationTrade, Lo
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("select d from DonationTrade d where d.id = :tradeId")
 	Optional<DonationTrade> findByIdForUpdate(Long tradeId);
+
+	List<DonationTrade> findByTitleOrDescriptionContaining(String title, String description);
 }
