@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.barter.domain.search.dto.SearchTopsResDto;
 import com.barter.domain.search.dto.SearchTradeResDto;
 import com.barter.domain.search.service.SearchService;
 
@@ -25,5 +26,11 @@ public class SearchController {
 	@GetMapping("/{word}")
 	public ResponseEntity<List<SearchTradeResDto>> findTrades(@PathVariable String word) {
 		return new ResponseEntity<>(searchService.createSearchKeywordAndFindTrades(word), HttpStatus.OK);
+	}
+
+	// 반환 타입: List 에 단어만 넣고 순위는 인덱스로
+	@GetMapping("/popular")
+	public ResponseEntity<List<String>> findPopularKeywords() {
+		return new ResponseEntity<>(searchService.findPopularKeywords(), HttpStatus.OK);
 	}
 }
