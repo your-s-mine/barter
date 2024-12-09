@@ -22,7 +22,7 @@ public class SearchController {
 
 	// 반환 타입은 뭘로 해야할까 ? 세 종류의 교환(trade)가 있음. 각 서비스와 레포지토리로 구분함. List 로 묶어서 보내봐야겠다.
 	@PostMapping("/{word}")
-	public ResponseEntity<List<SearchTradeResDto>> FindTrades(@PathVariable String word) {
+	public ResponseEntity<List<SearchTradeResDto>> findTrades(@PathVariable String word) {
 		return new ResponseEntity<>(searchService.createSearchKeywordAndFindTrades(word), HttpStatus.OK);
 	}
 }
