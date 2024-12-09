@@ -84,7 +84,7 @@ public class SearchService {
 		return searchKeywords.stream().map(topKeyword -> topKeyword.getWord()).toList();
 	}
 
-	@Scheduled(cron = "0 30 * * * *")
+	@Scheduled(cron = "0 */30 * * * *")
 	@Transactional
 	public void deleteHistoryOver24hours() {
 		LocalDateTime time = LocalDateTime.now().minusHours(24);
