@@ -3,7 +3,6 @@ package com.barter.domain.search.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,6 +76,13 @@ public class SearchService {
 		return tradeDtos;
 	}
 
+	public List<String> findPopularKeywords() {
+
+		List<SearchKeyword> searchKeywords = searchKeywordRepository.findTop10ByOrderByCountDesc();
+
+		return searchKeywords.stream().map(topKeyword -> topKeyword.getWord()).toList();
+	}
+
 	private List<SearchTradeResDto> mapDonationTradesToSearchTradeRes(List<DonationTrade> trades) {
 		return trades.stream()
 			.map(trade -> SearchTradeResDto.builder()
@@ -85,7 +91,7 @@ public class SearchService {
 				.tradeStatus(trade.getStatus())
 				.viewCount(trade.getViewCount())
 				.build())
-			.collect(Collectors.toList());
+			.toList();
 	}
 
 	private List<SearchTradeResDto> mapImmediateTradesToSearchTradeRes(List<ImmediateTrade> trades) {
@@ -96,7 +102,7 @@ public class SearchService {
 				.tradeStatus(trade.getStatus())
 				.viewCount(trade.getViewCount())
 				.build())
-			.collect(Collectors.toList());
+			.toList();
 	}
 
 	private List<SearchTradeResDto> mapPeriodTradesToSearchTradeRes(List<PeriodTrade> trades) {
@@ -107,6 +113,6 @@ public class SearchService {
 				.tradeStatus(trade.getStatus())
 				.viewCount(trade.getViewCount())
 				.build())
-			.collect(Collectors.toList());
+			.toList();
 	}
 }
