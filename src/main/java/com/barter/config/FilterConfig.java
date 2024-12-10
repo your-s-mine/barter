@@ -18,7 +18,7 @@ public class FilterConfig {
     public FilterRegistrationBean<JwtFilter> jwtFilterRegistration() {
         FilterRegistrationBean<JwtFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(jwtFilter);
-        registrationBean.addUrlPatterns("/protected/*"); // 인증이 필요한 경로만 지정
+        registrationBean.addUrlPatterns("/auth/*"); // 인증이 필요한 경로만 지정
         registrationBean.setOrder(1); // 필터 실행 순서
         return registrationBean;
     }
