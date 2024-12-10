@@ -1,5 +1,7 @@
 package com.barter.domain.member.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.barter.domain.member.entity.FavoriteKeyword;
@@ -10,4 +12,6 @@ public interface MemberFavoriteKeywordRepository extends JpaRepository<MemberFav
 	boolean existsByMemberAndFavoriteKeyword(Member member, FavoriteKeyword favoriteKeyword);
 
 	int countByMember(Member member);
+
+	List<MemberFavoriteKeyword> findByMember(Member member);
 }

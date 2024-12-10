@@ -1,10 +1,13 @@
 package com.barter.domain.member.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.barter.common.KeywordHelper;
 import com.barter.domain.member.dto.CreateFavoriteKeywordReqDto;
+import com.barter.domain.member.dto.FindFavoriteKeywordResDto;
 import com.barter.domain.member.entity.FavoriteKeyword;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.member.entity.MemberFavoriteKeyword;
@@ -44,5 +47,13 @@ public class FavoriteKeywordService {
 			.favoriteKeyword(favoriteKeyword)
 			.build();
 		memberFavoriteKeywordRepository.save(memberFavoriteKeyword);
+	}
+
+	public List<FindFavoriteKeywordResDto> findFavoriteKeywords(Long memberId) {
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 멤버입니다."));
+		return memberFavoriteKeywordRepository.findByMember(member).stream()
+			.map(FindFavoriteKeywordResDto::from)
+			.toList();
 	}
 }
