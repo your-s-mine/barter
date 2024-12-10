@@ -22,8 +22,6 @@ public class S3Service {
 
 	@Value("${cloud.aws.s3.bucket}")
 	private String bucket;
-	@Value("${cloud.aws.s3.image.prefix}")
-	private String urlPrefix;
 	private final AmazonS3 amazonS3;
 
 	public List<String> uploadFile(List<MultipartFile> multipartFiles) {
@@ -44,7 +42,7 @@ public class S3Service {
 					throw new IllegalStateException(e);
 				}
 
-				return urlPrefix + name;
+				return name;
 			})
 			.toList();
 	}
