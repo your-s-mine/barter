@@ -15,13 +15,43 @@ public class JwtUtil {
 
     private final long EXPIRATION_TIME = 1000 * 60 * 60; // 1시간
 
+    // 토큰 생성
     public String createToken(String email, String nickname) {
         return Jwts.builder()
-                .setSubject(email) // 토큰의 subject로 email 설정
+                .setSubject(email)
                 .claim("nickname", nickname)
-                .setIssuedAt(new Date()) // 토큰 발급 시간
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME)) // 만료 시간 설정
-                .signWith(SignatureAlgorithm.HS256, secretKey) // HS256 알고리즘을 사용해 서명
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
+    }
+
+    // 토큰 검증
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(token); // 토큰 검증
+            return true;
+        } catch (Exception e) {
+            return false; // 유효하지 않은 경우
+        }
+    }
+
+    // 클레임 추출
+    public String extractEmail(String token) {
+        return Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject(); // email 반환
+    }
+
+    public String extractNickname(String token) {
+        return Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody()
+                .get("nickname", String.class); // nickname 반환
     }
 }
