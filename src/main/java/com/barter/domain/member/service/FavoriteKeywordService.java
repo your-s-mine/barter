@@ -29,9 +29,10 @@ public class FavoriteKeywordService {
 			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 멤버입니다."));
 		String keyword = KeywordHelper.removeSpace(req.getKeyword());
 		FavoriteKeyword favoriteKeyword = favoriteKeywordRepository.findByKeyword(keyword)
-			.orElse(FavoriteKeyword.builder()
-				.keyword(keyword)
-				.build());
+			.orElseGet(() -> favoriteKeywordRepository.save(
+				FavoriteKeyword.builder()
+					.keyword(keyword)
+					.build()));
 		if (memberFavoriteKeywordRepository.existsByMemberAndFavoriteKeyword(member, favoriteKeyword)) {
 			throw new IllegalStateException("이미 관심키워드로 등록돼 있습니다.");
 		}
@@ -42,7 +43,6 @@ public class FavoriteKeywordService {
 			.member(member)
 			.favoriteKeyword(favoriteKeyword)
 			.build();
-		favoriteKeywordRepository.save(favoriteKeyword);
 		memberFavoriteKeywordRepository.save(memberFavoriteKeyword);
 	}
 }
