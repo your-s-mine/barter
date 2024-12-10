@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -23,4 +24,11 @@ public class MemberFavoriteKeyword {
 	private Member member;
 	@ManyToOne
 	private FavoriteKeyword favoriteKeyword;
+
+	@Builder
+	public MemberFavoriteKeyword(Long id, Member member, FavoriteKeyword favoriteKeyword) {
+		this.id = id;
+		this.member = member;
+		this.favoriteKeyword = favoriteKeyword;
+	}
 }
