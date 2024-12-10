@@ -31,4 +31,10 @@ public class MemberFavoriteKeyword {
 		this.member = member;
 		this.favoriteKeyword = favoriteKeyword;
 	}
+
+	public void validateAuthority(Long memberId) {
+		if (!member.isEqualsId(memberId)) {
+			throw new IllegalStateException("권한이 없습니다.");
+		}
+	}
 }

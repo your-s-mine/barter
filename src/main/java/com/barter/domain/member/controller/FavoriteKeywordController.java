@@ -4,7 +4,9 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,5 +42,17 @@ public class FavoriteKeywordController {
 		return ResponseEntity
 			.status(HttpStatus.OK)
 			.body(favoriteKeywordService.findFavoriteKeywords(memberId));
+	}
+
+	@DeleteMapping("/{memberFavoriteKeywordId}")
+	public ResponseEntity<Void> deleteFavoriteKeyword(
+		@PathVariable Long memberFavoriteKeywordId
+	) {
+		// TODO: 인증/인가 구현 완료 후 변경 예정
+		Long memberId = 1L;
+		favoriteKeywordService.deleteFavoriteKeyword(memberId, memberFavoriteKeywordId);
+		return ResponseEntity
+			.status(HttpStatus.NO_CONTENT)
+			.build();
 	}
 }
