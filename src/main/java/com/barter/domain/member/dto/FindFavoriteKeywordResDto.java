@@ -20,7 +20,7 @@ public class FindFavoriteKeywordResDto {
 	public static FindFavoriteKeywordResDto from(MemberFavoriteKeyword memberFavoriteKeyword) {
 		FavoriteKeyword favoriteKeyword = memberFavoriteKeyword.getFavoriteKeyword();
 		return FindFavoriteKeywordResDto.builder()
-			.id(favoriteKeyword.getId())
+			.id(memberFavoriteKeyword.getId())
 			.keyword(favoriteKeyword.getKeyword())
 			.build();
 	}

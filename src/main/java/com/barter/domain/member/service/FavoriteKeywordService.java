@@ -56,4 +56,11 @@ public class FavoriteKeywordService {
 			.map(FindFavoriteKeywordResDto::from)
 			.toList();
 	}
+
+	public void deleteFavoriteKeyword(Long memberId, Long memberFavoriteKeywordId) {
+		MemberFavoriteKeyword memberFavoriteKeyword = memberFavoriteKeywordRepository.findById(memberFavoriteKeywordId)
+			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 관심 키워드 입니다."));
+		memberFavoriteKeyword.validateAuthority(memberId);
+		memberFavoriteKeywordRepository.delete(memberFavoriteKeyword);
+	}
 }
