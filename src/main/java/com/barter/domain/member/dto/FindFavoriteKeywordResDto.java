@@ -8,8 +8,8 @@ import lombok.Getter;
 
 @Getter
 public class FindFavoriteKeywordResDto {
-	private Long id;
-	private String keyword;
+	private final Long id;
+	private final String keyword;
 
 	@Builder
 	public FindFavoriteKeywordResDto(Long id, String keyword) {
