@@ -18,8 +18,11 @@ public class FilterConfig {
     public FilterRegistrationBean<JwtFilter> jwtFilterRegistration() {
         FilterRegistrationBean<JwtFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(jwtFilter);
-        registrationBean.addUrlPatterns("/auth/*"); // 인증이 필요한 경로만 지정
+        registrationBean.addUrlPatterns("/auth/*"); // auth 경로에 필터 적용
         registrationBean.setOrder(1); // 필터 실행 순서
+
+        // 회원가입과 로그인 경로는 필터에서 제외
+        registrationBean.addInitParameter("excludeUrlPatterns", "/auth/signup,/auth/login");
         return registrationBean;
     }
 }
