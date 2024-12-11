@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.barter.domain.member.repository.MemberRepository;
+import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.entity.TradeProduct;
 import com.barter.domain.product.enums.SuggestedStatus;
@@ -50,9 +51,13 @@ public class PeriodTradeService {
 
 		/* TODO : RegisteredProduct 가 해당 유저의 물건인지 확인하는 로직 필요
 		    해당 로직 추가시 아래 코드는 변경 될 수 있음*/
+		RegisteredProduct registeredProduct = registeredProductRepository.findById(reqDto.getRegisteredProductId())
+			.orElseThrow(
+				() -> new IllegalArgumentException("없는 등록된 물건입니다.")
+			);
 
 		PeriodTrade periodTrade = PeriodTrade.createInitPeriodTrade(reqDto.getTitle(), reqDto.getDescription(),
-			reqDto.getProduct(),
+			registeredProduct,
 			reqDto.getEndedAt());
 
 		periodTrade.validateIsExceededMaxEndDate();
@@ -69,7 +74,7 @@ public class PeriodTradeService {
 		return new PagedModel<>(trades);
 	}
 
-	@Transactional(readOnly = true)
+	@Transactional
 	public FindPeriodTradeResDto findPeriodTradeById(Long id) {
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
@@ -164,7 +169,7 @@ public class PeriodTradeService {
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
 		periodTrade.validateAuthority(userId);
-		periodTrade.validateIsCompleted();
+		periodTrade.validateInProgress();
 
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(id, TradeType.PERIOD);
 
@@ -196,7 +201,7 @@ public class PeriodTradeService {
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
 		periodTrade.validateAuthority(userId);
-		periodTrade.validateIsCompleted();
+		periodTrade.validateInProgress();
 
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(id, TradeType.PERIOD);
 

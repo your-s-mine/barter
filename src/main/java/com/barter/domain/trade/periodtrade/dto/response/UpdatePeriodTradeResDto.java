@@ -16,7 +16,7 @@ public class UpdatePeriodTradeResDto {
 	private Long periodTradesId;
 	private String title;
 	private String description;
-	private RegisteredProduct product;
+	private Long registeredProductId;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 	private TradeStatus tradeStatus;
@@ -30,7 +30,7 @@ public class UpdatePeriodTradeResDto {
 		this.periodTradesId = periodTradesId;
 		this.title = title;
 		this.description = description;
-		this.product = product;
+		this.registeredProductId = product.getId();
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 		this.tradeStatus = tradeStatus;
@@ -48,6 +48,7 @@ public class UpdatePeriodTradeResDto {
 			.createdAt(periodTrade.getCreatedAt())
 			.updatedAt(periodTrade.getUpdatedAt())
 			.viewCount(periodTrade.getViewCount())
+			.tradeStatus(periodTrade.getStatus())
 			.endedAt(periodTrade.getEndedAt())
 			.build();
 	}

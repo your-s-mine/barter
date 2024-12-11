@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -19,4 +20,10 @@ public class FavoriteKeyword {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String keyword;
+
+	@Builder
+	public FavoriteKeyword(Long id, String keyword) {
+		this.id = id;
+		this.keyword = keyword;
+	}
 }
