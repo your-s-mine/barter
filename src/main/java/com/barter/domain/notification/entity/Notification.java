@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "ACTIVITY_NOTIFICATIONS")
-public class ActivityNotification extends BaseTimeStampEntity {
+public class ActivityNotification extends BaseTimeStampEntity {  // Notification 으로 변경
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
