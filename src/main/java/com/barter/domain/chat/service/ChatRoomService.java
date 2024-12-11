@@ -28,7 +28,7 @@ public class ChatRoomService {
 	@Transactional
 	public CreateChatRoomResDto createChatRoom(Member member, CreateChatRoomReqDto reqDto) {
 
-		Member registerMember = memberRepository.findById(reqDto.getMemberId())
+		Member registerMember = memberRepository.findById(reqDto.getRegisterMemberId())
 			.orElseThrow(() -> new IllegalArgumentException("해당하는 멤버가 없습니다."));
 
 		// 채팅방 생성
