@@ -2,13 +2,11 @@ package com.barter.domain.notification.service;
 
 import static com.barter.domain.notification.enums.EventKind.*;
 
-import java.io.IOException;
-
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import com.barter.domain.notification.respository.ActivityNotificationRepository;
-import com.barter.domain.notification.respository.SseEmitterRepository;
+import com.barter.domain.notification.SseEmitters;
+import com.barter.domain.notification.respository.NotificationRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,12 +16,12 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class NotificationService {
 
-	private final ActivityNotificationRepository activityNotificationRepository;
-	private final SseEmitterRepository sseEmitterRepository;
+	private final NotificationRepository notificationRepository;
+	private final SseEmitters sseEmitters;
 	private static final long TIMEOUT = 60 * 60 * 1000;
 
 	public SseEmitter subscribe(Long memberId) {
-		SseEmitter emitter = sseEmitterRepository.saveEmitter(memberId, new SseEmitter(TIMEOUT));
+		SseEmitter emitter = sseEmitters.saveEmitter(memberId, new SseEmitter(TIMEOUT));
 
 		emitter.onTimeout(() -> {
 			emitter.complete();
@@ -36,12 +34,12 @@ public class NotificationService {
 		});
 
 		emitter.onCompletion(() -> {
-			sseEmitterRepository.deleteEmitter(memberId);
+			sseEmitters.deleteEmitter(memberId);
 			log.info("연결해제된 SseEmitter 를 Local-Memory 에서 삭제, emitterKey={}", memberId);
 		});
 
 		// 더미 이벤트가 없는 상태로 Timeout 발생시 예외가 발생하기에 SseEmitter 발급시 더미 이벤트를 전달합니다.
-		sendEvent(memberId, DEFAULT.getName(), DEFAULT.getMessage());
+		sseEmitters.sendEvent(memberId, DEFAULT.getName(), DEFAULT.getMessage());
 
 		return emitter;
 	}
@@ -50,33 +48,14 @@ public class NotificationService {
 	     - 아래의 예시를 이벤트가 발생하는 비즈니스 로직에서 호출하면 됩니다.
 	     - 물론 해당 메서드를 호출할 서비스에 NotificationService 를 주입해야 합니다.
 	public void sendSuggestedProductStatusEvent(Long memberId, Long productId, SuggestedStatus status) {
-		ActivityNotification createdNotification = ActivityNotification.create(
+		Notification createdNotification = Notification.create(
 			"제안물품 상태가 " + status + "로 변경되었습니다.",
-			"/suggested-products/" + productId, memberId
+			TradeType.IMMEDIATE, productId, memberId
 		);
-		ActivityNotification savedNotification = activityNotificationRepository.save(createdNotification);
+		Notification savedNotification = notificationRepository.save(createdNotification);
 
 		// 엔티티 파라미터로 사용할게 아니라 DTO 에 담아 전달할 것(필요한 정보만)
-		sendEvent(memberId, "제안 물품 상태 변경", savedNotification);
+		sseEmitters.sendEvent(memberId, "제안 물품 상태 변경", savedNotification);
 	}
 	*/
-
-	private void sendEvent(Long memberId, String eventName, Object data) {
-		SseEmitter emitter = sseEmitterRepository.findByKey(memberId);
-		if (emitter == null) {
-			// 전달 대상 사용자의 SseEmitter 가 없다면 접속하지 않은 사용자이므로 이벤트 전달 중지
-			log.info("전달 대상 사용자 접속하지 않음");
-			return;
-		}
-
-		try {
-			emitter.send(SseEmitter.event()
-				.id(String.valueOf(memberId))
-				.name(eventName)
-				.data(data)
-			);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
 }
