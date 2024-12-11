@@ -1,5 +1,7 @@
 package com.barter.domain.notification;
 
+import static com.barter.domain.notification.enums.EventKind.*;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,14 +16,17 @@ import lombok.extern.slf4j.Slf4j;
 public class SseEmitters {
 
 	private final Map<Long, SseEmitter> emitterMap = new ConcurrentHashMap<>();
+	private static final long TIMEOUT = 10 * 1000;
 
-	public SseEmitter saveEmitter(Long emitterKey, SseEmitter emitter) {
-		emitterMap.put(emitterKey, emitter);
+	public SseEmitter saveEmitter(Long memberId) {
+		SseEmitter emitter = new SseEmitter(TIMEOUT);
+		emitterMap.put(memberId, emitter);
+
+		setCallbacks(memberId, emitter);
+
+		sendEvent(memberId, DEFAULT.getName(), DEFAULT.getMessage());
+
 		return emitter;
-	}
-
-	public void deleteEmitter(Long emitterKey) {
-		emitterMap.remove(emitterKey);
 	}
 
 	public void sendEvent(Long memberId, String eventName, Object data) {
@@ -41,5 +46,22 @@ public class SseEmitters {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private void setCallbacks(Long memberId, SseEmitter emitter) {
+		emitter.onTimeout(() -> {
+			emitter.complete();
+			log.info("타임아웃으로 SseEmitter 연결해제, emitterKey={}", memberId);
+		});
+
+		emitter.onError(error -> {
+			emitter.complete();
+			log.info("클라이언트 연결해제로 인해 SseEmitter 연결해제, emitterKey={}", memberId);
+		});
+
+		emitter.onCompletion(() -> {
+			emitterMap.remove(memberId);
+			log.info("연결해제된 SseEmitter 를 Local-Memory 에서 삭제, emitterKey={}", memberId);
+		});
 	}
 }
