@@ -1,6 +1,7 @@
 package com.barter.domain.chat.entity;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -23,5 +24,12 @@ public class ChatRoom {
 	private String id;
 
 	private LocalDateTime createdAt;
+
+	public static ChatRoom create() {
+		return ChatRoom.builder()
+			.id(UUID.randomUUID().toString())
+			.createdAt(LocalDateTime.now())
+			.build();
+	}
 
 }

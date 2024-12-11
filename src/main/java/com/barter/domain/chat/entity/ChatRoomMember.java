@@ -29,4 +29,12 @@ public class ChatRoomMember {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	private ChatRoom chatRoom;
+
+	public static ChatRoomMember create(final Member member, final ChatRoom chatRoom) {
+
+		return ChatRoomMember.builder()
+			.member(member)
+			.chatRoom(chatRoom)
+			.build();
+	}
 }
