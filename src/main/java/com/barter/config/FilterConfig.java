@@ -18,7 +18,7 @@ public class FilterConfig {
     public FilterRegistrationBean<JwtFilter> jwtFilterRegistration() {
         FilterRegistrationBean<JwtFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(jwtFilter);
-        registrationBean.addUrlPatterns("/auth/*"); // auth 경로에 필터 적용
+        registrationBean.addUrlPatterns("/*"); // auth 경로에 필터 적용
         registrationBean.setOrder(1); // 필터 실행 순서
 
         // 회원가입과 로그인 경로는 필터에서 제외

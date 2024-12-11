@@ -20,7 +20,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(jwtInterceptor)
-                .addPathPatterns("/auth/**") // 모든 경로에 대해 Interceptor 적용
+                .addPathPatterns("/**") // 모든 경로에 대해 Interceptor 적용
                 .excludePathPatterns("/auth/signup", "/auth/login"); // 회원가입 및 로그인 경로는 제외
     }
 
