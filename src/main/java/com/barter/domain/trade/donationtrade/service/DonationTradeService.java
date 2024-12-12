@@ -1,5 +1,6 @@
 package com.barter.domain.trade.donationtrade.service;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
@@ -9,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.member.repository.MemberRepository;
 import com.barter.domain.product.entity.RegisteredProduct;
+import com.barter.domain.product.enums.TradeType;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.trade.donationtrade.dto.request.CreateDonationTradeReqDto;
 import com.barter.domain.trade.donationtrade.dto.request.UpdateDonationTradeReqDto;
@@ -19,6 +21,7 @@ import com.barter.domain.trade.donationtrade.entity.DonationTrade;
 import com.barter.domain.trade.donationtrade.repository.DonationProductMemberRepository;
 import com.barter.domain.trade.donationtrade.repository.DonationTradeRepository;
 import com.barter.domain.trade.enums.DonationResult;
+import com.barter.event.trade.TradeNotificationEvent;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,6 +33,7 @@ public class DonationTradeService {
 	private final RegisteredProductRepository registeredProductRepository;
 	private final DonationProductMemberRepository donationProductMemberRepository;
 	private final MemberRepository memberRepository;
+	private final ApplicationEventPublisher publisher;
 
 	@Transactional
 	public void createDonationTrade(Long userId, CreateDonationTradeReqDto req) {
@@ -44,7 +48,12 @@ public class DonationTradeService {
 			req.getEndedAt());
 
 		donationTrade.validateIsExceededMaxEndDate();
-		donationTradeRepository.save(donationTrade);
+		DonationTrade savedDonationTrade = donationTradeRepository.save(donationTrade);
+		publisher.publishEvent(TradeNotificationEvent.builder()
+			.tradeId(savedDonationTrade.getId())
+			.type(TradeType.DONATION)
+			.productName(savedDonationTrade.getProduct().getName())
+			.build());
 	}
 
 	@Transactional(readOnly = true)
