@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.barter.domain.product.dto.request.SwitchRegisteredProductReqDto;
-import com.barter.domain.product.dto.request.SwitchSuggestedProductReqDto;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.enums.RegisteredStatus;
@@ -47,22 +46,18 @@ public class ProductSwitchService {
 		suggestedProductRepository.delete(suggestedProduct);
 	}
 
-	//SuggestedProductController 와 마찬가지로 요청 회원의 정보가 넘어와야 하므로 인증/인가 구현 완료 이후 수정이 필요함
 	@Transactional
-	public void createSuggestedProductFromRegisteredProduct(SwitchSuggestedProductReqDto request) {
-		RegisteredProduct registeredProduct = registeredProductRepository.findById(request.getRegisteredProductId())
+	public void createSuggestedProductFromRegisteredProduct(Long registeredProductId, Long verifiedMemberId) {
+		RegisteredProduct registeredProduct = registeredProductRepository.findById(registeredProductId)
 			.orElseThrow(() -> new RuntimeException("Registered product not found"));
 
-		if (!Objects.equals(registeredProduct.getMember().getId(), request.getMemberId())) {
-			throw new IllegalArgumentException("권한이 없습니다.");
-		}
-
+		registeredProduct.checkPermission(verifiedMemberId);
 		registeredProduct.checkPossibleDelete();
 
 		SuggestedProduct suggestedProduct = SuggestedProduct.builder()
 			.name(registeredProduct.getName())
 			.description(registeredProduct.getDescription())
-			// .images(registeredProduct.getImages())	등록 물품으로 제안 물품 생성시 수정할 계획입니다.
+			.images(registeredProduct.getImages())
 			.status(SuggestedStatus.PENDING)
 			.member(registeredProduct.getMember())
 			.build();

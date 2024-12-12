@@ -100,11 +100,12 @@ public class SuggestedProductController {
 
 	@PostMapping("/switch")
 	@ResponseStatus(HttpStatus.CREATED)
-	public void createdSuggestedProductFromRegisteredProduct(
-		@RequestBody @Valid SwitchSuggestedProductReqDto request
+	public void createSuggestedProductFromRegisteredProduct(
+		@RequestBody @Valid SwitchSuggestedProductReqDto request,
+		VerifiedMember verifiedMember
 	) {
-		// 현재 인증/인가 파트의 구현이 완료되지 않아 요청 회원의 정보가 전돨된다는 가정하에 작성하여 추후 수정이 필요함
-
-		productSwitchService.createSuggestedProductFromRegisteredProduct(request);
+		productSwitchService.createSuggestedProductFromRegisteredProduct(
+			request.getRegisteredProductId(), verifiedMember.getId()
+		);
 	}
 }
