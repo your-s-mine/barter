@@ -1,5 +1,10 @@
 package com.barter.domain.product.entity;
 
+import java.util.List;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.barter.domain.BaseTimeStampEntity;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateSuggestedProductReqDto;
@@ -31,14 +36,17 @@ public class SuggestedProduct extends BaseTimeStampEntity {
 	private Long id;
 	private String name;
 	private String description;
-	private String images;
+	@JdbcTypeCode(SqlTypes.JSON)
+	private List<String> images;    // 이전 회의에서 이미지 JSON 타입으로 DB 에 저장한다고 해서 수정했습니다.
 	@Enumerated(EnumType.STRING)
 	private SuggestedStatus status;
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Member member;
 
 	@Builder
-	public SuggestedProduct(String name, String description, String images, Member member, SuggestedStatus status) {
+	public SuggestedProduct(
+		String name, String description, List<String> images, Member member, SuggestedStatus status
+	) {
 		this.name = name;
 		this.description = description;
 		this.images = images;
@@ -46,11 +54,13 @@ public class SuggestedProduct extends BaseTimeStampEntity {
 		this.status = status;
 	}
 
-	public static SuggestedProduct create(CreateSuggestedProductReqDto request, Member member) {
+	public static SuggestedProduct create(
+		CreateSuggestedProductReqDto request, Member member, List<String> images
+	) {
 		return SuggestedProduct.builder()
 			.name(request.getName())
 			.description(request.getDescription())
-			.images(request.getImages())
+			.images(images)
 			.member(member)
 			.status(SuggestedStatus.PENDING)
 			.build();
@@ -75,7 +85,7 @@ public class SuggestedProduct extends BaseTimeStampEntity {
 
 		this.name = request.getName();
 		this.description = request.getDescription();
-		this.images = request.getImages();
+		// this.images = request.getImages();
 	}
 
 	public void updateStatus(String status) {
