@@ -70,6 +70,11 @@ public class PeriodTrade extends BaseTimeStampEntity {
 		if (endedAt.minusDays(MAX_AFTER_DAY).isAfter(LocalDateTime.now())) {
 			throw new IllegalArgumentException("종료일자는 오늘로부터 7일 이내만 가능합니다.");
 		}
+		if (endedAt.isBefore(LocalDateTime.now())) {
+			throw new IllegalArgumentException("현재 시간보다 적은 시간 예약은 불가능 합니다.");
+		}
+
+		// 추가 : 혹시 최소 마감 시간을 정해두면 그것을 여기에 적용하면 좋을 것 같습니다.
 	}
 
 	public void addViewCount() {
