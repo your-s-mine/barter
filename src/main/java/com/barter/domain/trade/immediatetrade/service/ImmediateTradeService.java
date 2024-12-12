@@ -187,12 +187,12 @@ public class ImmediateTradeService {
 	}
 
 	@Transactional
-	public FindImmediateTradeResDto updateStatus(Long tradeId, UpdateStatusReqDto reqDto) {
-
-		// todo: 유저 정보를 받아와 권한 확인 로직 추가 및 수정
+	public FindImmediateTradeResDto updateStatus(Long tradeId, UpdateStatusReqDto reqDto, VerifiedMember member) {
 
 		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
+
+		immediateTrade.validateAuthority(member.getId());
 
 		if (!(immediateTrade.isCompleted())) {
 			throw new IllegalStateException("교환이 완료된 건에 대해서는 상태 변경을 할 수 없습니다.");
