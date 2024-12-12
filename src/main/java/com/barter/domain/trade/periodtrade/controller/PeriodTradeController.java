@@ -75,8 +75,8 @@ public class PeriodTradeController {
 	}
 
 	@DeleteMapping("/period-trades/{id}")
-	public ResponseEntity<Void> deletePeriodTrade(@PathVariable Long id) {
-		periodTradeService.deletePeriodTrade(id);
+	public ResponseEntity<Void> deletePeriodTrade(Member member, @PathVariable Long id) {
+		periodTradeService.deletePeriodTrade(member, id);
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 	}
 
