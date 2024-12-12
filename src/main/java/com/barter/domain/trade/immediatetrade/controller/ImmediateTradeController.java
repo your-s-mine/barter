@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateImmediateTradeReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateTradeSuggestProductReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeReqDto;
@@ -45,8 +46,8 @@ public class ImmediateTradeController {
 
 	@PatchMapping("/{tradeId}")
 	public ResponseEntity<FindImmediateTradeResDto> update(@PathVariable Long tradeId,
-		@RequestBody @Valid UpdateImmediateTradeReqDto reqDto) throws IllegalAccessException {
-		return new ResponseEntity<>(immediateTradeService.update(tradeId, reqDto), HttpStatus.OK);
+		@RequestBody @Valid UpdateImmediateTradeReqDto reqDto, VerifiedMember member) throws IllegalAccessException {
+		return new ResponseEntity<>(immediateTradeService.update(member, tradeId, reqDto), HttpStatus.OK);
 	}
 
 	@GetMapping("")
