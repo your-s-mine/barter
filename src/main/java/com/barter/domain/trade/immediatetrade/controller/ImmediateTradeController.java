@@ -45,7 +45,8 @@ public class ImmediateTradeController {
 	}
 
 	@GetMapping("")
-	public ResponseEntity<PagedModel<FindImmediateTradeResDto>> findImmediateTrades(@PageableDefault Pageable pageable) {
+	public ResponseEntity<PagedModel<FindImmediateTradeResDto>> findImmediateTrades(
+		@PageableDefault Pageable pageable) {
 		return new ResponseEntity<>(immediateTradeService.findImmediateTrades(pageable), HttpStatus.OK);
 	}
 
@@ -63,7 +64,8 @@ public class ImmediateTradeController {
 	@PostMapping("/{tradeId}/suggest")
 	public ResponseEntity<String> createSuggest(@PathVariable Long tradeId,
 		@RequestBody @Valid CreateTradeSuggestProductReqDto reqDto, VerifiedMember member) {
-		return new ResponseEntity<>(immediateTradeService.createTradeSuggest(tradeId, reqDto, member), HttpStatus.CREATED);
+		return new ResponseEntity<>(immediateTradeService.createTradeSuggest(tradeId, reqDto, member),
+			HttpStatus.CREATED);
 	}
 
 	@PatchMapping("/{tradeId}/acceptance")
