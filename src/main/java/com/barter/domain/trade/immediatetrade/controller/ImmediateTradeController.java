@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateImmediateTradeReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateTradeSuggestProductReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeReqDto;
@@ -43,42 +44,42 @@ public class ImmediateTradeController {
 		return new ResponseEntity<>(immediateTradeService.find(tradeId), HttpStatus.OK);
 	}
 
-	@PatchMapping("/{tradeId}")
-	public ResponseEntity<FindImmediateTradeResDto> update(@PathVariable Long tradeId,
-		@RequestBody @Valid UpdateImmediateTradeReqDto reqDto) throws IllegalAccessException {
-		return new ResponseEntity<>(immediateTradeService.update(tradeId, reqDto), HttpStatus.OK);
-	}
-
 	@GetMapping("")
 	public ResponseEntity<PagedModel<FindImmediateTradeResDto>> findImmediateTrades(@PageableDefault Pageable pageable) {
 		return new ResponseEntity<>(immediateTradeService.findImmediateTrades(pageable), HttpStatus.OK);
 	}
 
+	@PatchMapping("/{tradeId}")
+	public ResponseEntity<FindImmediateTradeResDto> update(@PathVariable Long tradeId,
+		@RequestBody @Valid UpdateImmediateTradeReqDto reqDto, VerifiedMember member) throws IllegalAccessException {
+		return new ResponseEntity<>(immediateTradeService.update(member, tradeId, reqDto), HttpStatus.OK);
+	}
+
 	@DeleteMapping("/{tradeId}")
-	public ResponseEntity<String> delete(@PathVariable Long tradeId) {
-		return new ResponseEntity<>(immediateTradeService.delete(tradeId), HttpStatus.NO_CONTENT);
+	public ResponseEntity<String> delete(@PathVariable Long tradeId, VerifiedMember member) {
+		return new ResponseEntity<>(immediateTradeService.delete(tradeId, member), HttpStatus.NO_CONTENT);
 	}
 
 	@PostMapping("/{tradeId}/suggest")
 	public ResponseEntity<String> createSuggest(@PathVariable Long tradeId,
-		@RequestBody @Valid CreateTradeSuggestProductReqDto reqDto) {
-		return new ResponseEntity<>(immediateTradeService.createTradeSuggest(tradeId, reqDto), HttpStatus.CREATED);
+		@RequestBody @Valid CreateTradeSuggestProductReqDto reqDto, VerifiedMember member) {
+		return new ResponseEntity<>(immediateTradeService.createTradeSuggest(tradeId, reqDto, member), HttpStatus.CREATED);
 	}
 
 	@PatchMapping("/{tradeId}/acceptance")
-	public ResponseEntity<String> acceptTradeSuggest(@PathVariable Long tradeId) {
-		return new ResponseEntity<>(immediateTradeService.acceptTradeSuggest(tradeId), HttpStatus.ACCEPTED);
+	public ResponseEntity<String> acceptTradeSuggest(@PathVariable Long tradeId, VerifiedMember member) {
+		return new ResponseEntity<>(immediateTradeService.acceptTradeSuggest(tradeId, member), HttpStatus.ACCEPTED);
 	}
 
 	@DeleteMapping("/{tradeId}/denial")
-	public ResponseEntity<String> denyTradeSuggest(@PathVariable Long tradeId) {
-		return new ResponseEntity<>(immediateTradeService.denyTradeSuggest(tradeId), HttpStatus.NO_CONTENT);
+	public ResponseEntity<String> denyTradeSuggest(@PathVariable Long tradeId, VerifiedMember member) {
+		return new ResponseEntity<>(immediateTradeService.denyTradeSuggest(tradeId, member), HttpStatus.NO_CONTENT);
 	}
 
 	@PatchMapping("/status/{tradeId}")
 	public ResponseEntity<FindImmediateTradeResDto> updateStatus(@PathVariable Long tradeId,
-		@Valid @RequestBody UpdateStatusReqDto reqDto) {
-		return new ResponseEntity<>(immediateTradeService.updateStatus(tradeId, reqDto),
+		@Valid @RequestBody UpdateStatusReqDto reqDto, VerifiedMember member) {
+		return new ResponseEntity<>(immediateTradeService.updateStatus(tradeId, reqDto, member),
 			HttpStatus.OK);
 	}
 }

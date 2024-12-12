@@ -74,4 +74,16 @@ public class ImmediateTrade extends BaseTimeStampEntity {
 	public boolean isCompleted() {
 		return this.status == TradeStatus.COMPLETED;
 	}
+
+	public void validateAuthority(Long userId) {
+		if (!this.product.getMember().getId().equals(userId)) {
+			throw new IllegalArgumentException("해당 물품에 대한 권한이 없습니다.");
+		}
+	}
+
+	public void validateIsSelfSuggest(Long userId) {
+		if (this.product.getMember().getId().equals(userId)) {
+			throw new IllegalArgumentException("본인이 등록한 물품에 교환을 제안할 수 없습니다.");
+		}
+	}
 }
