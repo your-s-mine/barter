@@ -15,6 +15,7 @@ import com.barter.domain.product.enums.TradeType;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.trade.donationtrade.dto.request.CreateDonationTradeReqDto;
 import com.barter.domain.trade.donationtrade.dto.request.UpdateDonationTradeReqDto;
+import com.barter.domain.trade.donationtrade.dto.response.CreateDonationTradeResDto;
 import com.barter.domain.trade.donationtrade.dto.response.FindDonationTradeResDto;
 import com.barter.domain.trade.donationtrade.dto.response.SuggestDonationTradeResDto;
 import com.barter.domain.trade.donationtrade.entity.DonationProductMember;
@@ -37,24 +38,26 @@ public class DonationTradeService {
 	private final ApplicationEventPublisher publisher;
 
 	@Transactional
-	public void createDonationTrade(VerifiedMember verifiedMember, CreateDonationTradeReqDto req) {
+	public CreateDonationTradeResDto createDonationTrade(VerifiedMember verifiedMember, CreateDonationTradeReqDto req) {
 		RegisteredProduct product = registeredProductRepository.findById(req.getProductId())
 			.orElseThrow(() -> new IllegalStateException("등록되지 않은 물품입니다."));
 
 		product.validateOwner(verifiedMember.getId());
+		product.validatePendingStatusBeforeUpload();
 		DonationTrade donationTrade = DonationTrade.createInitDonationTrade(product,
 			req.getMaxAmount(),
 			req.getTitle(),
 			req.getDescription(),
 			req.getEndedAt());
 
-		donationTrade.validateCreateDonationTrade();
+		donationTrade.validateExceedMaxEndedAt();
 		DonationTrade savedDonationTrade = donationTradeRepository.save(donationTrade);
 		publisher.publishEvent(TradeNotificationEvent.builder()
 			.tradeId(savedDonationTrade.getId())
 			.type(TradeType.DONATION)
 			.productName(savedDonationTrade.getProduct().getName())
 			.build());
+		return CreateDonationTradeResDto.from(savedDonationTrade);
 	}
 
 	@Transactional(readOnly = true)
