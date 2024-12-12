@@ -21,6 +21,7 @@ import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.enums.RegisteredStatus;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.trade.donationtrade.dto.request.CreateDonationTradeReqDto;
+import com.barter.domain.trade.donationtrade.dto.request.UpdateDonationTradeReqDto;
 import com.barter.domain.trade.donationtrade.dto.response.CreateDonationTradeResDto;
 import com.barter.domain.trade.donationtrade.entity.DonationTrade;
 import com.barter.domain.trade.donationtrade.repository.DonationProductMemberRepository;
@@ -188,5 +189,69 @@ class DonationTradeServiceTest {
 		assertThat(result.getProductId()).isEqualTo(1L);
 		assertThat(result.getTitle()).isEqualTo("title");
 		assertThat(result.getDescription()).isEqualTo("description");
+	}
+
+	@Test
+	@DisplayName("나눔 거래 수정 정상 테스트")
+	void 나눔_거래_수정_정상_테스트() {
+		// given
+		VerifiedMember verifiedMember = VerifiedMember.builder()
+			.id(1L)
+			.build();
+		Long tradeId = 100L;
+		UpdateDonationTradeReqDto req = UpdateDonationTradeReqDto.builder()
+			.title("title")
+			.description("description")
+			.build();
+
+		DonationTrade donationTrade = mock(DonationTrade.class);
+		when(donationTradeRepository.findById(tradeId)).thenReturn(Optional.of(donationTrade));
+		doNothing().when(donationTrade).validateUpdate(verifiedMember.getId());
+		doNothing().when(donationTrade).update(req.getTitle(), req.getDescription());
+		when(donationTradeRepository.save(any(DonationTrade.class))).thenReturn(donationTrade);
+
+		// when
+		donationTradeService.updateDonationTrade(verifiedMember, tradeId, req);
+
+		// then
+		verify(donationTradeRepository, times(1)).findById(tradeId);
+		verify(donationTrade, times(1)).validateUpdate(verifiedMember.getId());
+		verify(donationTrade, times(1)).update("title", "description");
+		verify(donationTradeRepository, times(1)).save(donationTrade);
+	}
+
+	@Test
+	@DisplayName("존재하지 않는 나눔 교환 조회 시 예외 발생")
+	void 존재하지_않는_나눔_교환_조회_시_예외_발생() {
+		// given
+		VerifiedMember verifiedMember = new VerifiedMember(1L, "member");
+		Long tradeId = 999L;
+		UpdateDonationTradeReqDto req = new UpdateDonationTradeReqDto("title", "description");
+
+		when(donationTradeRepository.findById(tradeId)).thenReturn(Optional.empty());
+
+		// then
+		assertThatThrownBy(() -> donationTradeService.updateDonationTrade(verifiedMember, tradeId, req))
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessageContaining("존재하지 않는 나눔 교환");
+	}
+
+	@Test
+	@DisplayName("수정 권한 예외 테스트")
+	void 수정_권한_예외_테스트() {
+		// given
+		VerifiedMember verifiedMember = new VerifiedMember(2L, "member2");
+		Long tradeId = 100L;
+		UpdateDonationTradeReqDto req = new UpdateDonationTradeReqDto("title", "description");
+
+		DonationTrade donationTrade = mock(DonationTrade.class);
+		when(donationTradeRepository.findById(tradeId)).thenReturn(Optional.of(donationTrade));
+		doThrow(new IllegalStateException("권한이 없습니다."))
+			.when(donationTrade).validateUpdate(verifiedMember.getId());
+
+		// then
+		assertThatThrownBy(() -> donationTradeService.updateDonationTrade(verifiedMember, tradeId, req))
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessageContaining("권한이 없습니다.");
 	}
 }
