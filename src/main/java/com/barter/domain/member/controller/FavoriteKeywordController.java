@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.member.dto.CreateFavoriteKeywordReqDto;
 import com.barter.domain.member.dto.FindFavoriteKeywordResDto;
 import com.barter.domain.member.service.FavoriteKeywordService;
@@ -26,31 +27,29 @@ public class FavoriteKeywordController {
 	private final FavoriteKeywordService favoriteKeywordService;
 
 	@PostMapping
-	public ResponseEntity<Void> createFavoriteKeyword(@RequestBody CreateFavoriteKeywordReqDto req) {
-		// TODO: 인증/인가 개발 완료 시 교체 예정
-		Long memberId = 1L;
-		favoriteKeywordService.createFavoriteKeyword(memberId, req);
+	public ResponseEntity<Void> createFavoriteKeyword(
+		VerifiedMember verifiedMember,
+		@RequestBody CreateFavoriteKeywordReqDto req
+	) {
+		favoriteKeywordService.createFavoriteKeyword(verifiedMember, req);
 		return ResponseEntity
 			.status(HttpStatus.CREATED)
 			.build();
 	}
 
 	@GetMapping
-	public ResponseEntity<List<FindFavoriteKeywordResDto>> findFavoriteKeywords() {
-		// TODO: 인증/인가 개발 완료 시 교체 예정
-		Long memberId = 1L;
+	public ResponseEntity<List<FindFavoriteKeywordResDto>> findFavoriteKeywords(VerifiedMember verifiedMember) {
 		return ResponseEntity
 			.status(HttpStatus.OK)
-			.body(favoriteKeywordService.findFavoriteKeywords(memberId));
+			.body(favoriteKeywordService.findFavoriteKeywords(verifiedMember));
 	}
 
 	@DeleteMapping("/{memberFavoriteKeywordId}")
 	public ResponseEntity<Void> deleteFavoriteKeyword(
+		VerifiedMember verifiedMember,
 		@PathVariable Long memberFavoriteKeywordId
 	) {
-		// TODO: 인증/인가 구현 완료 후 변경 예정
-		Long memberId = 1L;
-		favoriteKeywordService.deleteFavoriteKeyword(memberId, memberFavoriteKeywordId);
+		favoriteKeywordService.deleteFavoriteKeyword(verifiedMember, memberFavoriteKeywordId);
 		return ResponseEntity
 			.status(HttpStatus.NO_CONTENT)
 			.build();
