@@ -27,7 +27,7 @@ public class PeriodTradeCloseEventListener {
 
 	@Async
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-	public void addPeriodTradeCloseEvent(PeriodTradeCloseEvent event) {
+	public void createPeriodTradeCloseEvent(PeriodTradeCloseEvent event) {
 		PeriodTrade periodTrade = event.getPeriodTrade();
 		updatePeriodTradeClosed(periodTrade);
 	}
