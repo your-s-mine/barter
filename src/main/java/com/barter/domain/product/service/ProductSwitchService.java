@@ -38,7 +38,7 @@ public class ProductSwitchService {
 		RegisteredProduct registeredProduct = RegisteredProduct.builder()
 			.name(suggestedProduct.getName())
 			.description(suggestedProduct.getDescription())
-			.images(suggestedProduct.getImages())
+			// .images(suggestedProduct.getImages())	제안 물품으로 등록 물품 생성시 수정할 계획입니다.
 			.status(RegisteredStatus.PENDING)
 			.member(suggestedProduct.getMember())
 			.build();
@@ -62,7 +62,7 @@ public class ProductSwitchService {
 		SuggestedProduct suggestedProduct = SuggestedProduct.builder()
 			.name(registeredProduct.getName())
 			.description(registeredProduct.getDescription())
-			.images(registeredProduct.getImages())
+			// .images(registeredProduct.getImages())	등록 물품으로 제안 물품 생성시 수정할 계획입니다.
 			.status(SuggestedStatus.PENDING)
 			.member(registeredProduct.getMember())
 			.build();
