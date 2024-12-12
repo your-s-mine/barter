@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -24,6 +25,7 @@ public class PeriodTradeCloseEventListener {
 	private final TaskScheduler taskScheduler;
 	private final PeriodTradeRepository periodTradeRepository; // 추가된 부분
 
+	@Async
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
 	public void addPeriodTradeCloseEvent(PeriodTradeCloseEvent event) {
 		PeriodTrade periodTrade = event.getPeriodTrade();
