@@ -118,6 +118,8 @@ public class PeriodTradeService {
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
 
+		periodTrade.updateRegisteredProduct("PENDING");
+
 		periodTrade.validateAuthority(member.getId());
 		periodTrade.validateIsCompleted();
 		periodTradeRepository.delete(periodTrade);

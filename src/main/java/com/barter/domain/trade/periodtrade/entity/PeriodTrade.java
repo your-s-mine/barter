@@ -123,6 +123,10 @@ public class PeriodTrade extends BaseTimeStampEntity {
 		}
 	}
 
+	public void updateRegisteredProduct(String status) {
+		this.registeredProduct.updateStatus(status);
+	}
+
 	public boolean updatePeriodTradeStatus(TradeStatus status) {
 
 		if (status.equals(TradeStatus.CLOSED)) { // CLOSED : 교환 등록자의 물품이 만료되거나 취소된 경우
