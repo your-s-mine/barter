@@ -1,5 +1,6 @@
 package com.barter.domain.product.service;
 
+import java.util.List;
 import java.util.Objects;
 
 import org.springframework.data.domain.Page;
@@ -7,9 +8,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.barter.common.s3.S3Service;
 import com.barter.domain.member.entity.Member;
-import com.barter.domain.member.repository.MemberRepository;
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.DeleteRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductInfoReqDto;
@@ -25,14 +27,15 @@ import lombok.RequiredArgsConstructor;
 public class RegisteredProductService {
 
 	private final RegisteredProductRepository registeredProductRepository;
-	private final MemberRepository memberRepository;
+	private final S3Service s3Service;
 
-	// RegisteredProductController 와 마찬가지로 요청 회원의 정보가 넘어와야 하므로 인증/인가 구현 완료 이후 수정이 필요함
-	public void createRegisteredProduct(CreateRegisteredProductReqDto request) {
-		Member requestMember = memberRepository.findById(request.getMemberId())
-			.orElseThrow(() -> new IllegalArgumentException("Member not found"));
+	public void createRegisteredProduct(
+		CreateRegisteredProductReqDto request, List<MultipartFile> multipartFiles, Long verifiedMemberId
+	) {
+		Member requestMember = Member.builder().id(verifiedMemberId).build();
+		List<String> images = s3Service.uploadFile(multipartFiles);
 
-		RegisteredProduct createdProduct = RegisteredProduct.create(request, requestMember);
+		RegisteredProduct createdProduct = RegisteredProduct.create(request, requestMember, images);
 		registeredProductRepository.save(createdProduct);
 	}
 

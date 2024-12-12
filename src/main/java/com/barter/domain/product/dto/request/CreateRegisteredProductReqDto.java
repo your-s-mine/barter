@@ -1,7 +1,6 @@
 package com.barter.domain.product.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,10 +20,4 @@ public class CreateRegisteredProductReqDto {
 	@NotBlank(message = "제안 물품의 설명을 반드시 작성해주세요!")
 	@Size(min = 5)
 	private String description;
-
-	@NotNull
-	private String images;
-
-	@NotNull
-	private Long memberId;
 }

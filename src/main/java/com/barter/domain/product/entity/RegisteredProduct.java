@@ -1,5 +1,10 @@
 package com.barter.domain.product.entity;
 
+import java.util.List;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.barter.domain.BaseTimeStampEntity;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
@@ -31,14 +36,17 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 	private Long id;
 	private String name;
 	private String description;
-	private String images;
+	@JdbcTypeCode(SqlTypes.JSON)
+	private List<String> images;    // 이전 회의에서 이미지 JSON 타입으로 DB 에 저장한다고 해서 수정했습니다.
 	@Enumerated(EnumType.STRING)
 	private RegisteredStatus status;
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Member member;
 
 	@Builder
-	public RegisteredProduct(String name, String description, String images, Member member, RegisteredStatus status) {
+	public RegisteredProduct(
+		String name, String description, List<String> images, Member member, RegisteredStatus status
+	) {
 		this.name = name;
 		this.description = description;
 		this.images = images;
@@ -46,11 +54,13 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 		this.status = status;
 	}
 
-	public static RegisteredProduct create(CreateRegisteredProductReqDto request, Member member) {
+	public static RegisteredProduct create(
+		CreateRegisteredProductReqDto request, Member member, List<String> images
+	) {
 		return RegisteredProduct.builder()
 			.name(request.getName())
 			.description(request.getDescription())
-			.images(request.getImages())
+			.images(images)
 			.member(member)
 			.status(RegisteredStatus.PENDING)
 			.build();
@@ -69,7 +79,7 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 
 		this.name = request.getName();
 		this.description = request.getDescription();
-		this.images = request.getImages();
+		// this.images = request.getImages();  등록 상품 정보 수정 리팩토링시 해결할 계획입니다.
 	}
 
 	public void updateStatus(String status) {

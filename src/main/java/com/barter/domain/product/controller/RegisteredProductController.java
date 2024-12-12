@@ -1,5 +1,7 @@
 package com.barter.domain.product.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -12,9 +14,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.DeleteRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.SwitchRegisteredProductReqDto;
@@ -37,9 +42,12 @@ public class RegisteredProductController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public void createRegisteredProduct(@RequestBody @Valid CreateRegisteredProductReqDto request) {
-		// 현재 인증/인가 파트의 구현이 완료되지 않아 요청 회원의 정보가 전달된다는 가정하에 작성하여 추후 수정이 필요함
-		registeredProductService.createRegisteredProduct(request);
+	public void createRegisteredProduct(
+		@RequestPart(name = "request") @Valid CreateRegisteredProductReqDto request,
+		@RequestPart(required = false, name = "multipartFiles") List<MultipartFile> multipartFiles,
+		VerifiedMember verifiedMember
+	) {
+		registeredProductService.createRegisteredProduct(request, multipartFiles, verifiedMember.getId());
 	}
 
 	@GetMapping("/{registeredProductId}")
