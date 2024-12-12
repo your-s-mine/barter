@@ -98,12 +98,12 @@ public class ImmediateTradeService {
 		return FindImmediateTradeResDto.from(updatedTrade);
 	}
 
-	public String delete(Long tradeId) {
-
-		// todo: 유저 정보를 받아와 권한 확인 로직 추가 및 수정
+	public String delete(Long tradeId, VerifiedMember member) {
 
 		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
+
+		immediateTrade.validateAuthority(member.getId());
 
 		immediateTradeRepository.delete(immediateTrade);
 

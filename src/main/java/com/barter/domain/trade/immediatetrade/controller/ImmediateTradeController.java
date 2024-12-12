@@ -56,8 +56,8 @@ public class ImmediateTradeController {
 	}
 
 	@DeleteMapping("/{tradeId}")
-	public ResponseEntity<String> delete(@PathVariable Long tradeId) {
-		return new ResponseEntity<>(immediateTradeService.delete(tradeId), HttpStatus.NO_CONTENT);
+	public ResponseEntity<String> delete(@PathVariable Long tradeId, VerifiedMember member) {
+		return new ResponseEntity<>(immediateTradeService.delete(tradeId, member), HttpStatus.NO_CONTENT);
 	}
 
 	@PostMapping("/{tradeId}/suggest")
