@@ -9,8 +9,6 @@ import lombok.Getter;
 
 @Getter
 public class CreatePeriodTradeReqDto {
-
-	private Long memberId;
 	@NotBlank(message = "타이틀은 필수입니다.")
 	@Size(min = 5, message = "타이틀은 5글자 이상이어야 합니다.")
 	private String title;

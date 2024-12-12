@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.trade.donationtrade.dto.request.CreateDonationTradeReqDto;
 import com.barter.domain.trade.donationtrade.dto.request.UpdateDonationTradeReqDto;
 import com.barter.domain.trade.donationtrade.dto.response.FindDonationTradeResDto;
@@ -46,11 +47,10 @@ public class DonationTradeController {
 
 	@PostMapping
 	public ResponseEntity<Void> createDonationTrade(
+		VerifiedMember verifiedMember,
 		@RequestBody @Valid CreateDonationTradeReqDto req
 	) {
-		// TODO: 인증된 Member 받아오는 기능 추가 필요
-		Long userId = 1L;
-		donationTradeService.createDonationTrade(userId, req);
+		donationTradeService.createDonationTrade(verifiedMember, req);
 		return ResponseEntity
 			.status(HttpStatus.CREATED)
 			.build();
@@ -58,23 +58,21 @@ public class DonationTradeController {
 
 	@PostMapping("/{tradeId}/suggest")
 	public ResponseEntity<SuggestDonationTradeResDto> suggestDonationTrade(
+		VerifiedMember verifiedMember,
 		@PathVariable("tradeId") Long tradeId
 	) {
-		// TODO: 인증된 Member 받아오는 기능 추가 필요.
-		Long userId = 2L;
 		return ResponseEntity
 			.status(HttpStatus.OK)
-			.body(donationTradeService.suggestDonationTrade(userId, tradeId));
+			.body(donationTradeService.suggestDonationTrade(verifiedMember, tradeId));
 	}
 
 	@PatchMapping("/{tradeId}")
 	public ResponseEntity<Void> updateDonationTrade(
+		VerifiedMember verifiedMember,
 		@RequestBody UpdateDonationTradeReqDto req,
 		@PathVariable("tradeId") Long tradeId
 	) {
-		// TODO: 인증된 Member 받아오는 기능 추가 필요
-		Long userId = 1L;
-		donationTradeService.updateDonationTrade(userId, tradeId, req);
+		donationTradeService.updateDonationTrade(verifiedMember, tradeId, req);
 		return ResponseEntity
 			.status(HttpStatus.NO_CONTENT)
 			.build();
@@ -82,11 +80,10 @@ public class DonationTradeController {
 
 	@DeleteMapping("/{tradeId}")
 	public ResponseEntity<Void> deleteDonationTrade(
+		VerifiedMember verifiedMember,
 		@PathVariable("tradeId") Long tradeId
 	) {
-		// TODO: 인증된 Member 받아오는 기능 추가 필요
-		Long userId = 1L;
-		donationTradeService.deleteDonationTrade(userId, tradeId);
+		donationTradeService.deleteDonationTrade(verifiedMember, tradeId);
 		return ResponseEntity
 			.status(HttpStatus.NO_CONTENT)
 			.build();

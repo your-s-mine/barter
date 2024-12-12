@@ -7,6 +7,7 @@ import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.member.repository.MemberRepository;
 import com.barter.domain.product.entity.RegisteredProduct;
@@ -36,11 +37,11 @@ public class DonationTradeService {
 	private final ApplicationEventPublisher publisher;
 
 	@Transactional
-	public void createDonationTrade(Long userId, CreateDonationTradeReqDto req) {
+	public void createDonationTrade(VerifiedMember verifiedMember, CreateDonationTradeReqDto req) {
 		RegisteredProduct product = registeredProductRepository.findById(req.getProductId())
 			.orElseThrow(() -> new IllegalStateException("등록되지 않은 물품입니다."));
 
-		product.validateOwner(userId);
+		product.validateOwner(verifiedMember.getId());
 		DonationTrade donationTrade = DonationTrade.createInitDonationTrade(product,
 			req.getMaxAmount(),
 			req.getTitle(),
@@ -71,31 +72,31 @@ public class DonationTradeService {
 	}
 
 	@Transactional
-	public void updateDonationTrade(Long userId, Long tradeId, UpdateDonationTradeReqDto req) {
+	public void updateDonationTrade(VerifiedMember verifiedMember, Long tradeId, UpdateDonationTradeReqDto req) {
 		DonationTrade donationTrade = donationTradeRepository.findById(tradeId)
 			.orElseThrow(() -> new IllegalStateException("존재하지 않는 나눔 교환 입니다."));
 
-		donationTrade.validateUpdate(userId);
+		donationTrade.validateUpdate(verifiedMember.getId());
 		donationTrade.update(req.getTitle(), req.getDescription());
 		donationTradeRepository.save(donationTrade);
 	}
 
 	@Transactional
-	public void deleteDonationTrade(Long userId, Long tradeId) {
+	public void deleteDonationTrade(VerifiedMember verifiedMember, Long tradeId) {
 		DonationTrade donationTrade = donationTradeRepository.findById(tradeId)
 			.orElseThrow(() -> new IllegalStateException("존재하지 않는 나눔 교환 입니다."));
 
-		donationTrade.validateDelete(userId);
+		donationTrade.validateDelete(verifiedMember.getId());
 		donationTrade.changeProductStatusPending();
 		donationTradeRepository.delete(donationTrade);
 	}
 
 	@Transactional
-	public SuggestDonationTradeResDto suggestDonationTrade(Long userId, Long tradeId) {
-		if (donationProductMemberRepository.existsByMemberIdAndDonationTradeId(userId, tradeId)) {
+	public SuggestDonationTradeResDto suggestDonationTrade(VerifiedMember verifiedMember, Long tradeId) {
+		if (donationProductMemberRepository.existsByMemberIdAndDonationTradeId(verifiedMember.getId(), tradeId)) {
 			throw new IllegalStateException("이미 요청한 유저입니다.");
 		}
-		Member requestMember = memberRepository.findById(userId)
+		Member requestMember = memberRepository.findById(verifiedMember.getId())
 			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 		DonationTrade donationTrade = donationTradeRepository.findByIdForUpdate(tradeId)
 			.orElseThrow(() -> new IllegalStateException("존재하지 않는 나눔 교환 입니다."));
