@@ -19,21 +19,36 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // 기본 생성자
 @Table(name = "REVIEWS")
 public class Review {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
 	@ManyToOne
 	private Member reviewer;
+
 	@ManyToOne
 	private Member reviewee;
+
 	@ManyToOne
 	private TradeProduct tradeProduct;
+
 	private String content;
 	private Double score;
+
 	@CreatedDate
 	private LocalDateTime createdAt;
+
+	// 필요한 모든 필드를 포함하는 생성자 추가
+	public Review(Member reviewer, Member reviewee, TradeProduct tradeProduct, String content, Double score, LocalDateTime createdAt) {
+		this.reviewer = reviewer;
+		this.reviewee = reviewee;
+		this.tradeProduct = tradeProduct;
+		this.content = content;
+		this.score = score;
+		this.createdAt = createdAt;
+	}
 }
