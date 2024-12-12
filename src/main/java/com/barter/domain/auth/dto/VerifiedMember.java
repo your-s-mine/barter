@@ -4,12 +4,12 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class VerifiedMemberDto {
+public class VerifiedMember {
 	private final Long id;
 	private final String email;
 
 	@Builder
-	public VerifiedMemberDto(Long id, String email) {
+	public VerifiedMember(Long id, String email) {
 		this.id = id;
 		this.email = email;
 	}

@@ -7,7 +7,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import com.barter.domain.auth.dto.VerifiedMemberDto;
+import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.security.JwtUtil;
 
 import io.jsonwebtoken.Claims;
@@ -23,7 +23,7 @@ public class MemberArgumentResolver implements HandlerMethodArgumentResolver {
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return parameter.getParameterType().equals(VerifiedMemberDto.class);
+		return parameter.getParameterType().equals(VerifiedMember.class);
 	}
 
 	@Override
@@ -39,7 +39,7 @@ public class MemberArgumentResolver implements HandlerMethodArgumentResolver {
 		Claims memberClaims = jwtUtil.getMemberClaims(token);
 		Long memberId = Long.parseLong(memberClaims.getSubject());
 		String email = (String)memberClaims.get("email");
-		return VerifiedMemberDto.builder()
+		return VerifiedMember.builder()
 			.id(memberId)
 			.email(email)
 			.build();
