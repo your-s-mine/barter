@@ -72,4 +72,10 @@ public class Notification extends BaseTimeStampEntity {
 			.memberId(memberId)
 			.build();
 	}
+
+	public void checkPossibleDelete() {
+		if (!this.isRead) {
+			throw new IllegalArgumentException("읽은 상태의 알람만 삭제할 수 있습니다.");
+		}
+	}
 }
