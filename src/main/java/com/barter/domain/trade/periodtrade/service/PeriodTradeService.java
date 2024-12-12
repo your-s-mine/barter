@@ -9,7 +9,7 @@ import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.barter.domain.member.entity.Member;
+import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.entity.TradeProduct;
@@ -47,19 +47,18 @@ public class PeriodTradeService {
 	private final RegisteredProductRepository registeredProductRepository;
 	private final SuggestedProductRepository suggestedProductRepository;
 	private final TradeProductRepository tradeProductRepository;
-
 	private final ApplicationEventPublisher eventPublisher;
 
 	// TODO : Member 는 나중에 VerifiedMember 로 변경될 예정
 	@Transactional
-	public CreatePeriodTradeResDto createPeriodTrades(CreatePeriodTradeReqDto reqDto) {
+	public CreatePeriodTradeResDto createPeriodTrades(VerifiedMember member, CreatePeriodTradeReqDto reqDto) {
 
 		RegisteredProduct registeredProduct = registeredProductRepository.findById(reqDto.getRegisteredProductId())
 			.orElseThrow(
 				() -> new IllegalArgumentException("없는 등록된 물건입니다.")
 			);
 
-		registeredProduct.validateOwner(reqDto.getMemberId());
+		registeredProduct.validateOwner(member.getId());
 
 		PeriodTrade periodTrade = PeriodTrade.createInitPeriodTrade(reqDto.getTitle(), reqDto.getDescription(),
 			registeredProduct,
@@ -93,7 +92,7 @@ public class PeriodTradeService {
 	}
 
 	@Transactional
-	public UpdatePeriodTradeResDto updatePeriodTrade(Member member, Long id, UpdatePeriodTradeReqDto reqDto) {
+	public UpdatePeriodTradeResDto updatePeriodTrade(VerifiedMember member, Long id, UpdatePeriodTradeReqDto reqDto) {
 
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
@@ -107,7 +106,7 @@ public class PeriodTradeService {
 	}
 
 	@Transactional
-	public void deletePeriodTrade(Member member, Long id) {
+	public void deletePeriodTrade(VerifiedMember member, Long id) {
 
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
@@ -120,7 +119,8 @@ public class PeriodTradeService {
 	}
 
 	@Transactional
-	public SuggestedPeriodTradeResDto suggestPeriodTrade(Member member, Long id, SuggestedPeriodTradeReqDto reqDto) {
+	public SuggestedPeriodTradeResDto suggestPeriodTrade(VerifiedMember member, Long id,
+		SuggestedPeriodTradeReqDto reqDto) {
 
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
@@ -146,7 +146,7 @@ public class PeriodTradeService {
 	}
 
 	@Transactional
-	public StatusUpdateResDto updatePeriodTradeStatus(Member member, Long id, StatusUpdateReqDto reqDto) {
+	public StatusUpdateResDto updatePeriodTradeStatus(VerifiedMember member, Long id, StatusUpdateReqDto reqDto) {
 
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
@@ -165,7 +165,7 @@ public class PeriodTradeService {
 	}
 
 	@Transactional
-	public AcceptPeriodTradeResDto acceptPeriodTrade(Member member, Long id, AcceptPeriodTradeReqDto reqDto) {
+	public AcceptPeriodTradeResDto acceptPeriodTrade(VerifiedMember member, Long id, AcceptPeriodTradeReqDto reqDto) {
 
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
@@ -196,7 +196,7 @@ public class PeriodTradeService {
 
 	// TODO : Deny 부분이 Accept 랑 구조가 비슷해서 단순화 시킬 필요 있다.
 	@Transactional
-	public DenyPeriodTradeResDto denyPeriodTrade(Member member, Long id, DenyPeriodTradeReqDto reqDto) {
+	public DenyPeriodTradeResDto denyPeriodTrade(VerifiedMember member, Long id, DenyPeriodTradeReqDto reqDto) {
 
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
