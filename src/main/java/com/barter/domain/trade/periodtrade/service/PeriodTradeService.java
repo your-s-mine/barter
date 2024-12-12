@@ -1,7 +1,6 @@
 package com.barter.domain.trade.periodtrade.service;
 
 import java.util.List;
-import java.util.Objects;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -57,9 +56,7 @@ public class PeriodTradeService {
 				() -> new IllegalArgumentException("없는 등록된 물건입니다.")
 			);
 
-		if (!Objects.equals(registeredProduct.getMember().getId(), member.getId())) {
-			throw new IllegalArgumentException("해당 물건 등록에 대한 권한이 없습니다.");
-		}
+		registeredProduct.validateOwner(member.getId());
 
 		PeriodTrade periodTrade = PeriodTrade.createInitPeriodTrade(reqDto.getTitle(), reqDto.getDescription(),
 			registeredProduct,
