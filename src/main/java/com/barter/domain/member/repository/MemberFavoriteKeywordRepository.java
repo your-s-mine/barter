@@ -14,4 +14,6 @@ public interface MemberFavoriteKeywordRepository extends JpaRepository<MemberFav
 	int countByMember(Member member);
 
 	List<MemberFavoriteKeyword> findByMember(Member member);
+
+	List<MemberFavoriteKeyword> findByFavoriteKeywordIn(List<FavoriteKeyword> keywords);
 }

@@ -1,5 +1,6 @@
 package com.barter.domain.trade.donationtrade.service;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
@@ -19,6 +20,7 @@ import com.barter.domain.trade.donationtrade.entity.DonationTrade;
 import com.barter.domain.trade.donationtrade.repository.DonationProductMemberRepository;
 import com.barter.domain.trade.donationtrade.repository.DonationTradeRepository;
 import com.barter.domain.trade.enums.DonationResult;
+import com.barter.event.trade.TradeNotificationEvent;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,6 +32,7 @@ public class DonationTradeService {
 	private final RegisteredProductRepository registeredProductRepository;
 	private final DonationProductMemberRepository donationProductMemberRepository;
 	private final MemberRepository memberRepository;
+	private final ApplicationEventPublisher publisher;
 
 	@Transactional
 	public void createDonationTrade(Long userId, CreateDonationTradeReqDto req) {
@@ -44,7 +47,10 @@ public class DonationTradeService {
 			req.getEndedAt());
 
 		donationTrade.validateIsExceededMaxEndDate();
-		donationTradeRepository.save(donationTrade);
+		DonationTrade savedDonationTrade = donationTradeRepository.save(donationTrade);
+		Long savedTradeId = savedDonationTrade.getId();
+		String savedTradeProductName = savedDonationTrade.getProduct().getName();
+		publisher.publishEvent(new TradeNotificationEvent(savedTradeId, savedTradeProductName));
 	}
 
 	@Transactional(readOnly = true)
