@@ -69,6 +69,7 @@ public class PeriodTradeService {
 			registeredProduct,
 			reqDto.getEndedAt());
 
+		registeredProduct.updateStatus("REGISTERING");
 		periodTrade.validateIsExceededMaxEndDate();
 
 		periodTradeRepository.save(periodTrade);
