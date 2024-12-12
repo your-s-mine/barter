@@ -2,6 +2,7 @@ package com.barter.domain.trade.periodtrade.service;
 
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.barter.domain.member.entity.Member;
-import com.barter.domain.member.repository.MemberRepository;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.entity.TradeProduct;
@@ -33,6 +33,7 @@ import com.barter.domain.trade.periodtrade.dto.response.SuggestedPeriodTradeResD
 import com.barter.domain.trade.periodtrade.dto.response.UpdatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 import com.barter.domain.trade.periodtrade.repository.PeriodTradeRepository;
+import com.barter.event.trade.PeriodTradeEvent.PeriodTradeCloseEvent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,10 +46,12 @@ public class PeriodTradeService {
 	private final PeriodTradeRepository periodTradeRepository;
 	private final RegisteredProductRepository registeredProductRepository;
 	private final SuggestedProductRepository suggestedProductRepository;
-	private final MemberRepository memberRepository;
 	private final TradeProductRepository tradeProductRepository;
 
+	private final ApplicationEventPublisher eventPublisher;
+
 	// TODO : Member 는 나중에 VerifiedMember 로 변경될 예정
+	@Transactional
 	public CreatePeriodTradeResDto createPeriodTrades(Member member, CreatePeriodTradeReqDto reqDto) {
 
 		RegisteredProduct registeredProduct = registeredProductRepository.findById(reqDto.getRegisteredProductId())
@@ -64,7 +67,11 @@ public class PeriodTradeService {
 
 		periodTrade.validateIsExceededMaxEndDate();
 
-		return CreatePeriodTradeResDto.from(periodTradeRepository.save(periodTrade));
+		periodTradeRepository.save(periodTrade);
+		// 이벤트 발행
+		eventPublisher.publishEvent(new PeriodTradeCloseEvent(periodTrade));
+
+		return CreatePeriodTradeResDto.from(periodTrade);
 	}
 
 	@Transactional(readOnly = true)
