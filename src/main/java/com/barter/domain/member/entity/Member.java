@@ -44,6 +44,15 @@ public class Member extends BaseTimeStampEntity {
 		this.joinPath = joinPath;
 	}
 
+	public static Member createBasicMember(String email, String hashedPassword, String nickname) {
+		return Member.builder()
+			.email(email)
+			.password(hashedPassword)
+			.nickname(nickname)
+			.joinPath(JoinPath.BASIC)
+			.build();
+	}
+
 	public boolean isEqualsId(Long userId) {
 		return id.equals(userId);
 	}
