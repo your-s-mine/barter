@@ -5,9 +5,11 @@ import java.time.LocalDateTime;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder // for test
 public class CreatePeriodTradeReqDto {
 	@NotBlank(message = "타이틀은 필수입니다.")
 	@Size(min = 5, message = "타이틀은 5글자 이상이어야 합니다.")
