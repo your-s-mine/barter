@@ -45,8 +45,8 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 
 	@Builder
 	public RegisteredProduct(
-		String name, String description, List<String> images, Member member, RegisteredStatus status
-	) {
+		Long id, String name, String description, List<String> images, Member member, RegisteredStatus status
+	) {this.id = id;
 		this.name = name;
 		this.description = description;
 		this.images = images;
@@ -119,6 +119,12 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 
 	public void changeStatusPending() {
 		this.status = RegisteredStatus.PENDING;
+	}
+
+	public void validatePendingStatusBeforeUpload() {
+		if (!status.equals(RegisteredStatus.PENDING)) {
+			throw new IllegalArgumentException("PENDING 상태만 업로드 가능합니다.");
+		}
 	}
 }
 

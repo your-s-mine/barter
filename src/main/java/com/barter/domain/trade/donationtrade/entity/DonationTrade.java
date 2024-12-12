@@ -72,7 +72,7 @@ public class DonationTrade extends BaseTimeStampEntity {
 			.build();
 	}
 
-	public void validateIsExceededMaxEndDate() {
+	public void validateExceedMaxEndedAt() {
 		if (endedAt.minusDays(MAX_AFTER_DAY).isAfter(LocalDateTime.now())) {
 			throw new IllegalArgumentException("종료일자는 오늘로부터 7일 이내만 가능합니다.");
 		}

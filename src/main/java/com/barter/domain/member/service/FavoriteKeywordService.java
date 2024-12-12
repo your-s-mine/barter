@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.barter.common.KeywordHelper;
+import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.member.dto.CreateFavoriteKeywordReqDto;
 import com.barter.domain.member.dto.FindFavoriteKeywordResDto;
 import com.barter.domain.member.entity.FavoriteKeyword;
@@ -27,8 +28,8 @@ public class FavoriteKeywordService {
 	private final MemberFavoriteKeywordRepository memberFavoriteKeywordRepository;
 
 	@Transactional
-	public void createFavoriteKeyword(Long memberId, CreateFavoriteKeywordReqDto req) {
-		Member member = memberRepository.findById(memberId)
+	public void createFavoriteKeyword(VerifiedMember verifiedMember, CreateFavoriteKeywordReqDto req) {
+		Member member = memberRepository.findById(verifiedMember.getId())
 			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 멤버입니다."));
 		String keyword = KeywordHelper.removeSpace(req.getKeyword());
 		FavoriteKeyword favoriteKeyword = favoriteKeywordRepository.findByKeyword(keyword)
@@ -49,18 +50,18 @@ public class FavoriteKeywordService {
 		memberFavoriteKeywordRepository.save(memberFavoriteKeyword);
 	}
 
-	public List<FindFavoriteKeywordResDto> findFavoriteKeywords(Long memberId) {
-		Member member = memberRepository.findById(memberId)
+	public List<FindFavoriteKeywordResDto> findFavoriteKeywords(VerifiedMember verifiedMember) {
+		Member member = memberRepository.findById(verifiedMember.getId())
 			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 멤버입니다."));
 		return memberFavoriteKeywordRepository.findByMember(member).stream()
 			.map(FindFavoriteKeywordResDto::from)
 			.toList();
 	}
 
-	public void deleteFavoriteKeyword(Long memberId, Long memberFavoriteKeywordId) {
+	public void deleteFavoriteKeyword(VerifiedMember verifiedMember, Long memberFavoriteKeywordId) {
 		MemberFavoriteKeyword memberFavoriteKeyword = memberFavoriteKeywordRepository.findById(memberFavoriteKeywordId)
 			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 관심 키워드 입니다."));
-		memberFavoriteKeyword.validateAuthority(memberId);
+		memberFavoriteKeyword.validateAuthority(verifiedMember.getId());
 		memberFavoriteKeywordRepository.delete(memberFavoriteKeyword);
 	}
 }

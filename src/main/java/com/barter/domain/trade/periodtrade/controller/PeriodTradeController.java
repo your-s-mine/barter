@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.barter.domain.member.entity.Member;
+import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.trade.periodtrade.dto.request.AcceptPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.CreatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.DenyPeriodTradeReqDto;
@@ -38,15 +38,11 @@ public class PeriodTradeController {
 
 	private final PeriodTradeService periodTradeService;
 
-	// TODO : 아래 모든 컨트롤러에 유저 정보가 포함되어야 한다.
-	// VerifiedMember member 형식으로 유저 정보가들어올 예정 (정보 : id, email, nickname)
-	// 일단 Member 로 하자
-
 	@PostMapping("/period-trades")
 	public ResponseEntity<CreatePeriodTradeResDto> createPeriodTrades(
-		Member member,
+		VerifiedMember member,
 		@Valid @RequestBody CreatePeriodTradeReqDto reqDto) {
-		return ResponseEntity.status(HttpStatus.CREATED).body(periodTradeService.createPeriodTrades(reqDto));
+		return ResponseEntity.status(HttpStatus.CREATED).body(periodTradeService.createPeriodTrades(member, reqDto));
 	}
 
 	@GetMapping("/period-trades")
@@ -66,7 +62,7 @@ public class PeriodTradeController {
 
 	@PatchMapping("/period-trades/{id}")
 	public ResponseEntity<UpdatePeriodTradeResDto> updatePeriodTrade(
-		Member member,
+		VerifiedMember member,
 		@PathVariable Long id,
 		@Valid @RequestBody UpdatePeriodTradeReqDto reqDto) {
 		return ResponseEntity.status(HttpStatus.OK).body(
@@ -75,14 +71,14 @@ public class PeriodTradeController {
 	}
 
 	@DeleteMapping("/period-trades/{id}")
-	public ResponseEntity<Void> deletePeriodTrade(Member member, @PathVariable Long id) {
+	public ResponseEntity<Void> deletePeriodTrade(VerifiedMember member, @PathVariable Long id) {
 		periodTradeService.deletePeriodTrade(member, id);
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 	}
 
 	@PostMapping("/period-trades/{id}/suggest") // 등록된 기간 교환에 대한 타 유저의 제안 요청 (최대 제안 물품은 일단 3개)
 	public ResponseEntity<SuggestedPeriodTradeResDto> suggestPeriodTrade(
-		Member member,
+		VerifiedMember member,
 		@PathVariable Long id,
 		@Valid @RequestBody SuggestedPeriodTradeReqDto reqDto) {
 		return ResponseEntity.status(HttpStatus.OK).body(
@@ -92,7 +88,7 @@ public class PeriodTradeController {
 
 	@PatchMapping("/period-trades/{id}/status")
 	public ResponseEntity<StatusUpdateResDto> updatePeriodTradeStatus(
-		Member member,
+		VerifiedMember member,
 		@PathVariable Long id,
 		@Valid @RequestBody StatusUpdateReqDto reqDto
 	) {
@@ -104,7 +100,7 @@ public class PeriodTradeController {
 
 	@PatchMapping("/period-trades/{id}/acceptance")
 	public ResponseEntity<AcceptPeriodTradeResDto> acceptPeriodTrade(
-		Member member,
+		VerifiedMember member,
 		@PathVariable Long id,
 		@Valid @RequestBody AcceptPeriodTradeReqDto reqDto) {
 		return ResponseEntity.status(HttpStatus.OK).body(
@@ -114,7 +110,7 @@ public class PeriodTradeController {
 
 	@PatchMapping("/period-trades/{id}/denial")
 	public ResponseEntity<DenyPeriodTradeResDto> denyPeriodTrade(
-		Member member,
+		VerifiedMember member,
 		@PathVariable Long id,
 		@Valid @RequestBody DenyPeriodTradeReqDto reqDto) {
 		return ResponseEntity.status(HttpStatus.OK).body(
