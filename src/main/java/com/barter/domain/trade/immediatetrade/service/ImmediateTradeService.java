@@ -117,7 +117,7 @@ public class ImmediateTradeService {
 		immediateTrade.validateIsSelfSuggest(member.getId());
 
 		if (!immediateTrade.validateTradeStatus(immediateTrade.getStatus())) {
-			throw new IllegalStateException("해당 교환에 제안할 수 없습니다.");
+			throw new IllegalStateException("PENDING 상태의 교환에만 제안할 수 있습니다.");
 		}
 
 		List<TradeProduct> tradeProducts = new ArrayList<>();
@@ -128,7 +128,7 @@ public class ImmediateTradeService {
 			);
 
 			if (!suggestedProduct.validateProductStatus(suggestedProduct.getStatus())) {
-				throw new IllegalArgumentException("해당 상품으로 제안하실 수 없습니다.");
+				throw new IllegalArgumentException("PENDING 상태의 상품으로만 제안하실 수 있습니다.");
 			}
 
 			suggestedProduct.changStatusSuggesting();
