@@ -93,6 +93,12 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 	public void changeStatusPending() {
 		this.status = RegisteredStatus.PENDING;
 	}
+
+	public void validatePendingStatusBeforeUpload() {
+		if (!status.equals(RegisteredStatus.PENDING)) {
+			throw new IllegalArgumentException("PENDING 상태만 업로드 가능합니다.");
+		}
+	}
 }
 
 

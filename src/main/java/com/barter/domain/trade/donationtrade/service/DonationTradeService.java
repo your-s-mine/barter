@@ -48,7 +48,7 @@ public class DonationTradeService {
 			req.getDescription(),
 			req.getEndedAt());
 
-		donationTrade.validateIsExceededMaxEndDate();
+		donationTrade.validateCreateDonationTrade();
 		DonationTrade savedDonationTrade = donationTradeRepository.save(donationTrade);
 		publisher.publishEvent(TradeNotificationEvent.builder()
 			.tradeId(savedDonationTrade.getId())
