@@ -76,15 +76,12 @@ public class RegisteredProductService {
 		registeredProductRepository.save(foundProduct);
 	}
 
-	// RegisteredProductController 와 마찬가지로 요청 회원의 정보가 넘어와야 하므로 인증/인가 구현 완료 이후 수정이 필요함
 	@Transactional
-	public void updateRegisteredProductStatus(UpdateRegisteredProductStatusReqDto request) {
+	public void updateRegisteredProductStatus(UpdateRegisteredProductStatusReqDto request, Long verifiedMemberId) {
 		RegisteredProduct foundProduct = registeredProductRepository.findById(request.getId())
 			.orElseThrow(() -> new IllegalArgumentException("Registered product not found"));
 
-		if (!Objects.equals(foundProduct.getMember().getId(), request.getMemberId())) {
-			throw new IllegalArgumentException("수정 권한이 없습니다.");
-		}
+		foundProduct.checkPermission(verifiedMemberId);
 
 		foundProduct.updateStatus(request.getStatus());
 		registeredProductRepository.save(foundProduct);
