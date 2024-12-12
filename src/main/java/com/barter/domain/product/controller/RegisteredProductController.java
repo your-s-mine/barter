@@ -21,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
-import com.barter.domain.product.dto.request.DeleteRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.SwitchRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductInfoReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductStatusReqDto;
@@ -87,12 +86,12 @@ public class RegisteredProductController {
 		registeredProductService.updateRegisteredProductStatus(request, verifiedMember.getId());
 	}
 
-	@DeleteMapping
+	@DeleteMapping("/{registeredProductId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void deleteRegisteredProduct(@RequestBody @Valid DeleteRegisteredProductReqDto request) {
-		// 현재 인증/인가 파트의 구현이 완료되지 않아 요청 회원의 정보가 전달된다는 가정하에 작성하여 추후 수정이 필요함
-
-		registeredProductService.deleteRegisteredProduct(request);
+	public void deleteRegisteredProduct(
+		@PathVariable(name = "registeredProductId") Long registeredProductId, VerifiedMember verifiedMember
+	) {
+		registeredProductService.deleteRegisteredProduct(registeredProductId, verifiedMember.getId());
 	}
 
 	@PostMapping("/switch")
