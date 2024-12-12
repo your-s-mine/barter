@@ -6,6 +6,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.barter.domain.notification.dto.request.UpdateNotificationStatusReqDto;
+import com.barter.domain.notification.dto.request.DeleteNotificationReqDto;
 import com.barter.domain.notification.dto.response.FindNotificationResDto;
 import com.barter.domain.notification.service.NotificationService;
 
@@ -67,5 +69,13 @@ public class NotificationController {
 		// RequestBody 의 'notificationId' 는 path parameter 로 전달받을 생각입니다.
 
 		notificationService.updateNotificationStatus(request);
+	}
+
+	// 인증/인가 적용시 RequestBody 를 전달 받지 않고 HttpServletRequest 에서 검증 회원정보를 전달 받을 생각입니다.
+	// 알림 ID 의 경우 path parameter 를 통해 전달 받을 생각입니다.
+	@DeleteMapping
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void deleteNotification(@RequestBody @Valid DeleteNotificationReqDto request) {
+		notificationService.deleteNotification(request);
 	}
 }
