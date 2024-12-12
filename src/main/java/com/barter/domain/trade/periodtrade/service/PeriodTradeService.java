@@ -1,6 +1,7 @@
 package com.barter.domain.trade.periodtrade.service;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,6 +9,7 @@ import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.barter.domain.member.entity.Member;
 import com.barter.domain.member.repository.MemberRepository;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
@@ -47,14 +49,17 @@ public class PeriodTradeService {
 	private final MemberRepository memberRepository;
 	private final TradeProductRepository tradeProductRepository;
 
-	public CreatePeriodTradeResDto createPeriodTrades(CreatePeriodTradeReqDto reqDto) {
+	// TODO : Member 는 나중에 VerifiedMember 로 변경될 예정
+	public CreatePeriodTradeResDto createPeriodTrades(Member member, CreatePeriodTradeReqDto reqDto) {
 
-		/* TODO : RegisteredProduct 가 해당 유저의 물건인지 확인하는 로직 필요
-		    해당 로직 추가시 아래 코드는 변경 될 수 있음*/
 		RegisteredProduct registeredProduct = registeredProductRepository.findById(reqDto.getRegisteredProductId())
 			.orElseThrow(
 				() -> new IllegalArgumentException("없는 등록된 물건입니다.")
 			);
+
+		if (!Objects.equals(registeredProduct.getMember().getId(), member.getId())) {
+			throw new IllegalArgumentException("해당 물건 등록에 대한 권한이 없습니다.");
+		}
 
 		PeriodTrade periodTrade = PeriodTrade.createInitPeriodTrade(reqDto.getTitle(), reqDto.getDescription(),
 			registeredProduct,

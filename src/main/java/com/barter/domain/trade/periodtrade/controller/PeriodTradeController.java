@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.barter.domain.member.entity.Member;
 import com.barter.domain.trade.periodtrade.dto.request.AcceptPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.CreatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.DenyPeriodTradeReqDto;
@@ -38,11 +39,14 @@ public class PeriodTradeController {
 	private final PeriodTradeService periodTradeService;
 
 	// TODO : 아래 모든 컨트롤러에 유저 정보가 포함되어야 한다.
+	// VerifiedMember member 형식으로 유저 정보가들어올 예정 (정보 : id, email, nickname)
+	// 일단 Member 로 하자
 
 	@PostMapping("/period-trades")
 	public ResponseEntity<CreatePeriodTradeResDto> createPeriodTrades(
+		Member member,
 		@Valid @RequestBody CreatePeriodTradeReqDto reqDto) {
-		return ResponseEntity.status(HttpStatus.CREATED).body(periodTradeService.createPeriodTrades(reqDto));
+		return ResponseEntity.status(HttpStatus.CREATED).body(periodTradeService.createPeriodTrades(member, reqDto));
 	}
 
 	@GetMapping("/period-trades")
