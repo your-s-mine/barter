@@ -254,4 +254,59 @@ class DonationTradeServiceTest {
 			.isInstanceOf(IllegalStateException.class)
 			.hasMessageContaining("권한이 없습니다.");
 	}
+
+	@Test
+	@DisplayName("나눔 교환 삭제 정상 테스트")
+	void 나눔_교환_정상_삭제_정상_테스트() {
+		// given
+		VerifiedMember verifiedMember = new VerifiedMember(1L, "member");
+		Long tradeId = 100L;
+		DonationTrade donationTrade = mock(DonationTrade.class);
+
+		when(donationTradeRepository.findById(tradeId)).thenReturn(Optional.of(donationTrade));
+		doNothing().when(donationTrade).validateDelete(verifiedMember.getId());
+		doNothing().when(donationTrade).changeProductStatusPending();
+
+		// when
+		donationTradeService.deleteDonationTrade(verifiedMember, tradeId);
+
+		// then
+		verify(donationTradeRepository, times(1)).findById(tradeId);
+		verify(donationTrade, times(1)).validateDelete(verifiedMember.getId());
+		verify(donationTrade, times(1)).changeProductStatusPending();
+		verify(donationTradeRepository, times(1)).delete(donationTrade);
+	}
+
+	@Test
+	@DisplayName("존재하지 않는 나눔 거래 삭제 시 예외 발생 테스트")
+	void 존재하지_않는_나눔_거래_삭제_시_예외_발생_테스트() {
+		// given
+		VerifiedMember verifiedMember = new VerifiedMember(1L, "member");
+		Long tradeId = 999L;
+
+		when(donationTradeRepository.findById(tradeId)).thenReturn(Optional.empty());
+
+		// then
+		assertThatThrownBy(() -> donationTradeService.deleteDonationTrade(verifiedMember, tradeId))
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessageContaining("존재하지 않는 나눔 교환");
+	}
+
+	@Test
+	@DisplayName("나눔 교환 삭제 권한 예외 테스트")
+	void 나눔_교환_삭제_권한_예외_테스트() {
+		// given
+		VerifiedMember verifiedMember = new VerifiedMember(2L, "member");
+		Long tradeId = 100L;
+		DonationTrade donationTrade = mock(DonationTrade.class);
+
+		when(donationTradeRepository.findById(tradeId)).thenReturn(Optional.of(donationTrade));
+		doThrow(new IllegalStateException("삭제 권한이 없습니다."))
+			.when(donationTrade).validateDelete(verifiedMember.getId());
+
+		// then
+		assertThatThrownBy(() -> donationTradeService.deleteDonationTrade(verifiedMember, tradeId))
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessageContaining("삭제 권한이 없습니다.");
+	}
 }
