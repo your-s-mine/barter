@@ -38,10 +38,6 @@ public class PeriodTradeController {
 
 	private final PeriodTradeService periodTradeService;
 
-	// TODO : 아래 모든 컨트롤러에 유저 정보가 포함되어야 한다.
-	// VerifiedMember member 형식으로 유저 정보가들어올 예정 (정보 : id, email, nickname)
-	// 일단 Member 로 하자
-
 	@PostMapping("/period-trades")
 	public ResponseEntity<CreatePeriodTradeResDto> createPeriodTrades(
 		VerifiedMember member,
