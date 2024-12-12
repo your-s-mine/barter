@@ -40,9 +40,11 @@ public class RegisteredProductService {
 	}
 
 	// 인증/인가가 구현되면 요청 회원 정보를 파라미터로 전달받아 요청한 '등록 물품' 등록자가 요청 회원인지 확인하는 로직을 추가 작성할 것 입니다.
-	public FindRegisteredProductResDto findRegisteredProduct(Long RegisteredProductId) {
+	public FindRegisteredProductResDto findRegisteredProduct(Long RegisteredProductId, Long verifiedMemberId) {
 		RegisteredProduct foundProduct = registeredProductRepository.findById(RegisteredProductId)
 			.orElseThrow(() -> new IllegalArgumentException("Registered product not found"));
+
+		foundProduct.checkPermission(verifiedMemberId);
 
 		return FindRegisteredProductResDto.from(foundProduct);
 	}

@@ -53,12 +53,10 @@ public class RegisteredProductController {
 	@GetMapping("/{registeredProductId}")
 	@ResponseStatus(HttpStatus.OK)
 	public FindRegisteredProductResDto findRegisteredProduct(
-		@PathVariable(name = "registeredProductId") Long registeredProductId
+		@PathVariable(name = "registeredProductId") Long registeredProductId,
+		VerifiedMember verifiedMember
 	) {
-		// 현재 인증/인가 파트의 구현이 완료되지 않아 요청 회원의 ID 정보를 전달 받지 못하고 있습니다.
-		// 구현 이후 해당 메서드의 파라미터로 요청 회원 정보를 전달받아 활용하는 쪽으로 수정할 계획입니다.
-
-		return registeredProductService.findRegisteredProduct(registeredProductId);
+		return registeredProductService.findRegisteredProduct(registeredProductId, verifiedMember.getId());
 	}
 
 	@GetMapping

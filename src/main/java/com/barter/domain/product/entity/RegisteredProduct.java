@@ -66,6 +66,14 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 			.build();
 	}
 
+	// 아래의 validateOwner() 의 경우 RegisteredProduct 를 패치 조인할 때 쓸수 있는 것 같아 따로 메서드 추가했습니다.
+	// 저의 경우 RegisteredProduct 의 회원 ID 가 파라미터로 전달된 ID 와 같은지만 비교하면 되기 때문입니다.
+	public void checkPermission(Long memberId) {
+		if (!this.member.getId().equals(memberId)) {
+			throw new IllegalArgumentException("권한이 없습니다.");
+		}
+	}
+
 	public void validateOwner(Long userId) {
 		if (!member.isEqualsId(userId)) {
 			throw new IllegalArgumentException("권한이 없습니다.");
