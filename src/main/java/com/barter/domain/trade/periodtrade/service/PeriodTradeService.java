@@ -113,14 +113,13 @@ public class PeriodTradeService {
 	}
 
 	@Transactional
-	public SuggestedPeriodTradeResDto suggestPeriodTrade(Long id, SuggestedPeriodTradeReqDto reqDto) {
+	public SuggestedPeriodTradeResDto suggestPeriodTrade(Member member, Long id, SuggestedPeriodTradeReqDto reqDto) {
 
-		Long userId = 2L; // 게시글에 제안하는 멤버
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
 
-		periodTrade.validateSuggestAuthority(userId); // 자신의 교환 (게시글) 에 제안 불가
+		periodTrade.validateSuggestAuthority(member.getId()); // 자신의 교환 (게시글) 에 제안 불가
 
 		// 기간 교환 시작 전(PENDING) 또는 이미 거래된(COMPLETED) 교환인 경우
 		periodTrade.validateIsPending();

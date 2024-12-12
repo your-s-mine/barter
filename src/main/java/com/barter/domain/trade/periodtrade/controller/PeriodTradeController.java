@@ -82,10 +82,11 @@ public class PeriodTradeController {
 
 	@PostMapping("/period-trades/{id}/suggest") // 등록된 기간 교환에 대한 타 유저의 제안 요청 (최대 제안 물품은 일단 3개)
 	public ResponseEntity<SuggestedPeriodTradeResDto> suggestPeriodTrade(
+		Member member,
 		@PathVariable Long id,
 		@Valid @RequestBody SuggestedPeriodTradeReqDto reqDto) {
 		return ResponseEntity.status(HttpStatus.OK).body(
-			periodTradeService.suggestPeriodTrade(id, reqDto)
+			periodTradeService.suggestPeriodTrade(member, id, reqDto)
 		);
 	}
 
