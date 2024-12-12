@@ -62,10 +62,10 @@ public class RegisteredProductController {
 	@GetMapping
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<FindRegisteredProductResDto> findRegisteredProducts(
-		@PageableDefault(sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
-		// 인증/인가 파트 구현이 끝난다면, 'REGISTERED_PRODUCTS' 테이블에서 요청 회원이 생성한 등록 물품들을 조회하도록 할 것 같습니다.
-
-		return registeredProductService.findRegisteredProducts(pageable);
+		@PageableDefault(sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable,
+		VerifiedMember verifiedMember
+	) {
+		return registeredProductService.findRegisteredProducts(pageable, verifiedMember.getId());
 	}
 
 	@PatchMapping

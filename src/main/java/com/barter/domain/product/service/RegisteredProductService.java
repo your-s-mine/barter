@@ -39,7 +39,6 @@ public class RegisteredProductService {
 		registeredProductRepository.save(createdProduct);
 	}
 
-	// 인증/인가가 구현되면 요청 회원 정보를 파라미터로 전달받아 요청한 '등록 물품' 등록자가 요청 회원인지 확인하는 로직을 추가 작성할 것 입니다.
 	public FindRegisteredProductResDto findRegisteredProduct(Long RegisteredProductId, Long verifiedMemberId) {
 		RegisteredProduct foundProduct = registeredProductRepository.findById(RegisteredProductId)
 			.orElseThrow(() -> new IllegalArgumentException("Registered product not found"));
@@ -49,9 +48,9 @@ public class RegisteredProductService {
 		return FindRegisteredProductResDto.from(foundProduct);
 	}
 
-	// 인증/인가 구현되면 요청 회원이 생성한 '등록 물품들만' 조회하도록 수정할 것으로 보입니다.
-	public PagedModel<FindRegisteredProductResDto> findRegisteredProducts(Pageable pageable) {
-		Page<FindRegisteredProductResDto> foundProducts = registeredProductRepository.findAll(pageable)
+	public PagedModel<FindRegisteredProductResDto> findRegisteredProducts(Pageable pageable, Long verifiedMemberId) {
+		Page<FindRegisteredProductResDto> foundProducts = registeredProductRepository
+			.findAllByMemberId(pageable, verifiedMemberId)
 			.map(FindRegisteredProductResDto::from);
 
 		return new PagedModel<>(foundProducts);
