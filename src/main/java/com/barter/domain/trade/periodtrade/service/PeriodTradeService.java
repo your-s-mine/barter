@@ -75,9 +75,6 @@ public class PeriodTradeService {
 		// 이벤트 발행
 		eventPublisher.publishEvent(new PeriodTradeCloseEvent(periodTrade));
 
-		// 중복된 물건으로 여러 periodTrade 생성 금지 로직 필요 (근데 모든 교환에 대해서 생각을 해봐야 할듯)
-		// 일단 해당 물품이 pending 인 경우만 등록가능하도록
-
 		return CreatePeriodTradeResDto.from(periodTrade);
 	}
 
