@@ -77,7 +77,7 @@ public class ImmediateTrade extends BaseTimeStampEntity {
 
 	public void validateAuthority(Long userId) {
 		if (!this.product.getMember().getId().equals(userId)) {
-			throw new IllegalArgumentException("해당 물품에 대한 수정 권한이 없습니다.");
+			throw new IllegalArgumentException("해당 물품에 대한 권한이 없습니다.");
 		}
 	}
 

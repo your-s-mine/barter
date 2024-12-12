@@ -67,8 +67,8 @@ public class ImmediateTradeController {
 	}
 
 	@PatchMapping("/{tradeId}/acceptance")
-	public ResponseEntity<String> acceptTradeSuggest(@PathVariable Long tradeId) {
-		return new ResponseEntity<>(immediateTradeService.acceptTradeSuggest(tradeId), HttpStatus.ACCEPTED);
+	public ResponseEntity<String> acceptTradeSuggest(@PathVariable Long tradeId, VerifiedMember member) {
+		return new ResponseEntity<>(immediateTradeService.acceptTradeSuggest(tradeId, member), HttpStatus.ACCEPTED);
 	}
 
 	@DeleteMapping("/{tradeId}/denial")
