@@ -88,17 +88,16 @@ public class PeriodTradeService {
 	}
 
 	@Transactional
-	public UpdatePeriodTradeResDto updatePeriodTrade(Long id, UpdatePeriodTradeReqDto reqDto) {
+	public UpdatePeriodTradeResDto updatePeriodTrade(Member member, Long id, UpdatePeriodTradeReqDto reqDto) {
 
-		Long userId = 1L;
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
-		periodTrade.validateAuthority(userId);
+		periodTrade.validateAuthority(member.getId());
 		periodTrade.validateIsCompleted();
 		periodTrade.update(reqDto.getTitle(), reqDto.getDescription());
 
-		return UpdatePeriodTradeResDto.from(periodTrade); // save 써도 되고 안써도 되고
+		return UpdatePeriodTradeResDto.from(periodTrade);
 
 	}
 

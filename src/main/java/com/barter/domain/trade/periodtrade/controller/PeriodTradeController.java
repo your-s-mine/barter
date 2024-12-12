@@ -66,10 +66,11 @@ public class PeriodTradeController {
 
 	@PatchMapping("/period-trades/{id}")
 	public ResponseEntity<UpdatePeriodTradeResDto> updatePeriodTrade(
+		Member member,
 		@PathVariable Long id,
 		@Valid @RequestBody UpdatePeriodTradeReqDto reqDto) {
 		return ResponseEntity.status(HttpStatus.OK).body(
-			periodTradeService.updatePeriodTrade(id, reqDto)
+			periodTradeService.updatePeriodTrade(member, id, reqDto)
 		);
 	}
 
