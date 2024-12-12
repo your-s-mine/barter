@@ -5,8 +5,8 @@ import lombok.Getter;
 
 @Getter
 public class VerifiedMemberDto {
-	private Long id;
-	private String email;
+	private final Long id;
+	private final String email;
 
 	@Builder
 	public VerifiedMemberDto(Long id, String email) {
