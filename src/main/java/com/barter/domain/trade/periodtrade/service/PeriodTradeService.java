@@ -13,6 +13,7 @@ import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.entity.TradeProduct;
+import com.barter.domain.product.enums.RegisteredStatus;
 import com.barter.domain.product.enums.SuggestedStatus;
 import com.barter.domain.product.enums.TradeType;
 import com.barter.domain.product.repository.RegisteredProductRepository;
@@ -60,6 +61,10 @@ public class PeriodTradeService {
 
 		registeredProduct.validateOwner(member.getId());
 
+		if (!registeredProduct.getStatus().equals(RegisteredStatus.PENDING)) {
+			throw new IllegalArgumentException("이미 다른 교환에 등록된 상품입니다.");
+		} // TODO : 엔티티에 위임해도 될것 같습니다. 일단은 최대한 해당 코드 수정안하고 반영 (전체 코드 리팩토링 시 반영하기)
+
 		PeriodTrade periodTrade = PeriodTrade.createInitPeriodTrade(reqDto.getTitle(), reqDto.getDescription(),
 			registeredProduct,
 			reqDto.getEndedAt());
@@ -69,6 +74,9 @@ public class PeriodTradeService {
 		periodTradeRepository.save(periodTrade);
 		// 이벤트 발행
 		eventPublisher.publishEvent(new PeriodTradeCloseEvent(periodTrade));
+
+		// 중복된 물건으로 여러 periodTrade 생성 금지 로직 필요 (근데 모든 교환에 대해서 생각을 해봐야 할듯)
+		// 일단 해당 물품이 pending 인 경우만 등록가능하도록
 
 		return CreatePeriodTradeResDto.from(periodTrade);
 	}
@@ -212,7 +220,7 @@ public class PeriodTradeService {
 			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId())) {
 				suggestedProduct.changStatusPending();
 				periodTrade.getRegisteredProduct()
-					.updateStatus("IN_PROGRESS");
+					.updateStatus("PENDING");
 			}
 
 		}
