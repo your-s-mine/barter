@@ -8,6 +8,8 @@ import com.barter.domain.review.dto.ReviewResponseDto;
 import com.barter.domain.review.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/reviews")
 @RequiredArgsConstructor
@@ -28,5 +30,12 @@ public class ReviewController {
                 requestDto.getScore()
         );
         return ResponseEntity.ok(responseDto);
+    }
+
+    @GetMapping("/my-reputation")
+    public ResponseEntity<List<ReviewResponseDto>> getMyReputation(VerifiedMember verifiedMember) {
+        // 나의 평판(리뷰) 조회
+        List<ReviewResponseDto> reviews = reviewService.getMyReputationReviews(verifiedMember);
+        return ResponseEntity.ok(reviews);
     }
 }
