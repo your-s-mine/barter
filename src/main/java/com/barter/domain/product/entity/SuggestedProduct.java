@@ -66,6 +66,12 @@ public class SuggestedProduct extends BaseTimeStampEntity {
 			.build();
 	}
 
+	public void checkPermission(Long memberId) {
+		if (!this.member.getId().equals(memberId)) {
+			throw new IllegalArgumentException("권한이 없습니다.");
+		}
+	}
+
 	public boolean validateProductStatus(SuggestedStatus status) {
 		return status.equals(SuggestedStatus.PENDING);
 	}

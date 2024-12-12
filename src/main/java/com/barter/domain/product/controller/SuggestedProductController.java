@@ -53,12 +53,10 @@ public class SuggestedProductController {
 	@GetMapping("/{suggestedProductId}")
 	@ResponseStatus(HttpStatus.OK)
 	public FindSuggestedProductResDto findSuggestedProduct(
-		@PathVariable(name = "suggestedProductId") Long suggestedProductId
+		@PathVariable(name = "suggestedProductId") Long suggestedProductId,
+		VerifiedMember verifiedMember
 	) {
-		// 현재 인증/인가 파트의 구현이 완료되지 않아 요청 회원의 ID 정보를 전달 받지 못하고 있습니다.
-		// 구현 이후 해당 메서드의 파라미터로 요청 회원 정보를 전달받아 활용하는 쪽으로 수정할 계획입니다.
-
-		return suggestedProductService.findSuggestedProduct(suggestedProductId);
+		return suggestedProductService.findSuggestedProduct(suggestedProductId, verifiedMember.getId());
 	}
 
 	@GetMapping

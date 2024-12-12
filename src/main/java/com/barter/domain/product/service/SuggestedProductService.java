@@ -42,10 +42,11 @@ public class SuggestedProductService {
 		suggestedProductRepository.save(createdProduct);
 	}
 
-	// 인증/인가가 구현되면 요청 회원 정보를 파라미터로 전달받아 요청한 '등록 물품' 등록자가 요청 회원인지 확인하는 로직을 추가 작성할 것 입니다.
-	public FindSuggestedProductResDto findSuggestedProduct(Long suggestedProductId) {
+	public FindSuggestedProductResDto findSuggestedProduct(Long suggestedProductId, Long verifiedMemberId) {
 		SuggestedProduct foundProduct = suggestedProductRepository.findById(suggestedProductId)
 			.orElseThrow(() -> new IllegalArgumentException("Suggested product not found"));
+
+		foundProduct.checkPermission(verifiedMemberId);
 
 		return FindSuggestedProductResDto.from(foundProduct);
 	}
