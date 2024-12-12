@@ -9,8 +9,8 @@ public class ImageCountValidator {
 		}
 	}
 
-	public static void checkImageCount(int currentImageCount, int deleteImageCount, int newImageCount) {
-		int resultCount = currentImageCount - deleteImageCount + newImageCount;
+	public static void checkImageCount(int deletedImageCount, int newImageCount) {
+		int resultCount = deletedImageCount + newImageCount;
 
 		if (resultCount > 3 || resultCount < 1) {
 			throw new IllegalArgumentException("1 ~ 3개 사이의 이미지를 가져야 합니다.");

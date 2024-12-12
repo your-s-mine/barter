@@ -66,15 +66,11 @@ public class RegisteredProductService {
 
 		foundProduct.checkPermission(verifiedMemberId);
 		foundProduct.checkPossibleUpdate();
-		ImageCountValidator.checkImageCount(
-			foundProduct.getImages().size(), request.getDeleteImageNames().size(), multipartFiles.size()
-		);
 
 		List<String> deleteImageNames = request.getDeleteImageNames();
-		if (!deleteImageNames.isEmpty()) {
-			foundProduct.deleteImages(request.getDeleteImageNames());    // 삭제 요청 이미지 이름(들) 엔티티에서 삭제
-			deleteImageNames.forEach(s3Service::deleteFile);    // 삭제 요청 이미지들 S3 에서 삭제
-		}
+		foundProduct.deleteImages(deleteImageNames);    // 삭제 요청 이미지 이름(들) 엔티티에서 삭제
+		ImageCountValidator.checkImageCount(foundProduct.getImages().size(), multipartFiles.size());
+		deleteImageNames.forEach(s3Service::deleteFile);    // 삭제 요청 이미지들 S3 에서 삭제
 
 		// 추가할 신규 이미지들이 있다면
 		if (!multipartFiles.isEmpty()) {
