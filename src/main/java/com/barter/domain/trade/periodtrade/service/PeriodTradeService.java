@@ -158,14 +158,12 @@ public class PeriodTradeService {
 	}
 
 	@Transactional
-	public AcceptPeriodTradeResDto acceptPeriodTrade(Long id, AcceptPeriodTradeReqDto reqDto) {
-
-		Long userId = 1L;
+	public AcceptPeriodTradeResDto acceptPeriodTrade(Member member, Long id, AcceptPeriodTradeReqDto reqDto) {
 
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
-		periodTrade.validateAuthority(userId);
+		periodTrade.validateAuthority(member.getId());
 		periodTrade.validateInProgress();
 
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(id, TradeType.PERIOD);
@@ -191,13 +189,12 @@ public class PeriodTradeService {
 
 	// TODO : Deny 부분이 Accept 랑 구조가 비슷해서 단순화 시킬 필요 있다.
 	@Transactional
-	public DenyPeriodTradeResDto denyPeriodTrade(Long id, DenyPeriodTradeReqDto reqDto) {
-		Long userId = 1L;
+	public DenyPeriodTradeResDto denyPeriodTrade(Member member, Long id, DenyPeriodTradeReqDto reqDto) {
 
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
-		periodTrade.validateAuthority(userId);
+		periodTrade.validateAuthority(member.getId());
 		periodTrade.validateInProgress();
 
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(id, TradeType.PERIOD);

@@ -104,19 +104,21 @@ public class PeriodTradeController {
 
 	@PatchMapping("/period-trades/{id}/acceptance")
 	public ResponseEntity<AcceptPeriodTradeResDto> acceptPeriodTrade(
+		Member member,
 		@PathVariable Long id,
 		@Valid @RequestBody AcceptPeriodTradeReqDto reqDto) {
 		return ResponseEntity.status(HttpStatus.OK).body(
-			periodTradeService.acceptPeriodTrade(id, reqDto)
+			periodTradeService.acceptPeriodTrade(member, id, reqDto)
 		);
 	}
 
 	@PatchMapping("/period-trades/{id}/denial")
 	public ResponseEntity<DenyPeriodTradeResDto> denyPeriodTrade(
+		Member member,
 		@PathVariable Long id,
 		@Valid @RequestBody DenyPeriodTradeReqDto reqDto) {
 		return ResponseEntity.status(HttpStatus.OK).body(
-			periodTradeService.denyPeriodTrade(id, reqDto)
+			periodTradeService.denyPeriodTrade(member, id, reqDto)
 		);
 	}
 
