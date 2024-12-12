@@ -2,13 +2,14 @@ package com.barter.domain.trade.periodtrade.service;
 
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.barter.domain.member.repository.MemberRepository;
+import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.entity.TradeProduct;
@@ -32,6 +33,7 @@ import com.barter.domain.trade.periodtrade.dto.response.SuggestedPeriodTradeResD
 import com.barter.domain.trade.periodtrade.dto.response.UpdatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 import com.barter.domain.trade.periodtrade.repository.PeriodTradeRepository;
+import com.barter.event.trade.PeriodTradeEvent.PeriodTradeCloseEvent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,17 +46,20 @@ public class PeriodTradeService {
 	private final PeriodTradeRepository periodTradeRepository;
 	private final RegisteredProductRepository registeredProductRepository;
 	private final SuggestedProductRepository suggestedProductRepository;
-	private final MemberRepository memberRepository;
 	private final TradeProductRepository tradeProductRepository;
 
+	private final ApplicationEventPublisher eventPublisher;
+
+	// TODO : Member 는 나중에 VerifiedMember 로 변경될 예정
+	@Transactional
 	public CreatePeriodTradeResDto createPeriodTrades(CreatePeriodTradeReqDto reqDto) {
 
-		/* TODO : RegisteredProduct 가 해당 유저의 물건인지 확인하는 로직 필요
-		    해당 로직 추가시 아래 코드는 변경 될 수 있음*/
 		RegisteredProduct registeredProduct = registeredProductRepository.findById(reqDto.getRegisteredProductId())
 			.orElseThrow(
 				() -> new IllegalArgumentException("없는 등록된 물건입니다.")
 			);
+
+		registeredProduct.validateOwner(reqDto.getMemberId());
 
 		PeriodTrade periodTrade = PeriodTrade.createInitPeriodTrade(reqDto.getTitle(), reqDto.getDescription(),
 			registeredProduct,
@@ -62,10 +67,12 @@ public class PeriodTradeService {
 
 		periodTrade.validateIsExceededMaxEndDate();
 
-		return CreatePeriodTradeResDto.from(periodTradeRepository.save(periodTrade));
-	}
+		periodTradeRepository.save(periodTrade);
+		// 이벤트 발행
+		eventPublisher.publishEvent(new PeriodTradeCloseEvent(periodTrade));
 
-	// TODO : (PeriodTrade 조회) : 멤버 구현 시 멤버정보를 받아서 해당 멤버가 참여한 PeriodTrade 만 조회 가능하도록 하기
+		return CreatePeriodTradeResDto.from(periodTrade);
+	}
 
 	@Transactional(readOnly = true)
 	public PagedModel<FindPeriodTradeResDto> findPeriodTrades(Pageable pageable) {
@@ -86,42 +93,40 @@ public class PeriodTradeService {
 	}
 
 	@Transactional
-	public UpdatePeriodTradeResDto updatePeriodTrade(Long id, UpdatePeriodTradeReqDto reqDto) {
+	public UpdatePeriodTradeResDto updatePeriodTrade(Member member, Long id, UpdatePeriodTradeReqDto reqDto) {
 
-		Long userId = 1L;
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
-		periodTrade.validateAuthority(userId);
+		periodTrade.validateAuthority(member.getId());
 		periodTrade.validateIsCompleted();
 		periodTrade.update(reqDto.getTitle(), reqDto.getDescription());
 
-		return UpdatePeriodTradeResDto.from(periodTrade); // save 써도 되고 안써도 되고
+		return UpdatePeriodTradeResDto.from(periodTrade);
 
 	}
 
 	@Transactional
-	public void deletePeriodTrade(Long id) {
-		Long userId = 1L;
+	public void deletePeriodTrade(Member member, Long id) {
+
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
 
-		periodTrade.validateAuthority(userId);
+		periodTrade.validateAuthority(member.getId());
 		periodTrade.validateIsCompleted();
 		periodTradeRepository.delete(periodTrade);
 
 	}
 
 	@Transactional
-	public SuggestedPeriodTradeResDto suggestPeriodTrade(Long id, SuggestedPeriodTradeReqDto reqDto) {
+	public SuggestedPeriodTradeResDto suggestPeriodTrade(Member member, Long id, SuggestedPeriodTradeReqDto reqDto) {
 
-		Long userId = 2L; // 게시글에 제안하는 멤버
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
 
-		periodTrade.validateSuggestAuthority(userId); // 자신의 교환 (게시글) 에 제안 불가
+		periodTrade.validateSuggestAuthority(member.getId()); // 자신의 교환 (게시글) 에 제안 불가
 
 		// 기간 교환 시작 전(PENDING) 또는 이미 거래된(COMPLETED) 교환인 경우
 		periodTrade.validateIsPending();
@@ -141,14 +146,13 @@ public class PeriodTradeService {
 	}
 
 	@Transactional
-	public StatusUpdateResDto updatePeriodTradeStatus(Long id, StatusUpdateReqDto reqDto) {
-		Long userId = 1L;
+	public StatusUpdateResDto updatePeriodTradeStatus(Member member, Long id, StatusUpdateReqDto reqDto) {
 
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
 
-		periodTrade.validateAuthority(userId); // 교환 (게시글)의 주인만 변경 가능
+		periodTrade.validateAuthority(member.getId()); // 교환 (게시글)의 주인만 변경 가능
 		periodTrade.validateIsCompleted(); // 이미 완료된 교환 건은 수정 불가
 		boolean isStatusUpdatable = periodTrade.updatePeriodTradeStatus(reqDto.getTradeStatus());
 		if (!isStatusUpdatable) {
@@ -161,14 +165,12 @@ public class PeriodTradeService {
 	}
 
 	@Transactional
-	public AcceptPeriodTradeResDto acceptPeriodTrade(Long id, AcceptPeriodTradeReqDto reqDto) {
-
-		Long userId = 1L;
+	public AcceptPeriodTradeResDto acceptPeriodTrade(Member member, Long id, AcceptPeriodTradeReqDto reqDto) {
 
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
-		periodTrade.validateAuthority(userId);
+		periodTrade.validateAuthority(member.getId());
 		periodTrade.validateInProgress();
 
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(id, TradeType.PERIOD);
@@ -194,13 +196,12 @@ public class PeriodTradeService {
 
 	// TODO : Deny 부분이 Accept 랑 구조가 비슷해서 단순화 시킬 필요 있다.
 	@Transactional
-	public DenyPeriodTradeResDto denyPeriodTrade(Long id, DenyPeriodTradeReqDto reqDto) {
-		Long userId = 1L;
+	public DenyPeriodTradeResDto denyPeriodTrade(Member member, Long id, DenyPeriodTradeReqDto reqDto) {
 
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
-		periodTrade.validateAuthority(userId);
+		periodTrade.validateAuthority(member.getId());
 		periodTrade.validateInProgress();
 
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(id, TradeType.PERIOD);
