@@ -1,6 +1,8 @@
 package com.barter.domain.product.controller;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -43,7 +45,7 @@ public class RegisteredProductController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public void createRegisteredProduct(
 		@RequestPart(name = "request") @Valid CreateRegisteredProductReqDto request,
-		@RequestPart(required = false, name = "multipartFiles") List<MultipartFile> multipartFiles,
+		@RequestPart(name = "multipartFiles") List<MultipartFile> multipartFiles,
 		VerifiedMember verifiedMember
 	) {
 		registeredProductService.createRegisteredProduct(request, multipartFiles, verifiedMember.getId());
@@ -74,7 +76,9 @@ public class RegisteredProductController {
 		@RequestPart(required = false, name = "multipartFiles") List<MultipartFile> multipartFiles,
 		VerifiedMember verifiedMember
 	) {
-		registeredProductService.updateRegisteredProductInfo(request, multipartFiles, verifiedMember.getId());
+		registeredProductService.updateRegisteredProductInfo(
+			request, Objects.requireNonNullElseGet(multipartFiles, ArrayList::new), verifiedMember.getId()
+		);
 	}
 
 	@PatchMapping("/status")

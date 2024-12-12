@@ -1,6 +1,5 @@
 package com.barter.domain.product.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -18,6 +17,7 @@ import com.barter.domain.product.dto.request.UpdateRegisteredProductStatusReqDto
 import com.barter.domain.product.dto.response.FindRegisteredProductResDto;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.repository.RegisteredProductRepository;
+import com.barter.domain.product.validator.ImageCountValidator;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,13 +31,10 @@ public class RegisteredProductService {
 	public void createRegisteredProduct(
 		CreateRegisteredProductReqDto request, List<MultipartFile> multipartFiles, Long verifiedMemberId
 	) {
+		ImageCountValidator.checkImageCount(multipartFiles.size());
+
+		List<String> images = s3Service.uploadFile(multipartFiles);
 		Member requestMember = Member.builder().id(verifiedMemberId).build();
-		List<String> images;
-		if (multipartFiles != null) {
-			images = s3Service.uploadFile(multipartFiles);
-		} else {
-			images = new ArrayList<>();
-		}
 
 		RegisteredProduct createdProduct = RegisteredProduct.create(request, requestMember, images);
 		registeredProductRepository.save(createdProduct);
@@ -69,15 +66,20 @@ public class RegisteredProductService {
 
 		foundProduct.checkPermission(verifiedMemberId);
 		foundProduct.checkPossibleUpdate();
+		ImageCountValidator.checkImageCount(
+			foundProduct.getImages().size(), request.getDeleteImageNames().size(), multipartFiles.size()
+		);
 
-		if (!request.getDeleteImageNames().isEmpty()) {
-			foundProduct.deleteImages(request.getDeleteImageNames());    // 삭제 요청 이미지들 삭제
+		List<String> deleteImageNames = request.getDeleteImageNames();
+		if (!deleteImageNames.isEmpty()) {
+			foundProduct.deleteImages(request.getDeleteImageNames());    // 삭제 요청 이미지 이름(들) 엔티티에서 삭제
+			deleteImageNames.forEach(s3Service::deleteFile);    // 삭제 요청 이미지들 S3 에서 삭제
 		}
 
-		// 추가할 신규 이미지들이 있다면 S3 에 저장후 엔티티 images 에 추가
-		if (multipartFiles != null) {
-			List<String> images = s3Service.uploadFile(multipartFiles);
-			foundProduct.updateImages(images);
+		// 추가할 신규 이미지들이 있다면
+		if (!multipartFiles.isEmpty()) {
+			List<String> images = s3Service.uploadFile(multipartFiles);    // S3 에 신규 이미지 저장
+			foundProduct.updateImages(images);    // 엔티티에 신규 이미지 이름(들) 추가
 		}
 
 		foundProduct.updateInfo(request);
