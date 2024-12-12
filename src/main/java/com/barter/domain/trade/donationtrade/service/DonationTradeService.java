@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.member.repository.MemberRepository;
 import com.barter.domain.product.entity.RegisteredProduct;
+import com.barter.domain.product.enums.TradeType;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.trade.donationtrade.dto.request.CreateDonationTradeReqDto;
 import com.barter.domain.trade.donationtrade.dto.request.UpdateDonationTradeReqDto;
@@ -48,9 +49,11 @@ public class DonationTradeService {
 
 		donationTrade.validateIsExceededMaxEndDate();
 		DonationTrade savedDonationTrade = donationTradeRepository.save(donationTrade);
-		Long savedTradeId = savedDonationTrade.getId();
-		String savedTradeProductName = savedDonationTrade.getProduct().getName();
-		publisher.publishEvent(new TradeNotificationEvent(savedTradeId, savedTradeProductName));
+		publisher.publishEvent(TradeNotificationEvent.builder()
+			.tradeId(savedDonationTrade.getId())
+			.type(TradeType.DONATION)
+			.productName(savedDonationTrade.getProduct().getName())
+			.build());
 	}
 
 	@Transactional(readOnly = true)

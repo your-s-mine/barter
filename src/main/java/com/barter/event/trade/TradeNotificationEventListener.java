@@ -32,6 +32,7 @@ public class TradeNotificationEventListener {
 			.findByFavoriteKeywordIn(existsKeywords);
 		keywordMembers.forEach(member -> {
 			// TODO: 알림 전송 개발되면 추가 예정.
+			log.info("관심 키워드로 등록한 물품 {}이(가) 교환에 등록되었습니다.", event.getProductName());
 		});
 	}
 }
