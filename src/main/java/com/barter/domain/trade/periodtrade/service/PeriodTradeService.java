@@ -19,6 +19,7 @@ import com.barter.domain.product.enums.TradeType;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.repository.SuggestedProductRepository;
 import com.barter.domain.product.repository.TradeProductRepository;
+import com.barter.domain.product.service.ProductSwitchService;
 import com.barter.domain.trade.periodtrade.dto.request.AcceptPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.CreatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.DenyPeriodTradeReqDto;
@@ -49,6 +50,7 @@ public class PeriodTradeService {
 	private final SuggestedProductRepository suggestedProductRepository;
 	private final TradeProductRepository tradeProductRepository;
 	private final ApplicationEventPublisher eventPublisher;
+	private final ProductSwitchService productSwitchService;
 
 	// TODO : Member 는 나중에 VerifiedMember 로 변경될 예정
 	@Transactional
@@ -143,9 +145,11 @@ public class PeriodTradeService {
 		List<SuggestedProduct> suggestedProduct = findSuggestedProductByIds(reqDto.getProductIds());
 
 		List<TradeProduct> tradeProducts = suggestedProduct.stream()
-			.map(product -> TradeProduct.createTradeProduct(
-				id, TradeType.PERIOD, product
-			)).toList();
+			.map(product -> {
+				TradeProduct tradeProduct = TradeProduct.createTradeProduct(id, TradeType.PERIOD, product);
+				product.changStatusSuggesting();
+				return tradeProduct;
+			}).toList();
 
 		tradeProductRepository.saveAll(tradeProducts);
 
