@@ -72,4 +72,8 @@ public class Notification extends BaseTimeStampEntity {
 			.memberId(memberId)
 			.build();
 	}
+
+	public void updateStatus() {
+		this.isRead = true;
+	}
 }
