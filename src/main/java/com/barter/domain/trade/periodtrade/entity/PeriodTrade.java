@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import com.barter.domain.BaseTimeStampEntity;
 import com.barter.domain.product.entity.RegisteredProduct;
+import com.barter.domain.product.enums.RegisteredStatus;
 import com.barter.domain.trade.enums.TradeStatus;
 
 import jakarta.persistence.Entity;
@@ -123,16 +124,20 @@ public class PeriodTrade extends BaseTimeStampEntity {
 		}
 	}
 
+	public void updateRegisteredProduct(RegisteredStatus status) {
+		this.registeredProduct.updateStatus(status.toString());
+	}
+
 	public boolean updatePeriodTradeStatus(TradeStatus status) {
 
 		if (status.equals(TradeStatus.CLOSED)) { // CLOSED : 교환 등록자의 물품이 만료되거나 취소된 경우
 			this.status = status;
-			this.registeredProduct.updateStatus("PENDING");
+			this.registeredProduct.updateStatus(RegisteredStatus.PENDING.toString());
 			return true;
 		}
 		if (status.equals(TradeStatus.IN_PROGRESS) && this.status.equals(TradeStatus.PENDING)) {
 			this.status = status;
-			this.registeredProduct.updateStatus("REGISTERING");
+			this.registeredProduct.updateStatus(RegisteredStatus.REGISTERING.toString());
 
 			return true;
 		}
