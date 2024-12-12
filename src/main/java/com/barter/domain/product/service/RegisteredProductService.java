@@ -1,5 +1,6 @@
 package com.barter.domain.product.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -31,7 +32,12 @@ public class RegisteredProductService {
 		CreateRegisteredProductReqDto request, List<MultipartFile> multipartFiles, Long verifiedMemberId
 	) {
 		Member requestMember = Member.builder().id(verifiedMemberId).build();
-		List<String> images = s3Service.uploadFile(multipartFiles);
+		List<String> images;
+		if (multipartFiles != null) {
+			images = s3Service.uploadFile(multipartFiles);
+		} else {
+			images = new ArrayList<>();
+		}
 
 		RegisteredProduct createdProduct = RegisteredProduct.create(request, requestMember, images);
 		registeredProductRepository.save(createdProduct);
