@@ -36,8 +36,6 @@ public class ImmediateTradeService {
 	private final TradeProductRepository tradeProductRepository;
 	private final SuggestedProductRepository suggestedProductRepository;
 
-
-	// todo: 유저 정보를 받아와 권한 확인 로직 추가 및 수정
 	public FindImmediateTradeResDto create(CreateImmediateTradeReqDto reqDto) {
 		RegisteredProduct registeredProduct = registeredProductRepository
 			.findById(reqDto.getRegisteredProduct().getId()).orElseThrow(
@@ -118,7 +116,7 @@ public class ImmediateTradeService {
 
 		immediateTrade.validateIsSelfSuggest(member.getId());
 
-		if (!immediateTrade.validateTradeStatus(immediateTrade.getStatus())) { // PENDING 상태인 거래에만 제안 가능
+		if (!immediateTrade.validateTradeStatus(immediateTrade.getStatus())) {
 			throw new IllegalStateException("해당 교환에 제안할 수 없습니다.");
 		}
 
@@ -129,7 +127,7 @@ public class ImmediateTradeService {
 				() -> new IllegalArgumentException("제안 상품을 찾을 수 없습니다.")
 			);
 
-			if (!suggestedProduct.validateProductStatus(suggestedProduct.getStatus())) { // PENDING 상태인 물품으로만 제안 가능
+			if (!suggestedProduct.validateProductStatus(suggestedProduct.getStatus())) {
 				throw new IllegalArgumentException("해당 상품으로 제안하실 수 없습니다.");
 			}
 
