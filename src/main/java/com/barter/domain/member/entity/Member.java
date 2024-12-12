@@ -3,6 +3,7 @@ package com.barter.domain.member.entity;
 import com.barter.domain.BaseTimeStampEntity;
 import com.barter.domain.member.enums.JoinPath;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -24,6 +25,7 @@ public class Member extends BaseTimeStampEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	@Column(unique = true)
 	private String email;
 	private String nickname;
 	private String password;
@@ -42,6 +44,15 @@ public class Member extends BaseTimeStampEntity {
 		this.oauthId = oauthId;
 		this.profileImage = profileImage;
 		this.joinPath = joinPath;
+	}
+
+	public static Member createBasicMember(String email, String hashedPassword, String nickname) {
+		return Member.builder()
+			.email(email)
+			.password(hashedPassword)
+			.nickname(nickname)
+			.joinPath(JoinPath.BASIC)
+			.build();
 	}
 
 	public boolean isEqualsId(Long userId) {
