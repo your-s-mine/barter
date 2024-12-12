@@ -23,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.product.dto.request.CreateSuggestedProductReqDto;
-import com.barter.domain.product.dto.request.DeleteSuggestedProductReqDto;
 import com.barter.domain.product.dto.request.SwitchSuggestedProductReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductInfoReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductStatusReqDto;
@@ -91,12 +90,12 @@ public class SuggestedProductController {
 		suggestedProductService.updateSuggestedProductStatus(request, verifiedMember.getId());
 	}
 
-	// 제안 물품을 삭제하는 API 의 경우, 현재 RequestBody 로 요청 파라미터를 전달 받습니다.
-	// 하지만 인증/인가 구현이후 RequestBody 가 아닌 Path Parameter 로 대상 제안 물품의 ID 를 전달 받도록 수정할 생각입니다.
-	@DeleteMapping
+	@DeleteMapping("/{suggestedProductId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void deleteSuggestedProduct(@RequestBody @Valid DeleteSuggestedProductReqDto request) {
-		suggestedProductService.deleteSuggestedProduct(request);
+	public void deleteSuggestedProduct(
+		@PathVariable(name = "suggestedProductId") Long suggestedProductId, VerifiedMember verifiedMember
+	) {
+		suggestedProductService.deleteSuggestedProduct(suggestedProductId, verifiedMember.getId());
 	}
 
 	@PostMapping("/switch")
