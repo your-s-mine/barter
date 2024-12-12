@@ -11,6 +11,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.barter.domain.notification.SseEmitters;
 import com.barter.domain.notification.dto.request.UpdateNotificationStatusReqDto;
+import com.barter.domain.notification.dto.request.DeleteNotificationReqDto;
 import com.barter.domain.notification.dto.response.FindNotificationResDto;
 import com.barter.domain.notification.entity.Notification;
 import com.barter.domain.notification.respository.NotificationRepository;
@@ -73,5 +74,19 @@ public class NotificationService {
 
 		foundNotification.updateStatus();
 		notificationRepository.save(foundNotification);
+	}
+
+	// 인증/인가 구현 이후에는 DTO 가 아닌 검증 회원 ID 와 알림 ID, 2개의 파라미터를 전달받을 계획입니다.
+	@Transactional
+	public void deleteNotification(DeleteNotificationReqDto request) {
+		Notification foundNotification = notificationRepository.findById(request.getNotificationId())
+			.orElseThrow(() -> new IllegalArgumentException("Notification not found"));
+
+		if (!Objects.equals(request.getMemberId(), foundNotification.getMemberId())) {
+			throw new IllegalArgumentException("삭제 권한이 없습니다.");
+		}
+
+		foundNotification.checkPossibleDelete();
+		notificationRepository.delete(foundNotification);
 	}
 }
