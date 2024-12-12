@@ -13,6 +13,7 @@ import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.entity.TradeProduct;
+import com.barter.domain.product.enums.RegisteredStatus;
 import com.barter.domain.product.enums.SuggestedStatus;
 import com.barter.domain.product.enums.TradeType;
 import com.barter.domain.product.repository.RegisteredProductRepository;
@@ -67,7 +68,7 @@ public class PeriodTradeService {
 			registeredProduct,
 			reqDto.getEndedAt());
 
-		registeredProduct.updateStatus("REGISTERING");
+		registeredProduct.updateStatus(RegisteredStatus.REGISTERING.toString());
 		periodTrade.validateIsExceededMaxEndDate();
 
 		periodTradeRepository.save(periodTrade);
@@ -116,7 +117,7 @@ public class PeriodTradeService {
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
 
-		periodTrade.updateRegisteredProduct("PENDING");
+		periodTrade.updateRegisteredProduct(RegisteredStatus.PENDING);
 
 		periodTrade.validateAuthority(member.getId());
 		periodTrade.validateIsCompleted();
@@ -189,7 +190,7 @@ public class PeriodTradeService {
 			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId())) {
 				suggestedProduct.changStatusAccepted();
 				periodTrade.getRegisteredProduct()
-					.updateStatus("ACCEPTED");// enum 타입이 아니어도 검증 로직이 구현되어 있기 때문에 일단 이렇게 구현함
+					.updateStatus(RegisteredStatus.ACCEPTED.toString());// enum 타입이 아니어도 검증 로직이 구현되어 있기 때문에 일단 이렇게 구현함
 			}
 
 			// 한 교환에 대해서 여러번의 교환은 불가능 (회의 때 말한 같은 물건으로 여러번 다른 교환 시도 방지 위함)
@@ -220,7 +221,7 @@ public class PeriodTradeService {
 			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId())) {
 				suggestedProduct.changStatusPending();
 				periodTrade.getRegisteredProduct()
-					.updateStatus("PENDING");
+					.updateStatus(RegisteredStatus.PENDING.toString());
 			}
 
 		}
