@@ -50,6 +50,16 @@ public class NotificationController {
 		return notificationService.findActivityNotifications(pageable);
 	}
 
+	@GetMapping("/keyword")
+	@ResponseStatus(HttpStatus.OK)
+	public PagedModel<FindNotificationResDto> findKeywordNotifications(
+		@PageableDefault(sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable
+	) {
+		// 인증/인가 파트 구현이 끝난다면, 'NOTIFICATIONS' 테이블에서 요청 회원의 키워드 알림들을 조회하도록 할 것 같습니다.
+
+		return notificationService.findKeywordNotifications(pageable);
+	}
+
 	@PatchMapping("/status")
 	@ResponseStatus(HttpStatus.OK)
 	public void updateNotificationStatus(@RequestBody @Valid UpdateNotificationStatusReqDto request) {

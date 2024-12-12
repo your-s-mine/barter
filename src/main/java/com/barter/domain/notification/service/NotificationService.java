@@ -53,6 +53,14 @@ public class NotificationService {
 		return new PagedModel<>(foundNotifications);
 	}
 
+	// 인증/인가 구현되면 요청 회원의 '키워드 알림 목록' 만 조회하도록 수정할 것 입니다.
+	public PagedModel<FindNotificationResDto> findKeywordNotifications(Pageable pageable) {
+		Page<FindNotificationResDto> foundNotifications = notificationRepository.findAllKeywordNotification(pageable)
+			.map(FindNotificationResDto::from);
+
+		return new PagedModel<>(foundNotifications);
+	}
+
 	// 인증/인가 구현되면 RequestBody 가 아닌 파라미터로 전달된 요청 회원 정보로 알림 대상인지 확인할 계획입니다.
 	@Transactional
 	public void updateNotificationStatus(UpdateNotificationStatusReqDto request) {
