@@ -70,10 +70,12 @@ public class RegisteredProductController {
 
 	@PatchMapping
 	@ResponseStatus(HttpStatus.OK)
-	public void updateRegisteredProductInfo(@RequestBody @Valid UpdateRegisteredProductInfoReqDto request) {
-		// 현재 인증/인가 파트의 구현이 완료되지 않아 요청 회원의 정보가 전달된다는 가정하에 작성하여 추후 수정이 필요함
-
-		registeredProductService.updateRegisteredProductInfo(request);
+	public void updateRegisteredProductInfo(
+		@RequestPart(name = "request") @Valid UpdateRegisteredProductInfoReqDto request,
+		@RequestPart(required = false, name = "multipartFiles") List<MultipartFile> multipartFiles,
+		VerifiedMember verifiedMember
+	) {
+		registeredProductService.updateRegisteredProductInfo(request, multipartFiles, verifiedMember.getId());
 	}
 
 	@PatchMapping("/status")

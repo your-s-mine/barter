@@ -80,14 +80,19 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 		}
 	}
 
-	public void updateInfo(UpdateRegisteredProductInfoReqDto request) {
+	public void checkPossibleUpdate() {
 		if (this.status != RegisteredStatus.PENDING) {
 			throw new IllegalArgumentException("PENDING 상태인 경우에만 등록 물품을 수정할 수 있습니다.");
 		}
+	}
 
+	public void updateInfo(UpdateRegisteredProductInfoReqDto request) {
 		this.name = request.getName();
 		this.description = request.getDescription();
-		// this.images = request.getImages();  등록 상품 정보 수정 리팩토링시 해결할 계획입니다.
+	}
+
+	public void updateImages(List<String> images) {
+		this.images = images;
 	}
 
 	public void updateStatus(String status) {
