@@ -11,4 +11,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
 	@Query(value = "SELECT n FROM Notification AS n WHERE n.notificationType = 'ACTIVITY'")
 	Page<Notification> findAllActivityNotification(Pageable pageable);
+
+	@Query(value = "SELECT n FROM Notification AS n WHERE n.notificationType = 'KEYWORD'")
+	Page<Notification> findAllKeywordNotification(Pageable pageable);
 }
