@@ -51,9 +51,9 @@ public class SuggestedProductService {
 		return FindSuggestedProductResDto.from(foundProduct);
 	}
 
-	// 인증/인가 구현되면 요청 회원이 생성한 '등록 물품들만' 조회하도록 수정할 것으로 보입니다.
-	public PagedModel<FindSuggestedProductResDto> findSuggestedProducts(Pageable pageable) {
-		Page<FindSuggestedProductResDto> foundProducts = suggestedProductRepository.findAll(pageable)
+	public PagedModel<FindSuggestedProductResDto> findSuggestedProducts(Pageable pageable, Long verifiedMemberId) {
+		Page<FindSuggestedProductResDto> foundProducts = suggestedProductRepository
+			.findAllByMemberId(pageable, verifiedMemberId)
 			.map(FindSuggestedProductResDto::from);
 
 		return new PagedModel<>(foundProducts);
