@@ -1,3 +1,4 @@
+/*
 package com.barter;
 
 import org.springframework.context.annotation.Bean;
@@ -13,3 +14,4 @@ public class TestConfig {
         return new BCryptPasswordEncoder();
     }
 }
+*/
