@@ -111,12 +111,12 @@ public class ImmediateTradeService {
 	}
 
 	@Transactional
-	public String createTradeSuggest(Long tradeId, CreateTradeSuggestProductReqDto reqDto) {
-
-		// todo: 유저 정보를 받아와 권한 확인 로직 추가 및 수정 ex - 본인이 등록한 교환에 제안 불가
+	public String createTradeSuggest(Long tradeId, CreateTradeSuggestProductReqDto reqDto, VerifiedMember member) {
 
 		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
+
+		immediateTrade.validateIsSelfSuggest(member.getId());
 
 		if (!immediateTrade.validateTradeStatus(immediateTrade.getStatus())) { // PENDING 상태인 거래에만 제안 가능
 			throw new IllegalStateException("해당 교환에 제안할 수 없습니다.");

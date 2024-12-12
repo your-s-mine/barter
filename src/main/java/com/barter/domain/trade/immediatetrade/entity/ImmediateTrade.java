@@ -81,4 +81,9 @@ public class ImmediateTrade extends BaseTimeStampEntity {
 		}
 	}
 
+	public void validateIsSelfSuggest(Long userId) {
+		if (this.product.getMember().getId().equals(userId)) {
+			throw new IllegalArgumentException("본인이 등록한 물품에 교환을 제안할 수 없습니다.");
+		}
+	}
 }

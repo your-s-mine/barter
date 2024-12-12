@@ -62,8 +62,8 @@ public class ImmediateTradeController {
 
 	@PostMapping("/{tradeId}/suggest")
 	public ResponseEntity<String> createSuggest(@PathVariable Long tradeId,
-		@RequestBody @Valid CreateTradeSuggestProductReqDto reqDto) {
-		return new ResponseEntity<>(immediateTradeService.createTradeSuggest(tradeId, reqDto), HttpStatus.CREATED);
+		@RequestBody @Valid CreateTradeSuggestProductReqDto reqDto, VerifiedMember member) {
+		return new ResponseEntity<>(immediateTradeService.createTradeSuggest(tradeId, reqDto, member), HttpStatus.CREATED);
 	}
 
 	@PatchMapping("/{tradeId}/acceptance")
