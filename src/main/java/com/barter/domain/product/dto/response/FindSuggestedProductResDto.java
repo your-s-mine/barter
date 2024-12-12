@@ -23,7 +23,7 @@ public class FindSuggestedProductResDto {
 			.id(product.getId())
 			.name(product.getName())
 			.description(product.getDescription())
-			.images(product.getImages())
+			// .images(product.getImages())
 			.createdAt(product.getCreatedAt())
 			.status(product.getStatus().name())
 			.build();
