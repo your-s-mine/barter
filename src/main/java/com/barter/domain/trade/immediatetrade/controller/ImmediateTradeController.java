@@ -44,15 +44,15 @@ public class ImmediateTradeController {
 		return new ResponseEntity<>(immediateTradeService.find(tradeId), HttpStatus.OK);
 	}
 
+	@GetMapping("")
+	public ResponseEntity<PagedModel<FindImmediateTradeResDto>> findImmediateTrades(@PageableDefault Pageable pageable) {
+		return new ResponseEntity<>(immediateTradeService.findImmediateTrades(pageable), HttpStatus.OK);
+	}
+
 	@PatchMapping("/{tradeId}")
 	public ResponseEntity<FindImmediateTradeResDto> update(@PathVariable Long tradeId,
 		@RequestBody @Valid UpdateImmediateTradeReqDto reqDto, VerifiedMember member) throws IllegalAccessException {
 		return new ResponseEntity<>(immediateTradeService.update(member, tradeId, reqDto), HttpStatus.OK);
-	}
-
-	@GetMapping("")
-	public ResponseEntity<PagedModel<FindImmediateTradeResDto>> findImmediateTrades(@PageableDefault Pageable pageable) {
-		return new ResponseEntity<>(immediateTradeService.findImmediateTrades(pageable), HttpStatus.OK);
 	}
 
 	@DeleteMapping("/{tradeId}")
