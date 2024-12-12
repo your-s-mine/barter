@@ -84,14 +84,23 @@ public class SuggestedProduct extends BaseTimeStampEntity {
 		this.status = SuggestedStatus.ACCEPTED;
 	}
 
-	public void updateInfo(UpdateSuggestedProductInfoReqDto request) {
+	public void checkPossibleUpdate() {
 		if (this.status != SuggestedStatus.PENDING) {
 			throw new IllegalArgumentException("PENDING 상태인 경우에만 제안 물품을 수정할 수 있습니다.");
 		}
+	}
 
+	public void updateInfo(UpdateSuggestedProductInfoReqDto request) {
 		this.name = request.getName();
 		this.description = request.getDescription();
-		// this.images = request.getImages();
+	}
+
+	public void deleteImages(List<String> images) {
+		this.images.removeAll(images);
+	}
+
+	public void updateImages(List<String> images) {
+		this.images.addAll(images);
 	}
 
 	public void updateStatus(String status) {

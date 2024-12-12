@@ -1,6 +1,8 @@
 package com.barter.domain.product.controller;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -70,10 +72,14 @@ public class SuggestedProductController {
 
 	@PatchMapping
 	@ResponseStatus(HttpStatus.OK)
-	public void updateSuggestedProductInfo(@RequestBody @Valid UpdateSuggestedProductInfoReqDto request) {
-		// 현재 인증/인가 파트의 구현이 완료되지 않아 요청 회원의 정보가 전달된다는 가정하에 작성하여 추후 수정이 필요함
-
-		suggestedProductService.updateSuggestedProductInfo(request);
+	public void updateSuggestedProductInfo(
+		@RequestPart(name = "request") @Valid UpdateSuggestedProductInfoReqDto request,
+		@RequestPart(required = false, name = "multipartFiles") List<MultipartFile> multipartFiles,
+		VerifiedMember verifiedMember
+	) {
+		suggestedProductService.updateSuggestedProductInfo(
+			request, Objects.requireNonNullElseGet(multipartFiles, ArrayList::new), verifiedMember.getId()
+		);
 	}
 
 	@PatchMapping("/status")
