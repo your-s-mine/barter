@@ -3,6 +3,7 @@ package com.barter.domain.member.entity;
 import com.barter.domain.BaseTimeStampEntity;
 import com.barter.domain.member.enums.JoinPath;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -24,6 +25,7 @@ public class Member extends BaseTimeStampEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	@Column(unique = true)
 	private String email;
 	private String nickname;
 	private String password;
