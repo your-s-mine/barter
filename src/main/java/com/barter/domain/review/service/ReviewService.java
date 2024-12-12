@@ -1,6 +1,9 @@
 package com.barter.domain.review.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.barter.domain.product.entity.TradeProduct;
@@ -52,5 +55,14 @@ public class ReviewService {
 
         // 저장 및 ReviewResponseDto 반환
         return ReviewResponseDto.from(reviewRepository.save(review));
+    }
+    @Transactional(readOnly = true)
+    public List<ReviewResponseDto> getMyReputationReviews(VerifiedMember verifiedMember) {
+        // 나의 평판(리뷰) 조회
+        List<Review> reviews = reviewRepository.findByRevieweeId(verifiedMember.getId());
+
+        return reviews.stream()
+                .map(ReviewResponseDto::from)
+                .collect(Collectors.toList());
     }
 }
