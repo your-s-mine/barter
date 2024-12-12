@@ -139,14 +139,13 @@ public class PeriodTradeService {
 	}
 
 	@Transactional
-	public StatusUpdateResDto updatePeriodTradeStatus(Long id, StatusUpdateReqDto reqDto) {
-		Long userId = 1L;
+	public StatusUpdateResDto updatePeriodTradeStatus(Member member, Long id, StatusUpdateReqDto reqDto) {
 
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
 
-		periodTrade.validateAuthority(userId); // 교환 (게시글)의 주인만 변경 가능
+		periodTrade.validateAuthority(member.getId()); // 교환 (게시글)의 주인만 변경 가능
 		periodTrade.validateIsCompleted(); // 이미 완료된 교환 건은 수정 불가
 		boolean isStatusUpdatable = periodTrade.updatePeriodTradeStatus(reqDto.getTradeStatus());
 		if (!isStatusUpdatable) {
