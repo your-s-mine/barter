@@ -91,8 +91,12 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 		this.description = request.getDescription();
 	}
 
+	public void deleteImages(List<String> images) {
+		this.images.removeAll(images);
+	}
+
 	public void updateImages(List<String> images) {
-		this.images = images;
+		this.images.addAll(images);
 	}
 
 	public void updateStatus(String status) {

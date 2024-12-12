@@ -70,12 +70,16 @@ public class RegisteredProductService {
 		foundProduct.checkPermission(verifiedMemberId);
 		foundProduct.checkPossibleUpdate();
 
-		// 이미지를 수정하지 않는 경우
+		if (!request.getDeleteImageNames().isEmpty()) {
+			foundProduct.deleteImages(request.getDeleteImageNames());    // 삭제 요청 이미지들 삭제
+		}
+
+		// 추가할 신규 이미지들이 있다면 S3 에 저장후 엔티티 images 에 추가
 		if (multipartFiles != null) {
-			foundProduct.getImages().forEach(s3Service::deleteFile);    // 이전 이미지 전부 삭제
-			List<String> images = s3Service.uploadFile(multipartFiles);    // 수정 이미지 전부 저장
+			List<String> images = s3Service.uploadFile(multipartFiles);
 			foundProduct.updateImages(images);
 		}
+
 		foundProduct.updateInfo(request);
 		registeredProductRepository.save(foundProduct);
 	}

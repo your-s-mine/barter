@@ -1,5 +1,7 @@
 package com.barter.domain.product.dto.request;
 
+import java.util.List;
+
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -17,4 +19,7 @@ public class UpdateRegisteredProductInfoReqDto {
 	@NotNull
 	@Size(min = 5)
 	private String description;
+
+	@NotNull
+	private List<String> deleteImageNames;
 }
