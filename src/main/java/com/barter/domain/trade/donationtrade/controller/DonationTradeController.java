@@ -47,11 +47,10 @@ public class DonationTradeController {
 
 	@PostMapping
 	public ResponseEntity<Void> createDonationTrade(
+		VerifiedMember verifiedMember,
 		@RequestBody @Valid CreateDonationTradeReqDto req
 	) {
-		// TODO: 인증된 Member 받아오는 기능 추가 필요
-		Long userId = 1L;
-		donationTradeService.createDonationTrade(userId, req);
+		donationTradeService.createDonationTrade(verifiedMember, req);
 		return ResponseEntity
 			.status(HttpStatus.CREATED)
 			.build();
@@ -62,10 +61,9 @@ public class DonationTradeController {
 		VerifiedMember verifiedMember,
 		@PathVariable("tradeId") Long tradeId
 	) {
-		Long memberId = verifiedMember.getId();
 		return ResponseEntity
 			.status(HttpStatus.OK)
-			.body(donationTradeService.suggestDonationTrade(memberId, tradeId));
+			.body(donationTradeService.suggestDonationTrade(verifiedMember, tradeId));
 	}
 
 	@PatchMapping("/{tradeId}")
@@ -74,8 +72,7 @@ public class DonationTradeController {
 		@RequestBody UpdateDonationTradeReqDto req,
 		@PathVariable("tradeId") Long tradeId
 	) {
-		Long memberId = verifiedMember.getId();
-		donationTradeService.updateDonationTrade(memberId, tradeId, req);
+		donationTradeService.updateDonationTrade(verifiedMember, tradeId, req);
 		return ResponseEntity
 			.status(HttpStatus.NO_CONTENT)
 			.build();
@@ -86,8 +83,7 @@ public class DonationTradeController {
 		VerifiedMember verifiedMember,
 		@PathVariable("tradeId") Long tradeId
 	) {
-		Long memberId = verifiedMember.getId();
-		donationTradeService.deleteDonationTrade(memberId, tradeId);
+		donationTradeService.deleteDonationTrade(verifiedMember, tradeId);
 		return ResponseEntity
 			.status(HttpStatus.NO_CONTENT)
 			.build();
