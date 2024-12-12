@@ -84,10 +84,11 @@ public class SuggestedProductController {
 
 	@PatchMapping("/status")
 	@ResponseStatus(HttpStatus.OK)
-	public void updateSuggestedProductStatus(@RequestBody @Valid UpdateSuggestedProductStatusReqDto request) {
-		// 현재 인증/인가 파트의 구현이 완료되지 않아 요청 회원의 정보가 전달된다는 가정하에 작성하여 추후 수정이 필요함
-
-		suggestedProductService.updateSuggestedProductStatus(request);
+	public void updateSuggestedProductStatus(
+		@RequestBody @Valid UpdateSuggestedProductStatusReqDto request,
+		VerifiedMember verifiedMember
+	) {
+		suggestedProductService.updateSuggestedProductStatus(request, verifiedMember.getId());
 	}
 
 	// 제안 물품을 삭제하는 API 의 경우, 현재 RequestBody 로 요청 파라미터를 전달 받습니다.

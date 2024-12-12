@@ -73,7 +73,7 @@ public class SuggestedProductService {
 		foundProduct.deleteImages(deleteImageNames);
 		ImageCountValidator.checkImageCount(foundProduct.getImages().size(), multipartFiles.size());
 		deleteImageNames.forEach(s3Service::deleteFile);
-		
+
 		if (!multipartFiles.isEmpty()) {
 			List<String> images = s3Service.uploadFile(multipartFiles);
 			foundProduct.updateImages(images);
@@ -83,15 +83,12 @@ public class SuggestedProductService {
 		suggestedProductRepository.save(foundProduct);
 	}
 
-	// SuggestedProductController 와 마찬가지로 요청 회원의 정보가 넘어와야 하므로 인증/인가 구현 완료 이후 수정이 필요함
 	@Transactional
-	public void updateSuggestedProductStatus(UpdateSuggestedProductStatusReqDto request) {
+	public void updateSuggestedProductStatus(UpdateSuggestedProductStatusReqDto request, Long verifiedMemberId) {
 		SuggestedProduct foundProduct = suggestedProductRepository.findById(request.getId())
 			.orElseThrow(() -> new IllegalArgumentException("Suggested product not found"));
 
-		if (!Objects.equals(foundProduct.getMember().getId(), request.getMemberId())) {
-			throw new IllegalArgumentException("수정 권한이 없습니다.");
-		}
+		foundProduct.checkPermission(verifiedMemberId);
 
 		foundProduct.updateStatus(request.getStatus());
 		suggestedProductRepository.save(foundProduct);
