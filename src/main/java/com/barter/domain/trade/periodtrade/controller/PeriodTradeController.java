@@ -46,7 +46,7 @@ public class PeriodTradeController {
 	public ResponseEntity<CreatePeriodTradeResDto> createPeriodTrades(
 		Member member,
 		@Valid @RequestBody CreatePeriodTradeReqDto reqDto) {
-		return ResponseEntity.status(HttpStatus.CREATED).body(periodTradeService.createPeriodTrades(member, reqDto));
+		return ResponseEntity.status(HttpStatus.CREATED).body(periodTradeService.createPeriodTrades(reqDto));
 	}
 
 	@GetMapping("/period-trades")

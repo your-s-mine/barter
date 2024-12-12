@@ -52,14 +52,14 @@ public class PeriodTradeService {
 
 	// TODO : Member 는 나중에 VerifiedMember 로 변경될 예정
 	@Transactional
-	public CreatePeriodTradeResDto createPeriodTrades(Member member, CreatePeriodTradeReqDto reqDto) {
+	public CreatePeriodTradeResDto createPeriodTrades(CreatePeriodTradeReqDto reqDto) {
 
 		RegisteredProduct registeredProduct = registeredProductRepository.findById(reqDto.getRegisteredProductId())
 			.orElseThrow(
 				() -> new IllegalArgumentException("없는 등록된 물건입니다.")
 			);
 
-		registeredProduct.validateOwner(member.getId());
+		registeredProduct.validateOwner(reqDto.getMemberId());
 
 		PeriodTrade periodTrade = PeriodTrade.createInitPeriodTrade(reqDto.getTitle(), reqDto.getDescription(),
 			registeredProduct,
