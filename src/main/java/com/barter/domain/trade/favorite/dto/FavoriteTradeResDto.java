@@ -1,7 +1,7 @@
 package com.barter.domain.trade.favorite.dto;
 
-import com.barter.domain.trade.favorite.entity.FavoriteTrade;
-import com.barter.domain.trade.enums.TradeType;
+import com.barter.domain.member.entity.FavoriteTrade;
+import com.barter.domain.trade.enums.TradeStatus;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -9,23 +9,23 @@ import lombok.Getter;
 public class FavoriteTradeResDto {
     private Long id;
     private Long memberId;
-    private TradeType tradesType;
-    private Long tradesId;
+    private TradeStatus tradeStatus; // 필드명 수정
+    private Long tradeId; // 필드명 수정
 
     @Builder
-    public FavoriteTradeResDto(Long id, Long memberId, TradeType tradesType, Long tradesId) {
+    public FavoriteTradeResDto(Long id, Long memberId, TradeStatus tradeStatus, Long tradeId) {
         this.id = id;
         this.memberId = memberId;
-        this.tradesType = tradesType;
-        this.tradesId = tradesId;
+        this.tradeStatus = tradeStatus;
+        this.tradeId = tradeId;
     }
 
     public static FavoriteTradeResDto from(FavoriteTrade favoriteTrade) {
         return FavoriteTradeResDto.builder()
                 .id(favoriteTrade.getId())
                 .memberId(favoriteTrade.getMember().getId())
-                .tradesType(favoriteTrade.getTradesType())
-                .tradesId(favoriteTrade.getTradesId())
+                .tradeStatus(favoriteTrade.getTradeStatus()) // 수정된 필드명
+                .tradeId(favoriteTrade.getTradeId()) // 수정된 필드명
                 .build();
     }
 }

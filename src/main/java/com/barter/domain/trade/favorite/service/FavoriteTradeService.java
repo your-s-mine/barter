@@ -3,11 +3,10 @@ package com.barter.domain.trade.favorite.service;
 import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.member.repository.MemberRepository;
-import com.barter.domain.trade.enums.TradeType;
 import com.barter.domain.trade.favorite.dto.CreateFavoriteTradeReqDto;
 import com.barter.domain.trade.favorite.dto.FavoriteTradeResDto;
-import com.barter.domain.trade.favorite.entity.FavoriteTrade;
 import com.barter.domain.trade.favorite.repository.FavoriteTradeRepository;
+import com.barter.domain.member.entity.FavoriteTrade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,15 +28,15 @@ public class FavoriteTradeService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         // 중복 확인
-        if (favoriteTradeRepository.existsByMemberAndTradesTypeAndTradesId(member, requestDto.getTradesType(), requestDto.getTradesId())) {
+        if (favoriteTradeRepository.existsByMemberAndTradeStatusAndTradeId(member, requestDto.getTradeStatus(), requestDto.getTradeId())) {
             throw new IllegalStateException("이미 관심 거래로 등록된 항목입니다.");
         }
 
         // 관심 거래 생성
         FavoriteTrade favoriteTrade = FavoriteTrade.builder()
                 .member(member)
-                .tradesType(requestDto.getTradesType())
-                .tradesId(requestDto.getTradesId())
+                .tradeStatus(requestDto.getTradeStatus()) // 필드명 수정
+                .tradeId(requestDto.getTradeId()) // 필드명 수정
                 .build();
 
         favoriteTradeRepository.save(favoriteTrade);
