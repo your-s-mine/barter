@@ -39,12 +39,14 @@ import com.barter.domain.trade.periodtrade.dto.request.CreatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.DenyPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.StatusUpdateReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.SuggestedPeriodTradeReqDto;
+import com.barter.domain.trade.periodtrade.dto.request.UpdatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.response.AcceptPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.CreatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.DenyPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.StatusUpdateResDto;
 import com.barter.domain.trade.periodtrade.dto.response.SuggestedPeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.response.UpdatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 import com.barter.domain.trade.periodtrade.repository.PeriodTradeRepository;
 import com.barter.event.trade.PeriodTradeEvent.PeriodTradeCloseEvent;
@@ -595,6 +597,43 @@ class PeriodTradeServiceTest {
 		verify(periodTrade, times(1)).validateAuthority(1L);
 		verify(periodTrade, times(1)).validateIsCompleted();
 		verify(periodTradeRepository, times(1)).findById(tradeId);
+	}
+
+	@Test
+	@DisplayName("기간 거래 업데이트")
+	public void 기간_거래_업데이트() {
+
+		// given
+		Long tradeId = 1L;
+		VerifiedMember member = mock(VerifiedMember.class);
+		when(member.getId()).thenReturn(1L);
+
+		String newTitle = "새 제목";
+		String newDescription = "새 설명";
+		UpdatePeriodTradeReqDto reqDto = new UpdatePeriodTradeReqDto(newTitle, newDescription);
+
+		PeriodTrade periodTrade = mock(PeriodTrade.class);
+		when(periodTrade.getId()).thenReturn(tradeId);
+
+		RegisteredProduct product = mock(RegisteredProduct.class);
+		when(product.getId()).thenReturn(100L);
+		when(periodTrade.getRegisteredProduct()).thenReturn(product);
+
+		when(periodTradeRepository.findById(tradeId)).thenReturn(Optional.of(periodTrade));
+
+		doNothing().when(periodTrade).validateAuthority(1L);
+		doNothing().when(periodTrade).validateIsCompleted();
+
+		// when
+		UpdatePeriodTradeResDto result = periodTradeService.updatePeriodTrade(member, tradeId, reqDto);
+
+		// then
+
+		verify(periodTradeRepository, times(1)).findById(tradeId);
+		verify(periodTrade, times(1)).validateAuthority(1L);
+		verify(periodTrade, times(1)).validateIsCompleted();
+		verify(periodTrade, times(1)).update(newTitle, newDescription);
+
 	}
 
 }
