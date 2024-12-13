@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +16,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 
 import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.member.entity.Member;
@@ -29,6 +34,7 @@ import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.repository.SuggestedProductRepository;
 import com.barter.domain.product.repository.TradeProductRepository;
 import com.barter.domain.trade.periodtrade.dto.request.AcceptPeriodTradeReqDto;
+import com.barter.domain.trade.enums.TradeStatus;
 import com.barter.domain.trade.periodtrade.dto.request.CreatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.DenyPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.SuggestedPeriodTradeReqDto;
@@ -36,6 +42,7 @@ import com.barter.domain.trade.periodtrade.dto.response.AcceptPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.CreatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.DenyPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.SuggestedPeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 import com.barter.domain.trade.periodtrade.repository.PeriodTradeRepository;
 import com.barter.event.trade.PeriodTradeEvent.PeriodTradeCloseEvent;
@@ -442,6 +449,94 @@ class PeriodTradeServiceTest {
 		verify(suggestedProduct1, times(1)).changStatusPending();
 		verify(suggestedProduct2, times(1)).changStatusPending();
 
+	}
+
+	// -----------------------------------------------------------------
+	@Test
+	@DisplayName("기간 교환 다건 조회")
+	public void 기간_교환_다건_조회() {
+
+		//given
+		Pageable pageable = PageRequest.of(0, 10);
+
+		PeriodTrade periodTrade = PeriodTrade.builder()
+			.title("test title")
+			.description("test description")
+			.status(TradeStatus.PENDING)
+			.product(registeredProduct)
+			.viewCount(0)
+			.endedAt(LocalDateTime.now().plusDays(5))
+			.build();
+
+		FindPeriodTradeResDto resDto1 = FindPeriodTradeResDto.from(periodTrade);
+		FindPeriodTradeResDto resDto2 = FindPeriodTradeResDto.from(periodTrade);
+
+		List<FindPeriodTradeResDto> tradeList = Arrays.asList(resDto1, resDto2);
+
+		Page mockPage = mock(Page.class);
+		when(mockPage.getContent()).thenReturn(tradeList);
+		when(periodTradeRepository.findAll(pageable)).thenReturn(mockPage);
+		when(mockPage.map(any())).thenReturn(mockPage);
+
+		// when
+		PagedModel<FindPeriodTradeResDto> result = periodTradeService.findPeriodTrades(pageable);
+
+		// then
+		assertThat(result).isNotNull();
+		assertThat(result.getContent()).hasSize(2);
+		assertThat(result.getContent()).containsExactly(resDto1, resDto2);
+		verify(periodTradeRepository, times(1)).findAll(pageable);
+		verify(mockPage, times(1)).map(any());
+
+	}
+
+	@Test
+	@DisplayName("기간 교환 단건 조회")
+	public void 기간_교환_단건_조회() {
+
+		// given
+		Long id = 1L;
+
+		PeriodTrade periodTrade = PeriodTrade.builder()
+			.title("test title")
+			.description("test description")
+			.status(TradeStatus.PENDING)
+			.product(registeredProduct)
+			.viewCount(0)
+			.endedAt(LocalDateTime.now().plusDays(5))
+			.build();
+
+		FindPeriodTradeResDto resDto = FindPeriodTradeResDto.from(periodTrade);
+
+		when(periodTradeRepository.findById(id)).thenReturn(Optional.of(periodTrade));
+
+		// when
+		FindPeriodTradeResDto result = periodTradeService.findPeriodTradeById(id);
+
+		// then
+		assertThat(result).isNotNull();
+		assertThat(result.getTitle()).isEqualTo(resDto.getTitle());
+		assertThat(periodTrade.getViewCount()).isEqualTo(1);
+		verify(periodTradeRepository, times(1)).findById(id);
+
+	}
+
+	@Test
+	@DisplayName("기간 거래 조회 시 없는 경우 예외")
+	public void 기간_거래_조회_시_없는_경우_예외() {
+		// given
+
+		Long id = 1L;
+
+		when(periodTradeRepository.findById(id)).thenThrow(
+			new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
+		);
+
+		// when & then
+		assertThatThrownBy(() -> periodTradeService.findPeriodTradeById(id))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("해당하는 기간 거래를 찾을 수 없습니다.");
+		verify(periodTradeRepository, times(1)).findById(id);
 	}
 
 }
