@@ -82,4 +82,10 @@ public class Notification extends BaseTimeStampEntity {
 			throw new IllegalArgumentException("읽은 상태의 알람만 삭제할 수 있습니다.");
 		}
 	}
+
+	public void checkPermission(Long memberId) {
+		if (!this.memberId.equals(memberId)) {
+			throw new IllegalArgumentException("권한이 없습니다.");
+		}
+	}
 }
