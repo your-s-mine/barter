@@ -11,7 +11,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.barter.domain.notification.SseEmitters;
 import com.barter.domain.notification.dto.request.DeleteNotificationReqDto;
-import com.barter.domain.notification.dto.request.UpdateNotificationStatusReqDto;
 import com.barter.domain.notification.dto.response.FindNotificationResDto;
 import com.barter.domain.notification.entity.Notification;
 import com.barter.domain.notification.respository.NotificationRepository;
@@ -62,15 +61,12 @@ public class NotificationService {
 		return new PagedModel<>(foundNotifications);
 	}
 
-	// 인증/인가 구현되면 RequestBody 가 아닌 파라미터로 전달된 요청 회원 정보로 알림 대상인지 확인할 계획입니다.
 	@Transactional
-	public void updateNotificationStatus(UpdateNotificationStatusReqDto request) {
-		Notification foundNotification = notificationRepository.findById(request.getNotificationId())
+	public void updateNotificationStatus(Long notificationId, Long verifiedMemberId) {
+		Notification foundNotification = notificationRepository.findById(notificationId)
 			.orElseThrow(() -> new IllegalArgumentException("Notification not found"));
 
-		if (!Objects.equals(foundNotification.getMemberId(), request.getMemberId())) {
-			throw new IllegalArgumentException("수정 권한이 없습니다.");
-		}
+		foundNotification.checkPermission(verifiedMemberId);
 
 		foundNotification.updateStatus();
 		notificationRepository.save(foundNotification);
