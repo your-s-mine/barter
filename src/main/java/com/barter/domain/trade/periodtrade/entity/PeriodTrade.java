@@ -42,12 +42,13 @@ public class PeriodTrade extends BaseTimeStampEntity {
 	private LocalDateTime endedAt;
 
 	@Builder
-	public PeriodTrade(String title, String description, RegisteredProduct product, TradeStatus status,
+	public PeriodTrade(Long id, String title, String description, RegisteredProduct registeredProduct,
+		TradeStatus status,
 		int viewCount, LocalDateTime endedAt) {
-
+		this.id = id;
 		this.title = title;
 		this.description = description;
-		this.registeredProduct = product;
+		this.registeredProduct = registeredProduct;
 		this.status = status;
 		this.viewCount = viewCount;
 		this.endedAt = endedAt;
@@ -60,7 +61,7 @@ public class PeriodTrade extends BaseTimeStampEntity {
 		return PeriodTrade.builder()
 			.title(title)
 			.description(description)
-			.product(product)
+			.registeredProduct(product)
 			.status(TradeStatus.PENDING)
 			.viewCount(0)
 			.endedAt(endedAt)

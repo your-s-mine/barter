@@ -467,7 +467,7 @@ class PeriodTradeServiceTest {
 			.title("test title")
 			.description("test description")
 			.status(TradeStatus.PENDING)
-			.product(registeredProduct)
+			.registeredProduct(registeredProduct)
 			.viewCount(0)
 			.endedAt(LocalDateTime.now().plusDays(5))
 			.build();
@@ -505,7 +505,7 @@ class PeriodTradeServiceTest {
 			.title("test title")
 			.description("test description")
 			.status(TradeStatus.PENDING)
-			.product(registeredProduct)
+			.registeredProduct(registeredProduct)
 			.viewCount(0)
 			.endedAt(LocalDateTime.now().plusDays(5))
 			.build();
@@ -612,27 +612,25 @@ class PeriodTradeServiceTest {
 		String newDescription = "새 설명";
 		UpdatePeriodTradeReqDto reqDto = new UpdatePeriodTradeReqDto(newTitle, newDescription);
 
-		PeriodTrade periodTrade = mock(PeriodTrade.class);
-		when(periodTrade.getId()).thenReturn(tradeId);
-
-		RegisteredProduct product = mock(RegisteredProduct.class);
-		when(product.getId()).thenReturn(100L);
-		when(periodTrade.getRegisteredProduct()).thenReturn(product);
+		PeriodTrade periodTrade = PeriodTrade.builder()
+			.id(1L)
+			.title("title")
+			.description("description")
+			.registeredProduct(registeredProduct)
+			.status(TradeStatus.PENDING)
+			.viewCount(0)
+			.build();
 
 		when(periodTradeRepository.findById(tradeId)).thenReturn(Optional.of(periodTrade));
-
-		doNothing().when(periodTrade).validateAuthority(1L);
-		doNothing().when(periodTrade).validateIsCompleted();
 
 		// when
 		UpdatePeriodTradeResDto result = periodTradeService.updatePeriodTrade(member, tradeId, reqDto);
 
 		// then
 
+		assertThat(result.getTitle()).isEqualTo("새 제목");
+		assertThat(periodTrade.getDescription()).isEqualTo("새 설명");
 		verify(periodTradeRepository, times(1)).findById(tradeId);
-		verify(periodTrade, times(1)).validateAuthority(1L);
-		verify(periodTrade, times(1)).validateIsCompleted();
-		verify(periodTrade, times(1)).update(newTitle, newDescription);
 
 	}
 
