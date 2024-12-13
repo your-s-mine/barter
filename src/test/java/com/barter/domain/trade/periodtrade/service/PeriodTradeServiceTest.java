@@ -33,16 +33,18 @@ import com.barter.domain.product.enums.TradeType;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.repository.SuggestedProductRepository;
 import com.barter.domain.product.repository.TradeProductRepository;
-import com.barter.domain.trade.periodtrade.dto.request.AcceptPeriodTradeReqDto;
 import com.barter.domain.trade.enums.TradeStatus;
+import com.barter.domain.trade.periodtrade.dto.request.AcceptPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.CreatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.DenyPeriodTradeReqDto;
+import com.barter.domain.trade.periodtrade.dto.request.StatusUpdateReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.SuggestedPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.response.AcceptPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.CreatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.DenyPeriodTradeResDto;
-import com.barter.domain.trade.periodtrade.dto.response.SuggestedPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.response.StatusUpdateResDto;
+import com.barter.domain.trade.periodtrade.dto.response.SuggestedPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 import com.barter.domain.trade.periodtrade.repository.PeriodTradeRepository;
 import com.barter.event.trade.PeriodTradeEvent.PeriodTradeCloseEvent;
@@ -537,6 +539,37 @@ class PeriodTradeServiceTest {
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining("해당하는 기간 거래를 찾을 수 없습니다.");
 		verify(periodTradeRepository, times(1)).findById(id);
+	}
+
+	@Test
+	@DisplayName("기간 교환 상태 변경")
+	public void 기간_교환_상태_변경() {
+
+		// given
+		Long tradeId = 1L;
+
+		PeriodTrade periodTrade = mock(PeriodTrade.class);
+		when(periodTrade.getId()).thenReturn(tradeId);
+		when(periodTrade.getStatus()).thenReturn(TradeStatus.PENDING);
+
+		StatusUpdateReqDto reqDto = new StatusUpdateReqDto(TradeStatus.CLOSED);
+
+		when(periodTradeRepository.findById(tradeId)).thenReturn(Optional.of(periodTrade));
+
+		doNothing().when(periodTrade).validateAuthority(1L);
+		doNothing().when(periodTrade).validateIsCompleted();
+
+		when(periodTrade.updatePeriodTradeStatus(TradeStatus.CLOSED)).thenReturn(true);
+
+		// when
+		StatusUpdateResDto result = periodTradeService.updatePeriodTradeStatus(verifiedMember, tradeId, reqDto);
+
+		// then
+		verify(periodTradeRepository, times(1)).findById(tradeId);
+		verify(periodTrade, times(1)).validateAuthority(1L);
+		verify(periodTrade, times(1)).validateIsCompleted();
+		verify(periodTrade, times(1)).updatePeriodTradeStatus(TradeStatus.CLOSED);
+
 	}
 
 }
