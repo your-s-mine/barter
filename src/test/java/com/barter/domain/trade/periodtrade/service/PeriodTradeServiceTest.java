@@ -267,6 +267,31 @@ class PeriodTradeServiceTest {
 	@DisplayName("기간 교환 단건 조회")
 	public void 기간_교환_단건_조회() {
 
+		// given
+		Long id = 1L;
+
+		PeriodTrade periodTrade = PeriodTrade.builder()
+			.title("test title")
+			.description("test description")
+			.status(TradeStatus.PENDING)
+			.product(registeredProduct)
+			.viewCount(0)
+			.endedAt(LocalDateTime.now().plusDays(5))
+			.build();
+
+		FindPeriodTradeResDto resDto = FindPeriodTradeResDto.from(periodTrade);
+
+		when(periodTradeRepository.findById(id)).thenReturn(Optional.of(periodTrade));
+
+		// when
+		FindPeriodTradeResDto result = periodTradeService.findPeriodTradeById(id);
+
+		// then
+		assertThat(result).isNotNull();
+		assertThat(result.getTitle()).isEqualTo(resDto.getTitle());
+		assertThat(periodTrade.getViewCount()).isEqualTo(1);
+		verify(periodTradeRepository, times(1)).findById(id);
+
 	}
 
 }
