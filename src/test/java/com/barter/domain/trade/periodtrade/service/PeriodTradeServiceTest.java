@@ -172,6 +172,28 @@ class PeriodTradeServiceTest {
 	}
 
 	@Test
+	@DisplayName("기간 교환 생성 시 이전 날짜 날짜 등록")
+	public void 기간_교환_생성_시_이전_날짜_등록() {
+
+		// given
+		CreatePeriodTradeReqDto reqDto = CreatePeriodTradeReqDto.builder()
+			.title("test title")
+			.description("test description")
+			.registeredProductId(registeredProduct.getId())
+			.endedAt(LocalDateTime.now().minusDays(1)) // 현재 보다 이전
+			.build();
+
+		when(registeredProductRepository.findById(reqDto.getRegisteredProductId()))
+			.thenReturn(Optional.of(registeredProduct));
+
+		// when &
+		assertThatThrownBy(() -> periodTradeService.createPeriodTrades(verifiedMember, reqDto))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("현재 시간보다 적은 시간 예약은 불가능 합니다.");
+
+	}
+
+	@Test
 	@DisplayName("기간 교환 생성 시 이미 다른 교환에 등록 중인 상품 등록")
 	public void 기간_교환_생성_시_이미_다른_교환에_등록_중인_상품_등록() {
 
