@@ -86,10 +86,6 @@ public class ImmediateTradeService {
 				() -> new IllegalArgumentException("등록 물품을 찾을 수 없습니다.")
 			);
 
-		if (registeredProduct.getMember().getId() == immediateTrade.getProduct().getMember().getId()) {
-			throw new IllegalAccessException("등록한 사람만이 수정할 수 있습니다");
-		}
-
 		immediateTrade.update(reqDto);
 
 		ImmediateTrade updatedTrade = immediateTradeRepository.save(immediateTrade);
@@ -134,6 +130,7 @@ public class ImmediateTradeService {
 			suggestedProduct.changStatusSuggesting();
 
 			TradeProduct tradeProduct = TradeProduct.builder()
+				.tradeId(tradeId)
 				.suggestedProduct(suggestedProduct)
 				.tradeType(TradeType.IMMEDIATE)
 				.build();
@@ -194,7 +191,7 @@ public class ImmediateTradeService {
 
 		immediateTrade.validateAuthority(member.getId());
 
-		if (!(immediateTrade.isCompleted())) {
+		if ((immediateTrade.isCompleted())) {
 			throw new IllegalStateException("교환이 완료된 건에 대해서는 상태 변경을 할 수 없습니다.");
 		}
 
