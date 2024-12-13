@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SseEmitters {
 
 	private final Map<Long, SseEmitter> emitterMap = new ConcurrentHashMap<>();
-	private static final long TIMEOUT = 10 * 1000;
+	private static final long TIMEOUT = 60 * 60 * 1000;
 
 	public SseEmitter saveEmitter(Long memberId) {
 		SseEmitter emitter = new SseEmitter(TIMEOUT);
