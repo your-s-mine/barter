@@ -130,6 +130,7 @@ public class ImmediateTradeService {
 			suggestedProduct.changStatusSuggesting();
 
 			TradeProduct tradeProduct = TradeProduct.builder()
+				.tradeId(tradeId)
 				.suggestedProduct(suggestedProduct)
 				.tradeType(TradeType.IMMEDIATE)
 				.build();
