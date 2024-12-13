@@ -9,9 +9,11 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
 import com.barter.domain.auth.dto.VerifiedMember;
@@ -26,6 +28,7 @@ import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 import com.barter.domain.trade.periodtrade.repository.PeriodTradeRepository;
 import com.barter.event.trade.PeriodTradeEvent.PeriodTradeCloseEvent;
 
+@ExtendWith(MockitoExtension.class)
 class PeriodTradeServiceTest {
 
 	@InjectMocks
@@ -45,8 +48,6 @@ class PeriodTradeServiceTest {
 
 	@BeforeEach
 	void setUp() {
-
-		MockitoAnnotations.openMocks(this);
 
 		verifiedMember = new VerifiedMember(1L, "test@email.com");
 
@@ -93,5 +94,9 @@ class PeriodTradeServiceTest {
 		verify(periodTradeRepository).save(any(PeriodTrade.class));
 		verify(eventPublisher).publishEvent(any(PeriodTradeCloseEvent.class));
 	}
+
+
+	@Test
+
 
 }
