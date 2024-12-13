@@ -1,4 +1,4 @@
-package com.barter.domain.trade.immediatetrade.service;
+package com.barter.domain.trade.immediatetrade;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -14,11 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedModel;
 
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
@@ -27,14 +22,15 @@ import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.repository.SuggestedProductRepository;
 import com.barter.domain.product.repository.TradeProductRepository;
 import com.barter.domain.trade.enums.TradeStatus;
-import com.barter.domain.trade.immediatetrade.service.dto.request.CreateImmediateTradeReqDto;
-import com.barter.domain.trade.immediatetrade.service.dto.response.FindImmediateTradeResDto;
-import com.barter.domain.trade.immediatetrade.service.entity.ImmediateTrade;
-import com.barter.domain.trade.immediatetrade.service.repository.ImmediateTradeRepository;
-import com.barter.domain.trade.immediatetrade.service.service.ImmediateTradeService;
+import com.barter.domain.trade.immediatetrade.dto.request.CreateImmediateTradeReqDto;
+import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeResDto;
+import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
+import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
+import com.barter.domain.trade.immediatetrade.service.ImmediateTradeService;
 
 @ExtendWith(MockitoExtension.class)
-public class FindAndFindAll {
+public class Create {
+
 	@Mock
 	ImmediateTradeRepository immediateTradeRepository;
 	@Mock
@@ -75,54 +71,34 @@ public class FindAndFindAll {
 	}
 
 	@Test
-	@DisplayName("즉시 교환 단건 조회")
-	void test() {
+	@DisplayName("즉시 교환 생성: 성공")
+	void success() {
 		// given
-		Long id = 1L;
-		when(immediateTradeRepository.findById(id)).thenReturn(Optional.ofNullable(immediateTrade));
+		when(registeredProductRepository.findById(createImmediateTradeReqDto.getRegisteredProduct().getId()))
+			.thenReturn(Optional.ofNullable(registeredProduct));
+
+		when(immediateTradeRepository.save(any())).thenReturn(immediateTrade);
+
+
 
 		// when
-		FindImmediateTradeResDto resDto = immediateTradeService.find(id);
+		FindImmediateTradeResDto resDto = immediateTradeService.create(createImmediateTradeReqDto);
 
 		// then
 		assertThat(resDto.getTitle()).isEqualTo("즉시 교환 제목");
 		assertThat(resDto.getDescription()).isEqualTo("즉시 교환 설명");
 		assertThat(resDto.getProduct()).isEqualTo(registeredProduct);
-		verify(immediateTradeRepository).findById(id);
 	}
 
 	@Test
-	@DisplayName("즉시 교환 다건 조회")
-	void testFindImmediateTrades() {
+	@DisplayName("즉시 교환 생성: 실패 - 등록 물품을 찾을 수 없는 경우")
+	void failure() {
 		// given
-		Pageable pageable = PageRequest.of(0, 10);
+		when(registeredProductRepository.findById(createImmediateTradeReqDto.getRegisteredProduct().getId()))
+			.thenReturn(Optional.empty());
 
-		List<ImmediateTrade> immediateTrades = new ArrayList<>();
-		for (int i = 1; i <= 10; i++) {
-			immediateTrades.add(
-				ImmediateTrade.builder()
-					.title("즉시 교환 제목 " + i)
-					.description("즉시 교환 설명 " + i)
-					.product(registeredProduct)
-					.status(TradeStatus.PENDING)
-					.viewCount(i)
-					.build()
-			);
-		}
-
-		Page<ImmediateTrade> immediateTradePage = new PageImpl<>(immediateTrades, pageable, 10);
-
-		when(immediateTradeRepository.findAll(pageable)).thenReturn(immediateTradePage);
-
-		// when
-		PagedModel<FindImmediateTradeResDto> result = immediateTradeService.findImmediateTrades(pageable);
-
-		// then
-		assertThat(result).isNotNull();
-		assertThat(result.getContent().get(0).getTitle()).isEqualTo("즉시 교환 제목 1");
-		assertThat(result.getContent().get(9).getViewCount()).isEqualTo(10);
-		assertThat(result.getContent()).hasSize(10);
-
-		verify(immediateTradeRepository).findAll(pageable);
+		// when, then
+		assertThatThrownBy(() -> immediateTradeService.create(createImmediateTradeReqDto))
+			.isInstanceOf(IllegalArgumentException.class);
 	}
 }

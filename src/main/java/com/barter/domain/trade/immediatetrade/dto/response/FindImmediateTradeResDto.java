@@ -1,10 +1,10 @@
-package com.barter.domain.trade.immediatetrade.service.dto.response;
+package com.barter.domain.trade.immediatetrade.dto.response;
 
 import java.time.LocalDateTime;
 
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.trade.enums.TradeStatus;
-import com.barter.domain.trade.immediatetrade.service.entity.ImmediateTrade;
+import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 
 import lombok.Builder;
 import lombok.Getter;
