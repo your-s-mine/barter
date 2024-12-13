@@ -171,4 +171,28 @@ class PeriodTradeServiceTest {
 
 	}
 
+	@Test
+	@DisplayName("기간 교환 생성 시 이미 다른 교환에 등록 중인 상품 등록")
+	public void 기간_교환_생성_시_이미_다른_교환에_등록_중인_상품_등록() {
+
+		// given
+		CreatePeriodTradeReqDto reqDto = CreatePeriodTradeReqDto.builder()
+			.title("test title")
+			.description("test description")
+			.registeredProductId(registeredProduct.getId())
+			.endedAt(LocalDateTime.now().plusDays(7))
+			.build();
+
+		registeredProduct.updateStatus(RegisteredStatus.REGISTERING.toString());
+
+		when(registeredProductRepository.findById(reqDto.getRegisteredProductId()))
+			.thenReturn(Optional.of(registeredProduct));
+
+		// when & then
+		assertThatThrownBy(() -> periodTradeService.createPeriodTrades(verifiedMember, reqDto))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("PENDING 상태만 업로드 가능합니다.");
+
+	}
+
 }
