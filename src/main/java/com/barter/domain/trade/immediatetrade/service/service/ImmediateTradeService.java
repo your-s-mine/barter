@@ -86,10 +86,6 @@ public class ImmediateTradeService {
 				() -> new IllegalArgumentException("등록 물품을 찾을 수 없습니다.")
 			);
 
-		if (registeredProduct.getMember().getId() == immediateTrade.getProduct().getMember().getId()) {
-			throw new IllegalAccessException("등록한 사람만이 수정할 수 있습니다");
-		}
-
 		immediateTrade.update(reqDto);
 
 		ImmediateTrade updatedTrade = immediateTradeRepository.save(immediateTrade);
