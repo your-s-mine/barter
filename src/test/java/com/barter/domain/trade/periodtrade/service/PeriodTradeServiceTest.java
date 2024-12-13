@@ -236,7 +236,7 @@ class PeriodTradeServiceTest {
 			.title("test title")
 			.description("test description")
 			.status(TradeStatus.PENDING)
-			.registeredProduct(registeredProduct)
+			.product(registeredProduct)
 			.viewCount(0)
 			.endedAt(LocalDateTime.now().plusDays(5))
 			.build();
@@ -260,6 +260,12 @@ class PeriodTradeServiceTest {
 		assertThat(result.getContent()).containsExactly(resDto1, resDto2);
 		verify(periodTradeRepository, times(1)).findAll(pageable);
 		verify(mockPage, times(1)).map(any());
+
+	}
+
+	@Test
+	@DisplayName("기간 교환 단건 조회")
+	public void 기간_교환_단건_조회() {
 
 	}
 
