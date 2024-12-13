@@ -572,4 +572,29 @@ class PeriodTradeServiceTest {
 
 	}
 
+	@Test
+	@DisplayName("기간 거래 삭제")
+	public void 기간_거래_삭제() {
+
+		// given
+		Long tradeId = 1L;
+
+		PeriodTrade periodTrade = mock(PeriodTrade.class);
+
+		when(periodTradeRepository.findById(tradeId)).thenReturn(Optional.of(periodTrade));
+
+		doNothing().when(periodTrade).validateAuthority(1L);
+		doNothing().when(periodTrade).validateIsCompleted();
+
+		// when
+		periodTradeService.deletePeriodTrade(verifiedMember, tradeId);
+
+		// then
+
+		verify(periodTradeRepository, times(1)).delete(periodTrade);
+		verify(periodTrade, times(1)).validateAuthority(1L);
+		verify(periodTrade, times(1)).validateIsCompleted();
+		verify(periodTradeRepository, times(1)).findById(tradeId);
+	}
+
 }
