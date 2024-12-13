@@ -131,6 +131,7 @@ public class ImmediateTradeService {
 			suggestedProduct.changStatusSuggesting();
 
 			TradeProduct tradeProduct = TradeProduct.builder()
+				.tradeId(tradeId)
 				.suggestedProduct(suggestedProduct)
 				.tradeType(TradeType.IMMEDIATE)
 				.build();
@@ -191,7 +192,7 @@ public class ImmediateTradeService {
 
 		immediateTrade.validateAuthority(member.getId());
 
-		if (!(immediateTrade.isCompleted())) {
+		if ((immediateTrade.isCompleted())) {
 			throw new IllegalStateException("교환이 완료된 건에 대해서는 상태 변경을 할 수 없습니다.");
 		}
 

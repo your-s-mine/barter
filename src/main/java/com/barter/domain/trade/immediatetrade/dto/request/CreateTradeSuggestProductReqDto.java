@@ -10,6 +10,6 @@ import lombok.Getter;
 
 @Getter
 public class CreateTradeSuggestProductReqDto {
-	@NotBlank
+
 	List<Long> suggestedProductIds = new ArrayList<>();
 }

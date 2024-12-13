@@ -87,7 +87,7 @@ public class Create {
 		// then
 		assertThat(resDto.getTitle()).isEqualTo("즉시 교환 제목");
 		assertThat(resDto.getDescription()).isEqualTo("즉시 교환 설명");
-		assertThat(resDto.getProduct()).isEqualTo(registeredProduct);
+		assertThat(resDto.getProductId()).isEqualTo(registeredProduct.getId());
 	}
 
 	@Test

@@ -32,8 +32,6 @@ public class ImmediateTradeController {
 
 	private final ImmediateTradeService immediateTradeService;
 
-	// todo: 맴버 받아오면 변수에 추가하기
-
 	@PostMapping("")
 	public ResponseEntity<FindImmediateTradeResDto> create(@RequestBody @Valid CreateImmediateTradeReqDto reqDto) {
 		return new ResponseEntity<>(immediateTradeService.create(reqDto), HttpStatus.CREATED);
@@ -58,7 +56,7 @@ public class ImmediateTradeController {
 
 	@DeleteMapping("/{tradeId}")
 	public ResponseEntity<String> delete(@PathVariable Long tradeId, VerifiedMember member) {
-		return new ResponseEntity<>(immediateTradeService.delete(tradeId, member), HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(immediateTradeService.delete(tradeId, member), HttpStatus.OK);
 	}
 
 	@PostMapping("/{tradeId}/suggest")
@@ -75,7 +73,7 @@ public class ImmediateTradeController {
 
 	@DeleteMapping("/{tradeId}/denial")
 	public ResponseEntity<String> denyTradeSuggest(@PathVariable Long tradeId, VerifiedMember member) {
-		return new ResponseEntity<>(immediateTradeService.denyTradeSuggest(tradeId, member), HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(immediateTradeService.denyTradeSuggest(tradeId, member), HttpStatus.OK);
 	}
 
 	@PatchMapping("/status/{tradeId}")
