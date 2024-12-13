@@ -42,8 +42,10 @@ class PeriodTradeServiceTest {
 	@Mock
 	private ApplicationEventPublisher eventPublisher;
 
-	private VerifiedMember verifiedMember;
+	@Mock
 	private RegisteredProduct registeredProduct;
+
+	private VerifiedMember verifiedMember;
 	private Member member;
 
 	@BeforeEach
@@ -115,6 +117,37 @@ class PeriodTradeServiceTest {
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining("없는 등록된 물건입니다.");
 
+	}
+
+	@Test
+	@DisplayName("기간 교환 생성 시 등록 물품에 대한 권한이 없는 경우")
+	public void 기간_교환_생성_시_등록_물품에_대한_권한이_없는_경우() {
+
+		//given
+
+		CreatePeriodTradeReqDto reqDto = CreatePeriodTradeReqDto.builder()
+			.title("test title")
+			.description("test description")
+			.registeredProductId(registeredProduct.getId())
+			.endedAt(LocalDateTime.now().plusDays(5))
+			.build();
+
+		RegisteredProduct mockRegisteredProduct = mock(RegisteredProduct.class); // Mock 객체 생성
+		// 아래 when 절에서 사용하기 위해서는 Mock 처리된 객체가 사용되어야 하기 때문
+
+		when(registeredProductRepository.findById(any()))
+			.thenReturn(Optional.of(mockRegisteredProduct));
+
+		doThrow(new IllegalArgumentException("권한이 없습니다."))
+			.when(mockRegisteredProduct).validateOwner(verifiedMember.getId());
+
+		//when & then
+		assertThatThrownBy(() -> periodTradeService.createPeriodTrades(verifiedMember, reqDto))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("권한이 없습니다.");
+
+		verify(registeredProductRepository).findById(reqDto.getRegisteredProductId());
+		verify(mockRegisteredProduct).validateOwner(verifiedMember.getId());
 	}
 
 }
