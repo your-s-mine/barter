@@ -3,6 +3,8 @@ package com.barter.domain.trade.immediatetrade;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -51,9 +53,12 @@ public class create {
 	void setUp() {
 		member = Member.createBasicMember("test@test.com", "1234", "test");
 		createRegisteredProductReqDto = new CreateRegisteredProductReqDto(
-			"등록 상품 제목", "등록 상품 설명", "등록 상품 이미지", member.getId());
+			"등록 상품 제목", "등록 상품 설명");
 
-		registeredProduct = RegisteredProduct.create(createRegisteredProductReqDto, member);
+		List<String> images = new ArrayList<>();
+		images.add("testImage");
+
+		registeredProduct = RegisteredProduct.create(createRegisteredProductReqDto, member, images);
 
 		createImmediateTradeReqDto = new CreateImmediateTradeReqDto(registeredProduct, "즉시 교환 제목", "즉시 교환 설명");
 
