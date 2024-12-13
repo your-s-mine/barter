@@ -54,9 +54,9 @@ public class NotificationService {
 		return new PagedModel<>(foundNotifications);
 	}
 
-	// 인증/인가 구현되면 요청 회원의 '키워드 알림 목록' 만 조회하도록 수정할 것 입니다.
-	public PagedModel<FindNotificationResDto> findKeywordNotifications(Pageable pageable) {
-		Page<FindNotificationResDto> foundNotifications = notificationRepository.findAllKeywordNotification(pageable)
+	public PagedModel<FindNotificationResDto> findKeywordNotifications(Pageable pageable, Long verifiedMemberId) {
+		Page<FindNotificationResDto> foundNotifications = notificationRepository
+			.findAllKeywordNotification(pageable, verifiedMemberId)
 			.map(FindNotificationResDto::from);
 
 		return new PagedModel<>(foundNotifications);
