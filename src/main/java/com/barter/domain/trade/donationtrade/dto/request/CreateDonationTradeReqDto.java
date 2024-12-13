@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
@@ -23,4 +24,14 @@ public class CreateDonationTradeReqDto {
 	@Size(min = 5, message = "설명은 5글자 이상만 가능합니다.")
 	private String description;
 	private LocalDateTime endedAt;
+
+	@Builder
+	public CreateDonationTradeReqDto(Long productId, Integer maxAmount, String title, String description,
+		LocalDateTime endedAt) {
+		this.productId = productId;
+		this.maxAmount = maxAmount;
+		this.title = title;
+		this.description = description;
+		this.endedAt = endedAt;
+	}
 }

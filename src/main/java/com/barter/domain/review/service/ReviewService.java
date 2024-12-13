@@ -1,13 +1,16 @@
 package com.barter.domain.review.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.barter.domain.product.entity.TradeProduct;
 import com.barter.domain.product.repository.TradeProductRepository;
 import com.barter.domain.review.entity.Review;
+import com.barter.domain.review.dto.ReviewResponseDto;
 import com.barter.domain.review.repository.ReviewRepository;
-import com.barter.domain.member.entity.Member;
 import com.barter.domain.member.repository.MemberRepository;
 import com.barter.domain.auth.dto.VerifiedMember;
 
@@ -22,39 +25,44 @@ public class ReviewService {
     private final TradeProductRepository tradeProductRepository;
 
     @Transactional
-    public Review createReview(VerifiedMember verifiedMember, Long revieweeId, Long tradeProductId, String content, Double score) {
-        Member reviewer = memberRepository.findById(verifiedMember.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Reviewer not found"));
+    public ReviewResponseDto createReview(VerifiedMember verifiedMember, Long revieweeId, Long tradeProductId, String content, Double score) {
+        // 리뷰 작성자 확인
+        memberRepository.findById(verifiedMember.getId())
+                .orElseThrow(() -> new IllegalArgumentException("리뷰 작성자를 찾을 수 없습니다."));
 
-        // 리뷰 대상자 가져오기
-        Member reviewee = memberRepository.findById(revieweeId)
-                .orElseThrow(() -> new IllegalArgumentException("Reviewee not found"));
+        // 리뷰 대상자 확인
+        memberRepository.findById(revieweeId)
+                .orElseThrow(() -> new IllegalArgumentException("리뷰 대상자를 찾을 수 없습니다."));
 
         // 거래 상품 확인
-        TradeProduct tradeProduct = tradeProductRepository.findById(tradeProductId)
-                .orElseThrow(() -> new IllegalArgumentException("Trade product not found"));
-
-        // 중복 리뷰 방지
-        if (reviewRepository.existsByReviewerAndTradeProduct(reviewer, tradeProduct)) {
-            throw new IllegalStateException("Review already exists for this trade product");
-        }
+        tradeProductRepository.findById(tradeProductId)
+                .orElseThrow(() -> new IllegalArgumentException("거래 상품을 찾을 수 없습니다."));
 
         // 점수 유효성 검사
         if (score < 1.0 || score > 5.0) {
-            throw new IllegalArgumentException("Score must be between 1 and 5");
+            throw new IllegalArgumentException("점수는 1에서 5 사이여야 합니다.");
         }
 
-        // Review 객체 생성
-        Review review = new Review(
-                reviewer,
-                reviewee,
-                tradeProduct,
-                content,
-                score,
-                LocalDateTime.now()
-        );
+        // Review 객체 생성 (빌더 패턴 사용)
+        Review review = Review.builder()
+                .reviewerId(verifiedMember.getId())
+                .revieweeId(revieweeId)
+                .tradeProductId(tradeProductId)
+                .content(content)
+                .score(score)
+                .createdAt(LocalDateTime.now())
+                .build();
 
-        // 저장
-        return reviewRepository.save(review);
+        // 저장 및 ReviewResponseDto 반환
+        return ReviewResponseDto.from(reviewRepository.save(review));
+    }
+    @Transactional(readOnly = true)
+    public List<ReviewResponseDto> getMyReputationReviews(VerifiedMember verifiedMember) {
+        // 나의 평판(리뷰) 조회
+        List<Review> reviews = reviewRepository.findByRevieweeId(verifiedMember.getId());
+
+        return reviews.stream()
+                .map(ReviewResponseDto::from)
+                .collect(Collectors.toList());
     }
 }

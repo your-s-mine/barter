@@ -8,6 +8,5 @@ import lombok.Getter;
 @Getter
 public class UpdateStatusReqDto {
 
-	@NotBlank(message = "상태 값은 필수 입니다.")
 	TradeStatus tradeStatus;
 }

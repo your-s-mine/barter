@@ -7,7 +7,10 @@ import com.barter.domain.auth.service.AuthService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,4 +36,11 @@ public class AuthController {
 				.status(HttpStatus.OK)
 				.body(authService.signIn(req));
 	}
+
+	// 회원 정보 조회 (주석 처리 유지)
+	// @GetMapping("/member/{memberId}")
+	// public ResponseEntity<SignInResDto> getMemberInfo(VerifiedMember verifiedMember) {
+	// 	SignInResDto memberInfo = authService.getMemberInfo(verifiedMember);
+	// 	return ResponseEntity.ok(memberInfo);
+	// }
 }

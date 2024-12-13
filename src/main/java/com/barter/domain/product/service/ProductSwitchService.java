@@ -1,12 +1,8 @@
 package com.barter.domain.product.service;
 
-import java.util.Objects;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.barter.domain.product.dto.request.SwitchRegisteredProductReqDto;
-import com.barter.domain.product.dto.request.SwitchSuggestedProductReqDto;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.enums.RegisteredStatus;
@@ -23,16 +19,12 @@ public class ProductSwitchService {
 	private final RegisteredProductRepository registeredProductRepository;
 	private final SuggestedProductRepository suggestedProductRepository;
 
-	// RegisteredProductController 와 마찬가지로 요청 회원의 정보가 넘어와야 하므로 인증/인가 구현 완료 이후 수정이 필요함
 	@Transactional
-	public void createRegisteredProductFromSuggestedProduct(SwitchRegisteredProductReqDto request) {
-		SuggestedProduct suggestedProduct = suggestedProductRepository.findById(request.getSuggestedProductId())
+	public void createRegisteredProductFromSuggestedProduct(Long suggestedProductId, Long verifiedMemberId) {
+		SuggestedProduct suggestedProduct = suggestedProductRepository.findById(suggestedProductId)
 			.orElseThrow(() -> new IllegalArgumentException("Suggested product not found"));
 
-		if (!Objects.equals(suggestedProduct.getMember().getId(), request.getMemberId())) {
-			throw new IllegalArgumentException("권한이 없습니다.");
-		}
-
+		suggestedProduct.checkPermission(verifiedMemberId);
 		suggestedProduct.checkPossibleDelete();
 
 		RegisteredProduct registeredProduct = RegisteredProduct.builder()
@@ -47,16 +39,12 @@ public class ProductSwitchService {
 		suggestedProductRepository.delete(suggestedProduct);
 	}
 
-	//SuggestedProductController 와 마찬가지로 요청 회원의 정보가 넘어와야 하므로 인증/인가 구현 완료 이후 수정이 필요함
 	@Transactional
-	public void createSuggestedProductFromRegisteredProduct(SwitchSuggestedProductReqDto request) {
-		RegisteredProduct registeredProduct = registeredProductRepository.findById(request.getRegisteredProductId())
+	public void createSuggestedProductFromRegisteredProduct(Long registeredProductId, Long verifiedMemberId) {
+		RegisteredProduct registeredProduct = registeredProductRepository.findById(registeredProductId)
 			.orElseThrow(() -> new RuntimeException("Registered product not found"));
 
-		if (!Objects.equals(registeredProduct.getMember().getId(), request.getMemberId())) {
-			throw new IllegalArgumentException("권한이 없습니다.");
-		}
-
+		registeredProduct.checkPermission(verifiedMemberId);
 		registeredProduct.checkPossibleDelete();
 
 		SuggestedProduct suggestedProduct = SuggestedProduct.builder()

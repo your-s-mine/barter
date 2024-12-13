@@ -16,7 +16,7 @@ public class FindImmediateTradeResDto {
 
 	private String title;
 	private String description;
-	private RegisteredProduct product;
+	private Long productId;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 	private TradeStatus tradeStatus;
@@ -28,7 +28,7 @@ public class FindImmediateTradeResDto {
 	{
 		this.title = title;
 		this.description = description;
-		this.product = product;
+		this.productId = product.getId();
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 		this.tradeStatus = tradeStatus;

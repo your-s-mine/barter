@@ -1,22 +1,23 @@
 package com.barter.domain.product.service;
 
-import java.util.Objects;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.barter.common.s3.S3Service;
 import com.barter.domain.member.entity.Member;
-import com.barter.domain.member.repository.MemberRepository;
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
-import com.barter.domain.product.dto.request.DeleteRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductInfoReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductStatusReqDto;
 import com.barter.domain.product.dto.response.FindRegisteredProductResDto;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.repository.RegisteredProductRepository;
+import com.barter.domain.product.validator.ImageCountValidator;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,72 +26,85 @@ import lombok.RequiredArgsConstructor;
 public class RegisteredProductService {
 
 	private final RegisteredProductRepository registeredProductRepository;
-	private final MemberRepository memberRepository;
+	private final S3Service s3Service;
 
-	// RegisteredProductController 와 마찬가지로 요청 회원의 정보가 넘어와야 하므로 인증/인가 구현 완료 이후 수정이 필요함
-	public void createRegisteredProduct(CreateRegisteredProductReqDto request) {
-		Member requestMember = memberRepository.findById(request.getMemberId())
-			.orElseThrow(() -> new IllegalArgumentException("Member not found"));
+	public void createRegisteredProduct(
+		CreateRegisteredProductReqDto request, List<MultipartFile> multipartFiles, Long verifiedMemberId
+	) {
+		ImageCountValidator.checkImageCount(multipartFiles.size());
 
-		RegisteredProduct createdProduct = RegisteredProduct.create(request, requestMember);
+		List<String> images = s3Service.uploadFile(multipartFiles);
+		Member requestMember = Member.builder().id(verifiedMemberId).build();
+
+		RegisteredProduct createdProduct = RegisteredProduct.create(request, requestMember, images);
 		registeredProductRepository.save(createdProduct);
 	}
 
-	// 인증/인가가 구현되면 요청 회원 정보를 파라미터로 전달받아 요청한 '등록 물품' 등록자가 요청 회원인지 확인하는 로직을 추가 작성할 것 입니다.
-	public FindRegisteredProductResDto findRegisteredProduct(Long RegisteredProductId) {
+	public FindRegisteredProductResDto findRegisteredProduct(Long RegisteredProductId, Long verifiedMemberId) {
 		RegisteredProduct foundProduct = registeredProductRepository.findById(RegisteredProductId)
 			.orElseThrow(() -> new IllegalArgumentException("Registered product not found"));
+
+		foundProduct.checkPermission(verifiedMemberId);
 
 		return FindRegisteredProductResDto.from(foundProduct);
 	}
 
-	// 인증/인가 구현되면 요청 회원이 생성한 '등록 물품들만' 조회하도록 수정할 것으로 보입니다.
-	public PagedModel<FindRegisteredProductResDto> findRegisteredProducts(Pageable pageable) {
-		Page<FindRegisteredProductResDto> foundProducts = registeredProductRepository.findAll(pageable)
+	public PagedModel<FindRegisteredProductResDto> findRegisteredProducts(Pageable pageable, Long verifiedMemberId) {
+		Page<FindRegisteredProductResDto> foundProducts = registeredProductRepository
+			.findAllByMemberId(pageable, verifiedMemberId)
 			.map(FindRegisteredProductResDto::from);
 
 		return new PagedModel<>(foundProducts);
 	}
 
-	// RegisteredProductController 와 마찬가지로 요청 회원의 정보가 넘어와야 하므로 인증/인가 구현 완료 이후 수정이 필요함
 	@Transactional
-	public void updateRegisteredProductInfo(UpdateRegisteredProductInfoReqDto request) {
+	public void updateRegisteredProductInfo(
+		UpdateRegisteredProductInfoReqDto request, List<MultipartFile> multipartFiles, Long verifiedMemberId
+	) {
 		RegisteredProduct foundProduct = registeredProductRepository.findById(request.getId())
 			.orElseThrow(() -> new IllegalArgumentException("Registered product not found"));
 
-		if (!Objects.equals(foundProduct.getMember().getId(), request.getMemberId())) {
-			throw new IllegalArgumentException("수정 권한이 없습니다.");
+		foundProduct.checkPermission(verifiedMemberId);
+		foundProduct.checkPossibleUpdate();
+
+		List<String> deleteImageNames = request.getDeleteImageNames();
+		foundProduct.deleteImages(deleteImageNames);    // 삭제 요청 이미지 이름(들) 엔티티에서 삭제
+		ImageCountValidator.checkImageCount(foundProduct.getImages().size(), multipartFiles.size());
+		deleteImageNames.forEach(s3Service::deleteFile);    // 삭제 요청 이미지들 S3 에서 삭제
+
+		// 추가할 신규 이미지들이 있다면
+		if (!multipartFiles.isEmpty()) {
+			List<String> images = s3Service.uploadFile(multipartFiles);    // S3 에 신규 이미지 저장
+			foundProduct.updateImages(images);    // 엔티티에 신규 이미지 이름(들) 추가
 		}
 
 		foundProduct.updateInfo(request);
 		registeredProductRepository.save(foundProduct);
 	}
 
-	// RegisteredProductController 와 마찬가지로 요청 회원의 정보가 넘어와야 하므로 인증/인가 구현 완료 이후 수정이 필요함
 	@Transactional
-	public void updateRegisteredProductStatus(UpdateRegisteredProductStatusReqDto request) {
+	public void updateRegisteredProductStatus(UpdateRegisteredProductStatusReqDto request, Long verifiedMemberId) {
 		RegisteredProduct foundProduct = registeredProductRepository.findById(request.getId())
 			.orElseThrow(() -> new IllegalArgumentException("Registered product not found"));
 
-		if (!Objects.equals(foundProduct.getMember().getId(), request.getMemberId())) {
-			throw new IllegalArgumentException("수정 권한이 없습니다.");
-		}
+		foundProduct.checkPermission(verifiedMemberId);
 
 		foundProduct.updateStatus(request.getStatus());
 		registeredProductRepository.save(foundProduct);
 	}
 
-	// RegisteredProductController 와 마찬가지로 요청 회원의 정보가 넘어와야 하므로 인증/인가 구현 완료 이후 수정이 필요함
 	@Transactional
-	public void deleteRegisteredProduct(DeleteRegisteredProductReqDto request) {
-		RegisteredProduct foundProduct = registeredProductRepository.findById(request.getId())
+	public void deleteRegisteredProduct(Long registeredProductId, Long verifiedMemberId) {
+		RegisteredProduct foundProduct = registeredProductRepository.findById(registeredProductId)
 			.orElseThrow(() -> new IllegalArgumentException("Registered product not found"));
 
-		if (!Objects.equals(foundProduct.getMember().getId(), request.getMemberId())) {
-			throw new IllegalArgumentException("수정 권한이 없습니다.");
-		}
-
+		foundProduct.checkPermission(verifiedMemberId);
 		foundProduct.checkPossibleDelete();
+
+		List<String> savedImages = foundProduct.getImages();
+		if (!savedImages.isEmpty()) {
+			foundProduct.getImages().forEach(s3Service::deleteFile);    // 저장된 이미지 전부 삭제
+		}
 		registeredProductRepository.delete(foundProduct);
 	}
 

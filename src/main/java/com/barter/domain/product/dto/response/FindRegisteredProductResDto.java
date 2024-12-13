@@ -1,6 +1,7 @@
 package com.barter.domain.product.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.barter.domain.product.entity.RegisteredProduct;
 
@@ -14,7 +15,7 @@ public class FindRegisteredProductResDto {
 	private Long id;
 	private String name;
 	private String description;
-	private String images;
+	private List<String> images;
 	private LocalDateTime createdAt;
 	private String status;
 
