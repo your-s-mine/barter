@@ -1,4 +1,4 @@
-package com.barter.domain.trade.immediatetrade;
+package com.barter.domain.trade.immediatetrade.service;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -9,8 +9,8 @@ import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.repository.SuggestedProductRepository;
 import com.barter.domain.product.repository.TradeProductRepository;
-import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
-import com.barter.domain.trade.immediatetrade.service.ImmediateTradeService;
+import com.barter.domain.trade.immediatetrade.service.repository.ImmediateTradeRepository;
+import com.barter.domain.trade.immediatetrade.service.service.ImmediateTradeService;
 
 @ExtendWith(MockitoExtension.class)
 public class find {

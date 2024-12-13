@@ -1,4 +1,4 @@
-package com.barter.domain.trade.immediatetrade;
+package com.barter.domain.trade.immediatetrade.service;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -15,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
 import com.barter.domain.product.entity.RegisteredProduct;
@@ -23,11 +22,11 @@ import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.repository.SuggestedProductRepository;
 import com.barter.domain.product.repository.TradeProductRepository;
 import com.barter.domain.trade.enums.TradeStatus;
-import com.barter.domain.trade.immediatetrade.dto.request.CreateImmediateTradeReqDto;
-import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeResDto;
-import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
-import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
-import com.barter.domain.trade.immediatetrade.service.ImmediateTradeService;
+import com.barter.domain.trade.immediatetrade.service.dto.request.CreateImmediateTradeReqDto;
+import com.barter.domain.trade.immediatetrade.service.dto.response.FindImmediateTradeResDto;
+import com.barter.domain.trade.immediatetrade.service.entity.ImmediateTrade;
+import com.barter.domain.trade.immediatetrade.service.repository.ImmediateTradeRepository;
+import com.barter.domain.trade.immediatetrade.service.service.ImmediateTradeService;
 
 @ExtendWith(MockitoExtension.class)
 public class create {
