@@ -13,7 +13,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-// 검색어 및 해당 24시간 내 몇 번 검색되었는지 count
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
