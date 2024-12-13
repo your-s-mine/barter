@@ -35,6 +35,14 @@ public class SearchService {
 	@Transactional
 	public List<SearchTradeResDto> createSearchKeywordAndFindTrades(String word) {
 
+		if (word.isBlank()) {
+			List<SearchTradeResDto> blank = new ArrayList<>();
+			blank.add(SearchTradeResDto.builder()
+				.title("검색어를 입력해주세요.")
+				.build());
+			return blank;
+		}
+
 		SearchKeyword searchKeyword = searchKeywordRepository.findByWord(word)
 			.orElseGet(() ->
 				searchKeywordRepository.save(SearchKeyword.builder()
