@@ -42,8 +42,9 @@ class PeriodTradeServiceTest {
 	@Mock
 	private ApplicationEventPublisher eventPublisher;
 
-	private VerifiedMember verifiedMember;
 	private RegisteredProduct registeredProduct;
+
+	private VerifiedMember verifiedMember;
 	private Member member;
 
 	@BeforeEach
@@ -93,6 +94,127 @@ class PeriodTradeServiceTest {
 		verify(registeredProductRepository).findById(reqDto.getRegisteredProductId());
 		verify(periodTradeRepository).save(any(PeriodTrade.class));
 		verify(eventPublisher).publishEvent(any(PeriodTradeCloseEvent.class));
+	}
+
+	@Test
+	@DisplayName("기간 교환 생성 시, 등록 되지 않은 물품 예외 테스트")
+	public void 기간_교환_생성_시_등록_되지_않은_물품_예외_테스트() {
+
+		//given
+		when(registeredProductRepository.findById(any()))
+			.thenThrow(new IllegalArgumentException("없는 등록된 물건입니다."));
+
+		CreatePeriodTradeReqDto reqDto = CreatePeriodTradeReqDto.builder()
+			.title("test title")
+			.description("test description")
+			.registeredProductId(registeredProduct.getId())
+			.endedAt(LocalDateTime.now().plusDays(5))
+			.build();
+
+		// when & then
+		assertThatThrownBy(() -> periodTradeService.createPeriodTrades(verifiedMember, reqDto))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("없는 등록된 물건입니다.");
+
+	}
+
+	@Test
+	@DisplayName("기간 교환 생성 시 등록 물품에 대한 권한이 없는 경우")
+	public void 기간_교환_생성_시_등록_물품에_대한_권한이_없는_경우() {
+
+		//given
+
+		CreatePeriodTradeReqDto reqDto = CreatePeriodTradeReqDto.builder()
+			.title("test title")
+			.description("test description")
+			.registeredProductId(registeredProduct.getId())
+			.endedAt(LocalDateTime.now().plusDays(5))
+			.build();
+
+		RegisteredProduct mockRegisteredProduct = mock(RegisteredProduct.class); // Mock 객체 생성
+		// 아래 when 절에서 사용하기 위해서는 Mock 처리된 객체가 사용되어야 하기 때문
+
+		when(registeredProductRepository.findById(any()))
+			.thenReturn(Optional.of(mockRegisteredProduct));
+
+		doThrow(new IllegalArgumentException("권한이 없습니다."))
+			.when(mockRegisteredProduct).validateOwner(verifiedMember.getId());
+
+		//when & then
+		assertThatThrownBy(() -> periodTradeService.createPeriodTrades(verifiedMember, reqDto))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("권한이 없습니다.");
+
+		verify(registeredProductRepository).findById(reqDto.getRegisteredProductId());
+		verify(mockRegisteredProduct).validateOwner(verifiedMember.getId());
+	}
+
+	@Test
+	@DisplayName("기간 교환 생성 시 유효하지 않은 날짜 등록")
+	public void 기간_교환_생성_시_유효하지_않은_날짜_등록() {
+
+		// given
+		CreatePeriodTradeReqDto reqDto = CreatePeriodTradeReqDto.builder()
+			.title("test title")
+			.description("test description")
+			.registeredProductId(registeredProduct.getId())
+			.endedAt(LocalDateTime.now().plusDays(10)) // 7일 초과
+			.build();
+
+		when(registeredProductRepository.findById(reqDto.getRegisteredProductId()))
+			.thenReturn(Optional.of(registeredProduct));
+
+		// when &
+		assertThatThrownBy(() -> periodTradeService.createPeriodTrades(verifiedMember, reqDto))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("종료일자는 오늘로부터 7일 이내만 가능합니다.");
+
+	}
+
+	@Test
+	@DisplayName("기간 교환 생성 시 이전 날짜 날짜 등록")
+	public void 기간_교환_생성_시_이전_날짜_등록() {
+
+		// given
+		CreatePeriodTradeReqDto reqDto = CreatePeriodTradeReqDto.builder()
+			.title("test title")
+			.description("test description")
+			.registeredProductId(registeredProduct.getId())
+			.endedAt(LocalDateTime.now().minusDays(1)) // 현재 보다 이전
+			.build();
+
+		when(registeredProductRepository.findById(reqDto.getRegisteredProductId()))
+			.thenReturn(Optional.of(registeredProduct));
+
+		// when &
+		assertThatThrownBy(() -> periodTradeService.createPeriodTrades(verifiedMember, reqDto))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("현재 시간보다 적은 시간 예약은 불가능 합니다.");
+
+	}
+
+	@Test
+	@DisplayName("기간 교환 생성 시 이미 다른 교환에 등록 중인 상품 등록")
+	public void 기간_교환_생성_시_이미_다른_교환에_등록_중인_상품_등록() {
+
+		// given
+		CreatePeriodTradeReqDto reqDto = CreatePeriodTradeReqDto.builder()
+			.title("test title")
+			.description("test description")
+			.registeredProductId(registeredProduct.getId())
+			.endedAt(LocalDateTime.now().plusDays(7))
+			.build();
+
+		registeredProduct.updateStatus(RegisteredStatus.REGISTERING.toString());
+
+		when(registeredProductRepository.findById(reqDto.getRegisteredProductId()))
+			.thenReturn(Optional.of(registeredProduct));
+
+		// when & then
+		assertThatThrownBy(() -> periodTradeService.createPeriodTrades(verifiedMember, reqDto))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("PENDING 상태만 업로드 가능합니다.");
+
 	}
 
 }
