@@ -36,8 +36,9 @@ public class ImmediateTrade extends BaseTimeStampEntity {
 	private int viewCount;
 
 	@Builder
-	public ImmediateTrade(String title, String description, RegisteredProduct product, TradeStatus status,
+	public ImmediateTrade(Long id, String title, String description, RegisteredProduct product, TradeStatus status,
 		int viewCount) {
+		this.id = id;
 		this.title = title;
 		this.description = description;
 		this.product = product;
