@@ -294,4 +294,22 @@ class PeriodTradeServiceTest {
 
 	}
 
+	@Test
+	@DisplayName("기간 거래 조회 시 없는 경우 예외")
+	public void 기간_거래_조회_시_없는_경우_예외() {
+		// given
+
+		Long id = 1L;
+
+		when(periodTradeRepository.findById(id)).thenThrow(
+			new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
+		);
+
+		// when & then
+		assertThatThrownBy(() -> periodTradeService.findPeriodTradeById(id))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("해당하는 기간 거래를 찾을 수 없습니다.");
+		verify(periodTradeRepository, times(1)).findById(id);
+	}
+
 }
