@@ -58,7 +58,7 @@ public class ImmediateTradeController {
 
 	@DeleteMapping("/{tradeId}")
 	public ResponseEntity<String> delete(@PathVariable Long tradeId, VerifiedMember member) {
-		return new ResponseEntity<>(immediateTradeService.delete(tradeId, member), HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(immediateTradeService.delete(tradeId, member), HttpStatus.OK);
 	}
 
 	@PostMapping("/{tradeId}/suggest")
@@ -75,7 +75,7 @@ public class ImmediateTradeController {
 
 	@DeleteMapping("/{tradeId}/denial")
 	public ResponseEntity<String> denyTradeSuggest(@PathVariable Long tradeId, VerifiedMember member) {
-		return new ResponseEntity<>(immediateTradeService.denyTradeSuggest(tradeId, member), HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(immediateTradeService.denyTradeSuggest(tradeId, member), HttpStatus.OK);
 	}
 
 	@PatchMapping("/status/{tradeId}")
