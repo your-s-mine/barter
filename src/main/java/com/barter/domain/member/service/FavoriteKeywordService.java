@@ -38,10 +38,10 @@ public class FavoriteKeywordService {
 					.keyword(keyword)
 					.build()));
 		if (memberFavoriteKeywordRepository.existsByMemberAndFavoriteKeyword(member, favoriteKeyword)) {
-			throw new IllegalStateException("이미 관심키워드로 등록돼 있습니다.");
+			throw new IllegalArgumentException("이미 관심키워드로 등록돼 있습니다.");
 		}
 		if (memberFavoriteKeywordRepository.countByMember(member) >= MAX_KEYWORD_COUNT) {
-			throw new IllegalStateException("관심 키워드는 3개까지만 등록 가능합니다.");
+			throw new IllegalArgumentException("관심 키워드는 3개까지만 등록 가능합니다.");
 		}
 		MemberFavoriteKeyword memberFavoriteKeyword = MemberFavoriteKeyword.builder()
 			.member(member)
