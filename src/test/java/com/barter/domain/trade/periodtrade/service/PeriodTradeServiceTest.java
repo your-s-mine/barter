@@ -4,14 +4,16 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
 import com.barter.domain.auth.dto.VerifiedMember;
@@ -26,6 +28,7 @@ import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 import com.barter.domain.trade.periodtrade.repository.PeriodTradeRepository;
 import com.barter.event.trade.PeriodTradeEvent.PeriodTradeCloseEvent;
 
+@ExtendWith(MockitoExtension.class)
 class PeriodTradeServiceTest {
 
 	@InjectMocks
@@ -46,8 +49,6 @@ class PeriodTradeServiceTest {
 	@BeforeEach
 	void setUp() {
 
-		MockitoAnnotations.openMocks(this);
-
 		verifiedMember = new VerifiedMember(1L, "test@email.com");
 
 		member = Member.builder() // 물건 register(등록) 한 멤버
@@ -61,7 +62,7 @@ class PeriodTradeServiceTest {
 		registeredProduct = RegisteredProduct.builder()
 			.name("골동품")
 			.description("100년 전통의 가구")
-			.images("sample.img")
+			.images(List.of("sample.img"))
 			.status(RegisteredStatus.PENDING)
 			.member(member)
 			.build();

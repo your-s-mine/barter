@@ -13,11 +13,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateRegisteredProductReqDto {
 
-	@NotBlank(message = "제안 물품의 이름을 반드시 작성해주세요!")
+	@NotBlank(message = "등록 물품의 이름을 반드시 작성해주세요!")
 	@Size(min = 5)
 	private String name;
 
-	@NotBlank(message = "제안 물품의 설명을 반드시 작성해주세요!")
+	@NotBlank(message = "등록 물품의 설명을 반드시 작성해주세요!")
 	@Size(min = 5)
 	private String description;
 }
