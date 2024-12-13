@@ -40,11 +40,10 @@ public class NotificationController {
 	@GetMapping("/activity")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<FindNotificationResDto> findActivityNotifications(
-		@PageableDefault(sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable
+		@PageableDefault(sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable,
+		VerifiedMember verifiedMember
 	) {
-		// 인증/인가 파트 구현이 끝난다면, 'NOTIFICATIONS' 테이블에서 요청 회원의 활동 알림들을 조회하도록 할 것 같습니다.
-
-		return notificationService.findActivityNotifications(pageable);
+		return notificationService.findActivityNotifications(pageable, verifiedMember.getId());
 	}
 
 	@GetMapping("/keyword")

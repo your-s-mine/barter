@@ -10,8 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.barter.domain.notification.SseEmitters;
-import com.barter.domain.notification.dto.request.UpdateNotificationStatusReqDto;
 import com.barter.domain.notification.dto.request.DeleteNotificationReqDto;
+import com.barter.domain.notification.dto.request.UpdateNotificationStatusReqDto;
 import com.barter.domain.notification.dto.response.FindNotificationResDto;
 import com.barter.domain.notification.entity.Notification;
 import com.barter.domain.notification.respository.NotificationRepository;
@@ -46,9 +46,9 @@ public class NotificationService {
 	}
 	*/
 
-	// 인증/인가 구현되면 요청 회원의 '알림 목록' 만 조회하도록 수정할 것입니다.
-	public PagedModel<FindNotificationResDto> findActivityNotifications(Pageable pageable) {
-		Page<FindNotificationResDto> foundNotifications = notificationRepository.findAllActivityNotification(pageable)
+	public PagedModel<FindNotificationResDto> findActivityNotifications(Pageable pageable, Long verifiedMemberId) {
+		Page<FindNotificationResDto> foundNotifications = notificationRepository
+			.findAllActivityNotification(pageable, verifiedMemberId)
 			.map(FindNotificationResDto::from);
 
 		return new PagedModel<>(foundNotifications);
