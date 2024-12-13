@@ -187,7 +187,8 @@ public class PeriodTradeService {
 		for (TradeProduct tradeProduct : tradeProducts) {
 			SuggestedProduct suggestedProduct = tradeProduct.getSuggestedProduct();
 
-			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId())) {
+			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId()) && suggestedProduct.getStatus()
+				.equals(SuggestedStatus.SUGGESTING)) {
 				suggestedProduct.changStatusAccepted();
 				periodTrade.getRegisteredProduct()
 					.updateStatus(RegisteredStatus.ACCEPTED.toString());// enum 타입이 아니어도 검증 로직이 구현되어 있기 때문에 일단 이렇게 구현함
@@ -218,7 +219,8 @@ public class PeriodTradeService {
 		for (TradeProduct tradeProduct : tradeProducts) {
 			SuggestedProduct suggestedProduct = tradeProduct.getSuggestedProduct();
 
-			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId())) {
+			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId()) && suggestedProduct.getStatus()
+				.equals(SuggestedStatus.SUGGESTING)) {
 				suggestedProduct.changStatusPending();
 				periodTrade.getRegisteredProduct()
 					.updateStatus(RegisteredStatus.PENDING.toString());
