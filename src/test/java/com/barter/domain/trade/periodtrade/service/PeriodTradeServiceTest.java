@@ -20,10 +20,16 @@ import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.member.enums.JoinPath;
 import com.barter.domain.product.entity.RegisteredProduct;
+import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.enums.RegisteredStatus;
+import com.barter.domain.product.enums.SuggestedStatus;
 import com.barter.domain.product.repository.RegisteredProductRepository;
+import com.barter.domain.product.repository.SuggestedProductRepository;
+import com.barter.domain.product.repository.TradeProductRepository;
 import com.barter.domain.trade.periodtrade.dto.request.CreatePeriodTradeReqDto;
+import com.barter.domain.trade.periodtrade.dto.request.SuggestedPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.response.CreatePeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.response.SuggestedPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 import com.barter.domain.trade.periodtrade.repository.PeriodTradeRepository;
 import com.barter.event.trade.PeriodTradeEvent.PeriodTradeCloseEvent;
@@ -36,6 +42,11 @@ class PeriodTradeServiceTest {
 
 	@Mock
 	private RegisteredProductRepository registeredProductRepository;
+	@Mock
+	private SuggestedProductRepository suggestedProductRepository;
+
+	@Mock
+	private TradeProductRepository tradeProductRepository;
 
 	@Mock
 	private PeriodTradeRepository periodTradeRepository;
@@ -215,6 +226,49 @@ class PeriodTradeServiceTest {
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining("PENDING 상태만 업로드 가능합니다.");
 
+	}
+
+	@Test
+	@DisplayName("등록된 기간 교환에 대해서 물품을 제안 성공")
+	public void 등록된_기간_교환에_대해서_물품을_제안_성공() {
+
+		//given
+		Long tradeId = 1L;
+
+		SuggestedPeriodTradeReqDto reqDto = new SuggestedPeriodTradeReqDto(List.of(101L, 102L));
+
+		PeriodTrade mockPeriodTrade = mock(PeriodTrade.class);
+		SuggestedProduct product1 = mock(SuggestedProduct.class);
+		SuggestedProduct product2 = mock(SuggestedProduct.class);
+
+		when(periodTradeRepository.findById(tradeId)).thenReturn(Optional.of(mockPeriodTrade));
+
+		doNothing().when(mockPeriodTrade).validateSuggestAuthority(member.getId());
+		doNothing().when(mockPeriodTrade).validateIsPending();
+		doNothing().when(mockPeriodTrade).validateIsCompleted();
+
+		when(suggestedProductRepository.findById(101L)).thenReturn(Optional.of(product1));
+		when(suggestedProductRepository.findById(102L)).thenReturn(Optional.of(product2));
+		when(product1.getStatus()).thenReturn(SuggestedStatus.PENDING);
+		when(product2.getStatus()).thenReturn(SuggestedStatus.PENDING);
+
+		when(tradeProductRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+
+		// when
+		SuggestedPeriodTradeResDto result = periodTradeService.suggestPeriodTrade(verifiedMember, tradeId, reqDto);
+
+		// then
+		assertThat(result).isNotNull();
+		assertThat(result.getPeriodTradeId()).isEqualTo(tradeId);
+		assertThat(result.getSuggestedProductIds()).hasSize(2);
+
+		verify(periodTradeRepository, times(1)).findById(tradeId);
+		verify(mockPeriodTrade, times(1)).validateSuggestAuthority(member.getId());
+		verify(mockPeriodTrade, times(1)).validateIsPending();
+		verify(mockPeriodTrade, times(1)).validateIsCompleted();
+		verify(suggestedProductRepository, times(1)).findById(101L);
+		verify(suggestedProductRepository, times(1)).findById(102L);
+		verify(tradeProductRepository, times(1)).saveAll(anyList());
 	}
 
 }
