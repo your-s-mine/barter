@@ -1,4 +1,4 @@
-package com.barter.domain.trade.immediatetrade.service.controller;
+package com.barter.domain.trade.immediatetrade.controller;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.barter.domain.auth.dto.VerifiedMember;
-import com.barter.domain.trade.immediatetrade.service.dto.request.CreateImmediateTradeReqDto;
-import com.barter.domain.trade.immediatetrade.service.dto.request.CreateTradeSuggestProductReqDto;
-import com.barter.domain.trade.immediatetrade.service.dto.request.UpdateImmediateTradeReqDto;
-import com.barter.domain.trade.immediatetrade.service.dto.request.UpdateStatusReqDto;
-import com.barter.domain.trade.immediatetrade.service.dto.response.FindImmediateTradeResDto;
-import com.barter.domain.trade.immediatetrade.service.service.ImmediateTradeService;
+import com.barter.domain.trade.immediatetrade.dto.request.CreateImmediateTradeReqDto;
+import com.barter.domain.trade.immediatetrade.dto.request.CreateTradeSuggestProductReqDto;
+import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeReqDto;
+import com.barter.domain.trade.immediatetrade.dto.request.UpdateStatusReqDto;
+import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeResDto;
+import com.barter.domain.trade.immediatetrade.service.ImmediateTradeService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
