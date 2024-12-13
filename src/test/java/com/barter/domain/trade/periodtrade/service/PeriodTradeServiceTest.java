@@ -291,4 +291,34 @@ class PeriodTradeServiceTest {
 		verifyNoMoreInteractions(periodTradeRepository);
 	}
 
+	@Test
+	@DisplayName("기간 거래 제안 실패 (제안된 상품 상태 오류)")
+	public void 기간_거래_제안_실패_제안_상품_상태_오류() {
+
+		//given
+		Long tradeId = 1L;
+
+		SuggestedPeriodTradeReqDto reqDto = new SuggestedPeriodTradeReqDto(List.of(101L));
+
+		PeriodTrade mockPeriodTrade = mock(PeriodTrade.class);
+		SuggestedProduct product = mock(SuggestedProduct.class);
+
+		when(periodTradeRepository.findById(tradeId)).thenReturn(Optional.of(mockPeriodTrade));
+		when(suggestedProductRepository.findById(101L)).thenReturn(Optional.of(product));
+		when(product.getStatus()).thenReturn(SuggestedStatus.ACCEPTED);
+
+		doNothing().when(mockPeriodTrade).validateSuggestAuthority(member.getId());
+		doNothing().when(mockPeriodTrade).validateIsPending();
+		doNothing().when(mockPeriodTrade).validateIsCompleted();
+
+		// when & then
+		assertThatThrownBy(() -> periodTradeService.suggestPeriodTrade(verifiedMember, tradeId, reqDto))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("다른 교환에 제안된 상품은 제안 할 수 없습니다.");
+
+		verify(periodTradeRepository, times(1)).findById(tradeId);
+		verify(suggestedProductRepository, times(1)).findById(101L);
+
+	}
+
 }
