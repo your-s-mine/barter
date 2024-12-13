@@ -1,9 +1,9 @@
-package com.barter.domain.trade.immediatetrade.service.entity;
+package com.barter.domain.trade.immediatetrade.entity;
 
 import com.barter.domain.BaseTimeStampEntity;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.trade.enums.TradeStatus;
-import com.barter.domain.trade.immediatetrade.service.dto.request.UpdateImmediateTradeReqDto;
+import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeReqDto;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

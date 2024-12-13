@@ -27,11 +27,10 @@ import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.repository.SuggestedProductRepository;
 import com.barter.domain.product.repository.TradeProductRepository;
 import com.barter.domain.trade.enums.TradeStatus;
-import com.barter.domain.trade.immediatetrade.service.dto.request.CreateImmediateTradeReqDto;
-import com.barter.domain.trade.immediatetrade.service.dto.response.FindImmediateTradeResDto;
-import com.barter.domain.trade.immediatetrade.service.entity.ImmediateTrade;
-import com.barter.domain.trade.immediatetrade.service.repository.ImmediateTradeRepository;
-import com.barter.domain.trade.immediatetrade.service.service.ImmediateTradeService;
+import com.barter.domain.trade.immediatetrade.dto.request.CreateImmediateTradeReqDto;
+import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeResDto;
+import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
+import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class FindAndFindAll {
