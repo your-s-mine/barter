@@ -271,4 +271,24 @@ class PeriodTradeServiceTest {
 		verify(tradeProductRepository, times(1)).saveAll(anyList());
 	}
 
+	@Test
+	@DisplayName("기간 거래 제안 실패 (기간 거래 없음)")
+	public void 기간_거래_제안_실패_기간_거래_없음() {
+
+		// given
+		Long tradeId = 1L;
+
+		SuggestedPeriodTradeReqDto reqDto = new SuggestedPeriodTradeReqDto(List.of(101L, 102L));
+
+		when(periodTradeRepository.findById(tradeId)).thenReturn(Optional.empty());
+
+		// when & then
+		assertThatThrownBy(() -> periodTradeService.suggestPeriodTrade(verifiedMember, tradeId, reqDto))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("해당하는 기간 거래를 찾을 수 없습니다.");
+
+		verify(periodTradeRepository, times(1)).findById(tradeId);
+		verifyNoMoreInteractions(periodTradeRepository);
+	}
+
 }
