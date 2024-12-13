@@ -35,7 +35,6 @@ public class SearchService {
 	@Transactional
 	public List<SearchTradeResDto> createSearchKeywordAndFindTrades(String word) {
 
-		// 검색어 찾고 없다면 생성
 		SearchKeyword searchKeyword = searchKeywordRepository.findByWord(word)
 			.orElseGet(() ->
 				searchKeywordRepository.save(SearchKeyword.builder()
@@ -43,26 +42,21 @@ public class SearchService {
 					.build()
 				));
 
-		// 검색 이력에 저장
 		searchHistoryRepository.save(SearchHistory.builder()
 			.searchKeyword(searchKeyword)
 			.build()
 		);
 
-		// 24시간 내 검색 횟수 계산
 		LocalDateTime since = LocalDateTime.now().minusHours(24);
 		Long recentCount = searchHistoryRepository.countRecentSearches(searchKeyword.getId(), since);
 
-		// 검색 count 업데이트
 		searchKeyword.updateCount(recentCount);
 		searchKeywordRepository.save(searchKeyword);
 
-		// 검색어로 교환 찾기
 		List<DonationTrade> donationTrades = donationTradeRepository.findByTitleOrDescriptionContaining(word, word);
 		List<ImmediateTrade> immediateTrades = immediateTradeRepository.findByTitleOrDescriptionContaining(word, word);
 		List<PeriodTrade> periodTrades = periodTradeRepository.findByTitleOrDescriptionContaining(word, word);
 
-		// 찾은 교환 List 를 변환하여 추가
 		List<SearchTradeResDto> tradeDtos = new ArrayList<>();
 		tradeDtos.addAll(mapDonationTradesToSearchTradeRes(donationTrades));
 		tradeDtos.addAll(mapImmediateTradesToSearchTradeRes(immediateTrades));
@@ -90,7 +84,7 @@ public class SearchService {
 		return searchKeywords.stream().map(topKeyword -> topKeyword.getWord()).toList();
 	}
 
-	@Scheduled(cron = "0 */30 * * * *")
+	@Scheduled(cron = "0 */5 * * * *")
 	@Transactional
 	public void deleteHistoryOver24hours() {
 		LocalDateTime time = LocalDateTime.now().minusHours(24);

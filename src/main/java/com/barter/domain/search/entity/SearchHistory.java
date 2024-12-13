@@ -15,7 +15,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
-// 검색 기록 관리 테이블, 24시간 주기로 관리됨
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "SEARCH_HISTORY")
