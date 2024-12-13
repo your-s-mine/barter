@@ -41,16 +41,5 @@ public class AuthService {
 			.accessToken(token)
 			.build();
 	}
-	// 회원 정보 조회
-    public MemberInfoDto findMemberInfo(VerifiedMember verifiedMember) {
-        Member member = memberRepository.findById(verifiedMember.getId())
-                .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
-
-        return MemberInfoDto.builder()
-                .id(member.getId())
-                .email(member.getEmail())
-                .nickname(member.getNickname())
-                .build();
-    }
 
 }

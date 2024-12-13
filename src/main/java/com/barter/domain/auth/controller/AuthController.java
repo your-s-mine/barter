@@ -31,12 +31,7 @@ public class AuthController {
 			.status(HttpStatus.OK)
 			.body(authService.signIn(req));
 	}
-	// 회원 정보 조회
-	@GetMapping("/member/me")
-	public ResponseEntity<MemberInfoDto> findMemberInfo(VerifiedMember verifiedMember) {
-		MemberInfoDto memberInfo = authService.findMemberInfo(verifiedMember);
-		return ResponseEntity.ok(memberInfo);
-	}
+
 
 }
 
