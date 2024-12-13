@@ -95,4 +95,26 @@ class PeriodTradeServiceTest {
 		verify(eventPublisher).publishEvent(any(PeriodTradeCloseEvent.class));
 	}
 
+	@Test
+	@DisplayName("기간 교환 생성 시, 등록 되지 않은 물품 예외 테스트")
+	public void 기간_교환_생성_시_등록_되지_않은_물품_예외_테스트() {
+
+		//given
+		when(registeredProductRepository.findById(any()))
+			.thenThrow(new IllegalArgumentException("없는 등록된 물건입니다."));
+
+		CreatePeriodTradeReqDto reqDto = CreatePeriodTradeReqDto.builder()
+			.title("test title")
+			.description("test description")
+			.registeredProductId(registeredProduct.getId())
+			.endedAt(LocalDateTime.now().plusDays(5))
+			.build();
+
+		// when & then
+		assertThatThrownBy(() -> periodTradeService.createPeriodTrades(verifiedMember, reqDto))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("없는 등록된 물건입니다.");
+
+	}
+
 }
