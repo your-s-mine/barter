@@ -28,7 +28,7 @@ import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
 
 @ExtendWith(MockitoExtension.class)
-public class Create {
+public class CreateTest {
 
 	@Mock
 	ImmediateTradeRepository immediateTradeRepository;

@@ -33,15 +33,9 @@ import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
 
 @ExtendWith(MockitoExtension.class)
-public class FindAndFindAll {
+public class FindAndFindAllTest {
 	@Mock
 	ImmediateTradeRepository immediateTradeRepository;
-	@Mock
-	RegisteredProductRepository registeredProductRepository;
-	@Mock
-	TradeProductRepository tradeProductRepository;
-	@Mock
-	SuggestedProductRepository suggestedProductRepository;
 	@InjectMocks
 	ImmediateTradeService immediateTradeService;
 
