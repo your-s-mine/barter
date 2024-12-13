@@ -1,4 +1,4 @@
-package com.barter.domain.trade.immediatetrade.dto.request;
+package com.barter.domain.trade.immediatetrade.service.dto.request;
 
 import java.util.ArrayList;
 import java.util.List;

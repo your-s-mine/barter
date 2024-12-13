@@ -1,4 +1,4 @@
-package com.barter.domain.trade.immediatetrade.dto.request;
+package com.barter.domain.trade.immediatetrade.service.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

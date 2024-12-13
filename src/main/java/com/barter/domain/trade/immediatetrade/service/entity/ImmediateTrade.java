@@ -1,9 +1,9 @@
-package com.barter.domain.trade.immediatetrade.entity;
+package com.barter.domain.trade.immediatetrade.service.entity;
 
 import com.barter.domain.BaseTimeStampEntity;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.trade.enums.TradeStatus;
-import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeReqDto;
+import com.barter.domain.trade.immediatetrade.service.dto.request.UpdateImmediateTradeReqDto;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,7 +13,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
