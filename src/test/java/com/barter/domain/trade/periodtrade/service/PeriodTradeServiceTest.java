@@ -42,7 +42,6 @@ class PeriodTradeServiceTest {
 	@Mock
 	private ApplicationEventPublisher eventPublisher;
 
-	@Mock
 	private RegisteredProduct registeredProduct;
 
 	private VerifiedMember verifiedMember;
@@ -148,6 +147,28 @@ class PeriodTradeServiceTest {
 
 		verify(registeredProductRepository).findById(reqDto.getRegisteredProductId());
 		verify(mockRegisteredProduct).validateOwner(verifiedMember.getId());
+	}
+
+	@Test
+	@DisplayName("기간 교환 생성 시 유효하지 않은 날짜 등록")
+	public void 기간_교환_생성_시_유효하지_않은_날짜_등록() {
+
+		// given
+		CreatePeriodTradeReqDto reqDto = CreatePeriodTradeReqDto.builder()
+			.title("test title")
+			.description("test description")
+			.registeredProductId(registeredProduct.getId())
+			.endedAt(LocalDateTime.now().plusDays(10)) // 7일 초과
+			.build();
+
+		when(registeredProductRepository.findById(reqDto.getRegisteredProductId()))
+			.thenReturn(Optional.of(registeredProduct));
+
+		// when &
+		assertThatThrownBy(() -> periodTradeService.createPeriodTrades(verifiedMember, reqDto))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("종료일자는 오늘로부터 7일 이내만 가능합니다.");
+
 	}
 
 }
