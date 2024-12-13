@@ -15,8 +15,8 @@ import com.barter.domain.search.repository.SearchHistoryRepository;
 import com.barter.domain.search.repository.SearchKeywordRepository;
 import com.barter.domain.trade.donationtrade.entity.DonationTrade;
 import com.barter.domain.trade.donationtrade.repository.DonationTradeRepository;
-import com.barter.domain.trade.immediatetrade.service.entity.ImmediateTrade;
-import com.barter.domain.trade.immediatetrade.service.repository.ImmediateTradeRepository;
+import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
+import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
 import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 import com.barter.domain.trade.periodtrade.repository.PeriodTradeRepository;
 
