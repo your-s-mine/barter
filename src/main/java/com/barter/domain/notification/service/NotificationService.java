@@ -1,7 +1,5 @@
 package com.barter.domain.notification.service;
 
-import java.util.Objects;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
@@ -10,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.barter.domain.notification.SseEmitters;
-import com.barter.domain.notification.dto.request.DeleteNotificationReqDto;
 import com.barter.domain.notification.dto.response.FindNotificationResDto;
 import com.barter.domain.notification.entity.Notification;
 import com.barter.domain.notification.respository.NotificationRepository;
@@ -72,15 +69,12 @@ public class NotificationService {
 		notificationRepository.save(foundNotification);
 	}
 
-	// 인증/인가 구현 이후에는 DTO 가 아닌 검증 회원 ID 와 알림 ID, 2개의 파라미터를 전달받을 계획입니다.
 	@Transactional
-	public void deleteNotification(DeleteNotificationReqDto request) {
-		Notification foundNotification = notificationRepository.findById(request.getNotificationId())
+	public void deleteNotification(Long notificationId, Long verifiedMemberId) {
+		Notification foundNotification = notificationRepository.findById(notificationId)
 			.orElseThrow(() -> new IllegalArgumentException("Notification not found"));
 
-		if (!Objects.equals(request.getMemberId(), foundNotification.getMemberId())) {
-			throw new IllegalArgumentException("삭제 권한이 없습니다.");
-		}
+		foundNotification.checkPermission(verifiedMemberId);
 
 		foundNotification.checkPossibleDelete();
 		notificationRepository.delete(foundNotification);
