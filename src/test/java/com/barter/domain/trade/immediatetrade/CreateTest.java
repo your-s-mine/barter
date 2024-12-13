@@ -35,10 +35,7 @@ public class CreateTest {
 	ImmediateTradeRepository immediateTradeRepository;
 	@Mock
 	RegisteredProductRepository registeredProductRepository;
-	@Mock
-	TradeProductRepository tradeProductRepository;
-	@Mock
-	SuggestedProductRepository suggestedProductRepository;
+
 	@InjectMocks
 	ImmediateTradeService immediateTradeService;
 

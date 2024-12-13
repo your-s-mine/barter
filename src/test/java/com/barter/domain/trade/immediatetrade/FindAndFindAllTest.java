@@ -37,12 +37,7 @@ import com.barter.domain.trade.immediatetrade.service.ImmediateTradeService;
 public class FindAndFindAllTest {
 	@Mock
 	ImmediateTradeRepository immediateTradeRepository;
-	@Mock
-	RegisteredProductRepository registeredProductRepository;
-	@Mock
-	TradeProductRepository tradeProductRepository;
-	@Mock
-	SuggestedProductRepository suggestedProductRepository;
+
 	@InjectMocks
 	ImmediateTradeService immediateTradeService;
 
