@@ -72,6 +72,7 @@ public class ImmediateTradeService {
 		return new PagedModel<>(trades);
 	}
 
+	@Transactional
 	public FindImmediateTradeResDto update(VerifiedMember member, Long tradeId,
 		UpdateImmediateTradeReqDto reqDto) throws
 		IllegalAccessException {

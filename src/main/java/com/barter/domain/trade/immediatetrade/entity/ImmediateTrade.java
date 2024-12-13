@@ -1,8 +1,7 @@
 package com.barter.domain.trade.immediatetrade.entity;
 
-import java.util.Objects;
-
 import com.barter.domain.BaseTimeStampEntity;
+import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.trade.enums.TradeStatus;
 import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeReqDto;
@@ -38,8 +37,9 @@ public class ImmediateTrade extends BaseTimeStampEntity {
 	private int viewCount;
 
 	@Builder
-	public ImmediateTrade(String title, String description, RegisteredProduct product, TradeStatus status,
+	public ImmediateTrade(Long id, String title, String description, RegisteredProduct product, TradeStatus status,
 		int viewCount) {
+		this.id = id;
 		this.title = title;
 		this.description = description;
 		this.product = product;
@@ -77,7 +77,7 @@ public class ImmediateTrade extends BaseTimeStampEntity {
 	}
 
 	public void validateAuthority(Long userId) {
-		if (!(Objects.equals(this.product.getMember().getId(), userId))) {
+		if (!this.product.getMember().getId().equals(userId)) {
 			throw new IllegalArgumentException("해당 물품에 대한 권한이 없습니다.");
 		}
 	}

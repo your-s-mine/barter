@@ -3,8 +3,6 @@ package com.barter.domain.trade.immediatetrade.service;
 import static org.assertj.core.api.AssertionsForClassTypes.*;
 import static org.mockito.Mockito.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -17,13 +15,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.member.entity.Member;
-import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.repository.RegisteredProductRepository;
-import com.barter.domain.product.repository.SuggestedProductRepository;
-import com.barter.domain.product.repository.TradeProductRepository;
 import com.barter.domain.trade.enums.TradeStatus;
-import com.barter.domain.trade.immediatetrade.dto.request.CreateImmediateTradeReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeReqDto;
 import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeResDto;
 import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
@@ -35,39 +29,35 @@ public class UpdateTest {
 	ImmediateTradeRepository immediateTradeRepository;
 	@Mock
 	RegisteredProductRepository registeredProductRepository;
-	@Mock
-	TradeProductRepository tradeProductRepository;
-	@Mock
-	SuggestedProductRepository suggestedProductRepository;
 	@InjectMocks
 	ImmediateTradeService immediateTradeService;
 
 	Member member;
-	CreateRegisteredProductReqDto createRegisteredProductReqDto;
 	RegisteredProduct registeredProduct;
-	CreateImmediateTradeReqDto createImmediateTradeReqDto;
 	ImmediateTrade immediateTrade;
-
 	VerifiedMember verifiedMember;
 
 	@BeforeEach
 	void setUp() {
-		member = Member.createBasicMember("test@test.com", "1234", "test");
+		member = Member.builder()
+			.id(1L)
+			.email("test@email.com")
+			.password("1234")
+			.build();
 
 		verifiedMember = new VerifiedMember(member.getId(), member.getEmail());
 
-		createRegisteredProductReqDto = new CreateRegisteredProductReqDto("등록 상품 제목", "등록 상품 설명");
-
-		List<String> images = new ArrayList<>();
-		images.add("testImage");
-
-		registeredProduct = RegisteredProduct.create(createRegisteredProductReqDto, member, images);
-
-		createImmediateTradeReqDto = new CreateImmediateTradeReqDto(registeredProduct, "즉시 교환 제목", "즉시 교환 설명");
+		registeredProduct = RegisteredProduct.builder()
+			.id(1L)
+			.name("등록 상품 이름")
+			.description("등록 상품 설명")
+			.member(member)
+			.build();
 
 		immediateTrade = ImmediateTrade.builder()
-			.title(createImmediateTradeReqDto.getTitle())
-			.description(createImmediateTradeReqDto.getDescription())
+			.id(1L)
+			.title("즉시 교환 제목")
+			.description("즉시 교환 설명")
 			.product(registeredProduct)
 			.status(TradeStatus.PENDING)
 			.viewCount(0)
@@ -78,11 +68,13 @@ public class UpdateTest {
 	@DisplayName("즉시 교환 수정: 성공")
 	void updateSuccess() throws IllegalAccessException {
 		// given
-		UpdateImmediateTradeReqDto reqDto = new UpdateImmediateTradeReqDto(registeredProduct.getId(), "수정된 제목", "수정된 설명");
+		UpdateImmediateTradeReqDto reqDto = new UpdateImmediateTradeReqDto(registeredProduct.getId(), "수정된 제목",
+			"수정된 설명");
 
-		when(immediateTradeRepository.findById(immediateTrade.getId())).thenReturn(Optional.of(immediateTrade));
-		when(registeredProductRepository.findById(registeredProduct.getId())).thenReturn(Optional.of(registeredProduct));
-		when(immediateTradeRepository.save(any())).thenReturn(Optional.of(immediateTrade));
+		when(immediateTradeRepository.findById(immediateTrade.getId())).thenReturn(Optional.ofNullable(immediateTrade));
+		when(registeredProductRepository.findById(registeredProduct.getId())).thenReturn(
+			Optional.of(registeredProduct));
+		when(immediateTradeRepository.save(any())).thenReturn(immediateTrade);
 
 		// when
 		FindImmediateTradeResDto result = immediateTradeService.update(verifiedMember, immediateTrade.getId(), reqDto);
@@ -94,16 +86,45 @@ public class UpdateTest {
 	}
 
 	@Test
-	@DisplayName("즉시 교환 수정: 실패 - 권한 없음")
-	void updateFailureNoAuthority() {
+	@DisplayName("즉시 교환 수정: 실패 - 교환을 찾지 못하는 경우")
+	void updateFailureNotFoundTrade() {
 		// given
-		UpdateImmediateTradeReqDto reqDto = new UpdateImmediateTradeReqDto(registeredProduct.getId(), "수정된 제목", "수정된 설명");
-
-		when(immediateTradeRepository.findById(1L)).thenReturn(Optional.of(immediateTrade));
+		UpdateImmediateTradeReqDto reqDto = new UpdateImmediateTradeReqDto(registeredProduct.getId(),
+			registeredProduct.getName(), registeredProduct.getDescription());
 
 		// when, then
 		assertThatThrownBy(() ->
-			immediateTradeService.update(verifiedMember, 1L, new UpdateImmediateTradeReqDto(1L, "", "")))
-			.isInstanceOf(IllegalAccessException.class);
+			immediateTradeService.update(verifiedMember, immediateTrade.getId(), reqDto))
+			.isInstanceOf(IllegalArgumentException.class).hasMessage("해당 교환을 찾을 수 없습니다.");
+	}
+
+	@Test
+	@DisplayName("즉시 교환 수정: 실패 - 수정 권한이 없는 경우")
+	void updateFailureNoAuthority() {
+		// given
+		UpdateImmediateTradeReqDto reqDto = new UpdateImmediateTradeReqDto(2L, "수정된 제목", "수정된 설명");
+
+		when(immediateTradeRepository.findById(immediateTrade.getId())).thenReturn(Optional.ofNullable(immediateTrade));
+
+		verifiedMember = new VerifiedMember(123L, member.getEmail());
+
+		// when, then
+		assertThatThrownBy(() ->
+			immediateTradeService.update(verifiedMember, immediateTrade.getId(), reqDto))
+			.isInstanceOf(IllegalArgumentException.class).hasMessage("해당 물품에 대한 권한이 없습니다.");
+	}
+
+	@Test
+	@DisplayName("즉시 교환 수정: 실패 - 등록 물품을 찾을 수 없는 경우")
+	void updateFailureNotFoundProduct() {
+		// given
+		UpdateImmediateTradeReqDto reqDto = new UpdateImmediateTradeReqDto(2L, "수정된 제목", "수정된 설명");
+
+		when(immediateTradeRepository.findById(immediateTrade.getId())).thenReturn(Optional.ofNullable(immediateTrade));
+
+		// when, then
+		assertThatThrownBy(() ->
+			immediateTradeService.update(verifiedMember, immediateTrade.getId(), reqDto))
+			.isInstanceOf(IllegalArgumentException.class).hasMessage("등록 물품을 찾을 수 없습니다.");
 	}
 }
