@@ -29,7 +29,7 @@ import com.barter.domain.trade.immediatetrade.service.repository.ImmediateTradeR
 import com.barter.domain.trade.immediatetrade.service.service.ImmediateTradeService;
 
 @ExtendWith(MockitoExtension.class)
-public class create {
+public class Create {
 
 	@Mock
 	ImmediateTradeRepository immediateTradeRepository;
