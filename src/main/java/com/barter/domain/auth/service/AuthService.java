@@ -1,11 +1,8 @@
 package com.barter.domain.auth.service;
 
-import com.barter.domain.auth.dto.VerifiedMember;
+import com.barter.domain.auth.dto.*;
 import org.springframework.stereotype.Service;
 
-import com.barter.domain.auth.dto.SignInReqDto;
-import com.barter.domain.auth.dto.SignInResDto;
-import com.barter.domain.auth.dto.SignUpReqDto;
 import com.barter.domain.auth.exception.DuplicateEmailException;
 import com.barter.domain.auth.exception.InvalidCredentialsException;
 import com.barter.domain.member.entity.Member;
@@ -45,12 +42,15 @@ public class AuthService {
 			.build();
 	}
 	// 회원 정보 조회
-	public SignInResDto getMemberInfo(VerifiedMember verifiedMember) {
-		Member member = memberRepository.findById(verifiedMember.getId())
-				.orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+    public MemberInfoDto findMemberInfo(VerifiedMember verifiedMember) {
+        Member member = memberRepository.findById(verifiedMember.getId())
+                .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
 
-		return SignInResDto.builder()
-				.accessToken("dummy-access-token") // 실제 액세스 토큰 발급 로직이 있으면 여기에 적용
-				.build();
-	}
+        return MemberInfoDto.builder()
+                .id(member.getId())
+                .email(member.getEmail())
+                .nickname(member.getNickname())
+                .build();
+    }
+
 }

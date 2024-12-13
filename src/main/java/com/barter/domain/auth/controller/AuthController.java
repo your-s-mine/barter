@@ -1,13 +1,10 @@
 package com.barter.domain.auth.controller;
 
-import com.barter.domain.auth.dto.VerifiedMember;
+import com.barter.domain.auth.dto.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.barter.domain.auth.dto.SignInReqDto;
-import com.barter.domain.auth.dto.SignInResDto;
-import com.barter.domain.auth.dto.SignUpReqDto;
 import com.barter.domain.auth.service.AuthService;
 
 import jakarta.validation.Valid;
@@ -35,9 +32,12 @@ public class AuthController {
 			.body(authService.signIn(req));
 	}
 	// 회원 정보 조회
-	@GetMapping("/member/{memberId}")
-	public ResponseEntity<SignInResDto> getMemberInfo(VerifiedMember verifiedMember) {
-		SignInResDto memberInfo = authService.getMemberInfo(verifiedMember);
+	@GetMapping("/member/me")
+	public ResponseEntity<MemberInfoDto> findMemberInfo(VerifiedMember verifiedMember) {
+		MemberInfoDto memberInfo = authService.findMemberInfo(verifiedMember);
 		return ResponseEntity.ok(memberInfo);
 	}
+
 }
+
+
