@@ -79,4 +79,29 @@ public class RegisteredProductServiceTest {
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining("Registered product not found");
 	}
+
+	@Test
+	@DisplayName("등록 물품 단건 조회 - 조회 권한이 없는 경우 예외 테스트")
+	void findRegisteredProductTest_Exception2() {
+		//given
+		Long registeredProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(registeredProductId)).thenReturn(
+			Optional.of(RegisteredProduct.builder()
+				.id(1L)
+				.name("test product")
+				.description("test product description")
+				.images(List.of("image1", "image2"))
+				.member(Member.builder().id(2L).build())
+				.status(RegisteredStatus.PENDING)
+				.build()
+			)
+		);
+
+		//when & then
+		assertThatThrownBy(() -> registeredProductService.findRegisteredProduct(registeredProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("권한이 없습니다.");
+	}
 }
