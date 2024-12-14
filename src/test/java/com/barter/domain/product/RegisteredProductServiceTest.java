@@ -73,4 +73,27 @@ public class RegisteredProductServiceTest {
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("Registered product not found");
 	}
+
+	@Test
+	@DisplayName("등록 물품 삭제 - 수정 권한 예외 테스트")
+	void deleteRegisteredProductTest_Exception2() {
+		//given
+		Long registeredProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(registeredProductId)).thenReturn(
+			Optional.of(RegisteredProduct.builder()
+				.id(1L)
+				.status(RegisteredStatus.PENDING)
+				.member(Member.builder().id(2L).build())
+				.build()
+			)
+		);
+
+		//when & then
+		Assertions.assertThatThrownBy(() ->
+				registeredProductService.deleteRegisteredProduct(registeredProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("권한이 없습니다.");
+	}
 }
