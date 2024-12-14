@@ -178,4 +178,37 @@ public class RegisteredProductServiceTest {
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("PENDING 상태인 경우에만 등록 물품을 수정할 수 있습니다.");
 	}
+
+	@Test
+	@DisplayName("등록 물품 정보 수정 - 수정 후 이미지 개수 예외 테스트")
+	void updateRegisteredProductInfoTest_Exception4() {
+		//given
+		UpdateRegisteredProductInfoReqDto request = UpdateRegisteredProductInfoReqDto.builder()
+			.id(1L)
+			.deleteImageNames(new ArrayList<>())
+			.build();
+
+		MultipartFile imageFile = new MockMultipartFile("test image", "test".getBytes(StandardCharsets.UTF_8));
+		List<MultipartFile> multipartFiles = List.of(imageFile, imageFile);
+
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(request.getId())).thenReturn(
+			Optional.of(RegisteredProduct.builder()
+				.id(1L)
+				.name("test product")
+				.description("test description")
+				.images(new ArrayList<>(Arrays.asList("test image1", "test image2")))
+				.status(RegisteredStatus.PENDING)
+				.member(Member.builder().id(verifiedMemberId).build())
+				.build()
+			)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			registeredProductService.updateRegisteredProductInfo(request, multipartFiles, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("1 ~ 3개 사이의 이미지를 가져야 합니다.");
+	}
 }
