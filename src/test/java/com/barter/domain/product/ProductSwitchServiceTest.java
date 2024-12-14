@@ -126,4 +126,32 @@ public class ProductSwitchServiceTest {
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("권한이 없습니다.");
 	}
+
+	@Test
+	@DisplayName("등록 물품 생성(제안물품을 등록물품으로) - 삭제 가능 상태 예외 테스트")
+	void createRegisteredProductFromSuggestedProductTest_Exception3() {
+		//given
+		Long suggestedProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		SuggestedProduct suggestedProduct = SuggestedProduct.builder()
+			.id(suggestedProductId)
+			.name("test product")
+			.description("test description")
+			.images(List.of("test image1", "test image2"))
+			.status(SuggestedStatus.SUGGESTING)
+			.member(Member.builder().id(1L).build())
+			.build();
+		suggestedProductRepository.save(suggestedProduct);
+
+		when(suggestedProductRepository.findById(suggestedProductId)).thenReturn(
+			Optional.of(suggestedProduct)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			productSwitchService.createRegisteredProductFromSuggestedProduct(suggestedProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("PENDING 상태인 경우에만 제안 물품을 삭제할 수 있습니다.");
+	}
 }
