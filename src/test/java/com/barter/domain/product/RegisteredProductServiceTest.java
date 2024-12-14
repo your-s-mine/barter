@@ -36,8 +36,8 @@ public class RegisteredProductServiceTest {
 	private RegisteredProductService registeredProductService;
 
 	@Test
-	@DisplayName("등록물품 생성 - 정상 작동 테스트")
-	public void createRegisteredProductTest_Successful() {
+	@DisplayName("등록 물품 생성 - 성공 테스트")
+	void createRegisteredProductTest_Success() {
 		//given
 		CreateRegisteredProductReqDto request = CreateRegisteredProductReqDto.builder()
 			.name("test product")
@@ -76,5 +76,28 @@ public class RegisteredProductServiceTest {
 		assertThat(response.getImages().size()).isEqualTo(2);
 		assertThat(response.getStatus()).isEqualTo(RegisteredStatus.PENDING.name());
 		assertThat(response.getMemberId()).isEqualTo(verifiedMemberId);
+	}
+
+	@Test
+	@DisplayName("등록 물품 생성 - 최대 이미지 개수 예외 테스트")
+	void createRegisteredProductTest_Exception1() {
+		//given
+		CreateRegisteredProductReqDto request = CreateRegisteredProductReqDto.builder()
+			.name("test product")
+			.description("test description")
+			.build();
+
+		MultipartFile imageFile = new MockMultipartFile(
+			"file", "test.png", "text/plain", "test".getBytes(StandardCharsets.UTF_8)
+		);
+		List<MultipartFile> multipartFiles = List.of(imageFile, imageFile, imageFile, imageFile);
+
+		Long verifiedMemberId = 1L;
+
+		//when && then
+		assertThatThrownBy(
+			() -> registeredProductService.createRegisteredProduct(request, multipartFiles, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("1 ~ 3개 사이의 이미지를 가져야 합니다.");
 	}
 }
