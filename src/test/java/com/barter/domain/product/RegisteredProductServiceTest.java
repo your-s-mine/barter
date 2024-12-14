@@ -147,4 +147,35 @@ public class RegisteredProductServiceTest {
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("권한이 없습니다.");
 	}
+
+	@Test
+	@DisplayName("등록 물품 정보 수정 - 수정 가능 상태 예외 테스트")
+	void updateRegisteredProductInfoTest_Exception3() {
+		//given
+		UpdateRegisteredProductInfoReqDto request = UpdateRegisteredProductInfoReqDto.builder()
+			.id(1L)
+			.build();
+
+		List<MultipartFile> multipartFiles = new ArrayList<>();
+
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(request.getId())).thenReturn(
+			Optional.of(RegisteredProduct.builder()
+				.id(1L)
+				.name("test product")
+				.description("test description")
+				.images(new ArrayList<>(Arrays.asList("test image1", "test image2")))
+				.status(RegisteredStatus.REGISTERING)
+				.member(Member.builder().id(verifiedMemberId).build())
+				.build()
+			)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			registeredProductService.updateRegisteredProductInfo(request, multipartFiles, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("PENDING 상태인 경우에만 등록 물품을 수정할 수 있습니다.");
+	}
 }
