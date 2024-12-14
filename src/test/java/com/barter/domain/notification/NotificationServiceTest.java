@@ -1,13 +1,13 @@
 package com.barter.domain.notification;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -32,7 +32,7 @@ public class NotificationServiceTest {
 		Long verifiedMemberId = 1L;
 
 		SseEmitter newEmitter = new SseEmitter();
-		Mockito.when(sseEmitters.saveEmitter(verifiedMemberId))
+		when(sseEmitters.saveEmitter(verifiedMemberId))
 			.thenReturn(newEmitter);
 
 		//when
