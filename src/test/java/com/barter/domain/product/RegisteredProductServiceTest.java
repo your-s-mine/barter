@@ -1,5 +1,10 @@
 package com.barter.domain.product;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.util.Optional;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,6 +13,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.barter.common.s3.S3Service;
+import com.barter.domain.member.entity.Member;
+import com.barter.domain.product.dto.request.UpdateRegisteredProductStatusReqDto;
+import com.barter.domain.product.dto.response.UpdateRegisteredProductStatusResDto;
+import com.barter.domain.product.entity.RegisteredProduct;
+import com.barter.domain.product.enums.RegisteredStatus;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.service.RegisteredProductService;
 
@@ -25,6 +35,38 @@ public class RegisteredProductServiceTest {
 	@Test
 	@DisplayName("등록 물품 상태 수정 - 성공 테스트")
 	void updateRegisteredProductStatusTest_Success() {
-		
+		//given
+		UpdateRegisteredProductStatusReqDto request = UpdateRegisteredProductStatusReqDto.builder()
+			.id(1L)
+			.status("REGISTERING")
+			.build();
+
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(request.getId())).thenReturn(
+			Optional.of(RegisteredProduct.builder()
+				.id(1L)
+				.status(RegisteredStatus.PENDING)
+				.member(Member.builder().id(1L).build())
+				.build()
+			)
+		);
+
+		when(registeredProductRepository.save(any())).thenReturn(
+			RegisteredProduct.builder()
+				.id(1L)
+				.status(RegisteredStatus.REGISTERING)
+				.build()
+		);
+
+		//when
+		UpdateRegisteredProductStatusResDto response = registeredProductService.updateRegisteredProductStatus(
+			request, verifiedMemberId
+		);
+
+		//then
+		assertThat(response).isNotNull();
+		assertThat(response.getId()).isEqualTo(request.getId());
+		assertThat(response.getStatus()).isEqualTo(request.getStatus());
 	}
 }
