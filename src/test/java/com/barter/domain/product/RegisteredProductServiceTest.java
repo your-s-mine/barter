@@ -69,4 +69,25 @@ public class RegisteredProductServiceTest {
 		assertThat(response.getId()).isEqualTo(request.getId());
 		assertThat(response.getStatus()).isEqualTo(request.getStatus());
 	}
+
+	@Test
+	@DisplayName("등록 물품 상태 수정 - 수정 등록 물품이 존재하지 않는 경우 예외 테스트")
+	void updateRegisteredProductStatusTest_Exception1() {
+		//given
+		UpdateRegisteredProductStatusReqDto request = UpdateRegisteredProductStatusReqDto.builder()
+			.id(1L)
+			.status("REGISTERING")
+			.build();
+
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(request.getId()))
+			.thenThrow(new IllegalArgumentException("Registered product not found"));
+
+		//when & then
+		assertThatThrownBy(() ->
+			registeredProductService.updateRegisteredProductStatus(request, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Registered product not found");
+	}
 }
