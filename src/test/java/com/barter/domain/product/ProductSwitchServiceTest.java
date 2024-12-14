@@ -80,4 +80,22 @@ public class ProductSwitchServiceTest {
 		assertThat(response.getMemberId()).isEqualTo(verifiedMemberId);
 		assertThat(suggestedProductRepository.count()).isEqualTo(0L);
 	}
+
+	@Test
+	@DisplayName("등록 물품 생성(제안물품을 등록물품으로) - 대상 제안 물품이 존재하지 않는 경우 예외 테스트")
+	void createRegisteredProductFromSuggestedProductTest_Exception1() {
+		//given
+		Long suggestedProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(suggestedProductRepository.findById(suggestedProductId)).thenThrow(
+			new IllegalArgumentException("Suggested product not found")
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			productSwitchService.createRegisteredProductFromSuggestedProduct(suggestedProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Suggested product not found");
+	}
 }
