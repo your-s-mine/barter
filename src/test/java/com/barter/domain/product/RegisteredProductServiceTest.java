@@ -63,4 +63,20 @@ public class RegisteredProductServiceTest {
 		assertThat(response.getImages()).containsExactly("image1", "image2");
 		assertThat(response.getStatus()).isEqualTo(RegisteredStatus.PENDING.name());
 	}
+
+	@Test
+	@DisplayName("등록 물품 단건 조회 - 조회 등록 물품이 없을 경우 예외 테스트")
+	void findRegisteredProductTest_Exception1() {
+		//given
+		Long registeredProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(registeredProductId))
+			.thenThrow(new IllegalArgumentException("Registered product not found"));
+
+		//when & then
+		assertThatThrownBy(() -> registeredProductService.findRegisteredProduct(registeredProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("Registered product not found");
+	}
 }
