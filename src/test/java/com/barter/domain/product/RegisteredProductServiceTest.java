@@ -93,4 +93,27 @@ public class RegisteredProductServiceTest {
 		assertThat(response.getImages().get(1)).isEqualTo("new image1");
 		assertThat(response.getImages().get(2)).isEqualTo("new image2");
 	}
+
+	@Test
+	@DisplayName("등록 물품 정보 수정 - 수정할 등록 물품이 없을 경우 예외 테스트")
+	void updateRegisteredProductInfoTest_Exception1() {
+		//given
+		UpdateRegisteredProductInfoReqDto request = UpdateRegisteredProductInfoReqDto.builder()
+			.id(1L)
+			.build();
+
+		List<MultipartFile> multipartFiles = new ArrayList<>();
+
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(request.getId())).thenThrow(
+			new IllegalArgumentException("Registered product not found")
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			registeredProductService.updateRegisteredProductInfo(request, multipartFiles, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Registered product not found");
+	}
 }
