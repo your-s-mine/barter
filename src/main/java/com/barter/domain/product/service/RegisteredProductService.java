@@ -15,6 +15,7 @@ import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductInfoReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductStatusReqDto;
 import com.barter.domain.product.dto.response.FindRegisteredProductResDto;
+import com.barter.domain.product.dto.response.UpdateRegisteredProductStatusResDto;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.validator.ImageCountValidator;
@@ -83,14 +84,17 @@ public class RegisteredProductService {
 	}
 
 	@Transactional
-	public void updateRegisteredProductStatus(UpdateRegisteredProductStatusReqDto request, Long verifiedMemberId) {
+	public UpdateRegisteredProductStatusResDto updateRegisteredProductStatus(
+		UpdateRegisteredProductStatusReqDto request, Long verifiedMemberId
+	) {
 		RegisteredProduct foundProduct = registeredProductRepository.findById(request.getId())
 			.orElseThrow(() -> new IllegalArgumentException("Registered product not found"));
 
 		foundProduct.checkPermission(verifiedMemberId);
 
 		foundProduct.updateStatus(request.getStatus());
-		registeredProductRepository.save(foundProduct);
+		RegisteredProduct updatedProduct = registeredProductRepository.save(foundProduct);
+		return UpdateRegisteredProductStatusResDto.form(updatedProduct);
 	}
 
 	@Transactional
