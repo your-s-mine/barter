@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import java.util.List;
 import java.util.Optional;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,5 +55,22 @@ public class RegisteredProductServiceTest {
 
 		//then
 		assertThat(registeredProductRepository.count()).isEqualTo(0L);
+	}
+
+	@Test
+	@DisplayName("등록 물품 삭제 - 대상 등록 물품이 존재하지 않는 경우 예외 테스트")
+	void deleteRegisteredProductTest_Exception1() {
+		//given
+		Long registeredProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(registeredProductId))
+			.thenThrow(new IllegalArgumentException("Registered product not found"));
+
+		//when & then
+		Assertions.assertThatThrownBy(() ->
+				registeredProductService.deleteRegisteredProduct(registeredProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Registered product not found");
 	}
 }
