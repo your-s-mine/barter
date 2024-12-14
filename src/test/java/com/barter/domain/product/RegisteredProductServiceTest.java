@@ -96,4 +96,27 @@ public class RegisteredProductServiceTest {
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("권한이 없습니다.");
 	}
+
+	@Test
+	@DisplayName("등록 물품 삭제 - 삭제 가능 상태 예외 테스트")
+	void deleteRegisteredProductTest_Exception3() {
+		//given
+		Long registeredProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(registeredProductId)).thenReturn(
+			Optional.of(RegisteredProduct.builder()
+				.id(1L)
+				.status(RegisteredStatus.REGISTERING)
+				.member(Member.builder().id(1L).build())
+				.build()
+			)
+		);
+
+		//when & then
+		Assertions.assertThatThrownBy(() ->
+				registeredProductService.deleteRegisteredProduct(registeredProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("PENDING 상태인 경우에만 등록 물품을 삭제할 수 있습니다.");
+	}
 }
