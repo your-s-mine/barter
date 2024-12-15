@@ -40,7 +40,7 @@ public class SuggestedProductServiceTest {
 
 	@Test
 	@DisplayName("제안 물품 정보 수정 - 성공 테스트")
-	void updateSuggestedProductTest_Success() {
+	void updateSuggestedProductInfoTest_Success() {
 		//given
 		UpdateSuggestedProductInfoReqDto request = UpdateSuggestedProductInfoReqDto.builder()
 			.id(1L)
@@ -95,7 +95,7 @@ public class SuggestedProductServiceTest {
 
 	@Test
 	@DisplayName("제안 물품 정보 수정 - 수정할 제안 물품이 없을 경우 예외 테스트")
-	void updateSuggestedProductTest_Exception1() {
+	void updateSuggestedProductInfoTest_Exception1() {
 		//given
 		UpdateSuggestedProductInfoReqDto request = UpdateSuggestedProductInfoReqDto.builder()
 			.id(1L)
@@ -118,7 +118,7 @@ public class SuggestedProductServiceTest {
 
 	@Test
 	@DisplayName("제안 물품 정보 수정 - 수정 권한 예외 테스트")
-	void updateSuggestedProductTest_Exception2() {
+	void updateSuggestedProductInfoTest_Exception2() {
 		//given
 		UpdateSuggestedProductInfoReqDto request = UpdateSuggestedProductInfoReqDto.builder()
 			.id(1L)
@@ -149,7 +149,7 @@ public class SuggestedProductServiceTest {
 
 	@Test
 	@DisplayName("제안 물품 정보 수정 - 수정 가능 상태 예외 테스트")
-	void updateSuggestedProductTest_Exception3() {
+	void updateSuggestedProductInfoTest_Exception3() {
 		//given
 		UpdateSuggestedProductInfoReqDto request = UpdateSuggestedProductInfoReqDto.builder()
 			.id(1L)
@@ -180,7 +180,7 @@ public class SuggestedProductServiceTest {
 
 	@Test
 	@DisplayName("제안 물품 정보 수정 - 수정 후 이미지 개수 예외 테스트")
-	void updateSuggestedProductTest_Exception4() {
+	void updateSuggestedProductInfoTest_Exception4() {
 		//given
 		UpdateSuggestedProductInfoReqDto request = UpdateSuggestedProductInfoReqDto.builder()
 			.id(1L)
