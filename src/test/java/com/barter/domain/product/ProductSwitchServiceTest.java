@@ -98,4 +98,32 @@ public class ProductSwitchServiceTest {
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("Registered product not found");
 	}
+
+	@Test
+	@DisplayName("제안 물품 생성(등록물품을 제안물품으로) - 권한 예외 테스트")
+	void createSuggestedProductFromRegisteredProductTest_Exception2() {
+		//given
+		Long registeredProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		RegisteredProduct registeredProduct = RegisteredProduct.builder()
+			.id(registeredProductId)
+			.name("test product")
+			.description("test description")
+			.images(List.of("test image1", "test image2"))
+			.status(RegisteredStatus.PENDING)
+			.member(Member.builder().id(2L).build())
+			.build();
+		registeredProductRepository.save(registeredProduct);
+
+		when(registeredProductRepository.findById(registeredProductId)).thenReturn(
+			Optional.of(registeredProduct)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			productSwitchService.createSuggestedProductFromRegisteredProduct(registeredProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("권한이 없습니다.");
+	}
 }
