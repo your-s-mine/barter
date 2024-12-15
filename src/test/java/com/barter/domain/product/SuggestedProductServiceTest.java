@@ -77,4 +77,27 @@ public class SuggestedProductServiceTest {
 		assertThat(response.getStatus()).isEqualTo(SuggestedStatus.PENDING.name());
 		assertThat(response.getMemberId()).isEqualTo(verifiedMemberId);
 	}
+
+	@Test
+	@DisplayName("제안 물품 생성 - 최대 이미지 개수 예외 테스트")
+	void createSuggestedProductTest_Exception1() {
+		//given
+		CreateSuggestedProductReqDto request = CreateSuggestedProductReqDto.builder()
+			.name("test product")
+			.description("test description")
+			.build();
+
+		MultipartFile imageFile = new MockMultipartFile(
+			"file", "test.png", "test/plain", "test".getBytes(StandardCharsets.UTF_8)
+		);
+		List<MultipartFile> multipartFiles = List.of(imageFile, imageFile, imageFile, imageFile);
+
+		Long verifiedMemberId = 1L;
+
+		//when & then
+		assertThatThrownBy(() ->
+			suggestedProductService.createSuggestedProduct(request, multipartFiles, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("1 ~ 3개 사이의 이미지를 가져야 합니다.");
+	}
 }
