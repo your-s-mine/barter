@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import java.util.List;
 import java.util.Optional;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,5 +63,22 @@ public class SuggestedProductServiceTest {
 		assertThat(response.getDescription()).isEqualTo("test description");
 		assertThat(response.getImages()).containsExactly("test image1", "test image2");
 		assertThat(response.getStatus()).isEqualTo(SuggestedStatus.PENDING.name());
+	}
+
+	@Test
+	@DisplayName("제안 물품 단건 조회 - 조회 제안 물품이 없을 경우 예외 테스트")
+	void findSuggestedProductTest_Exception1() {
+		//given
+		Long suggestedProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(suggestedProductRepository.findById(suggestedProductId))
+			.thenThrow(new IllegalArgumentException("Suggested product not found"));
+
+		//when & then
+		Assertions.assertThatThrownBy(() ->
+				suggestedProductService.findSuggestedProduct(suggestedProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Suggested product not found");
 	}
 }
