@@ -92,4 +92,27 @@ public class SuggestedProductServiceTest {
 		assertThat(response.getImages().get(1)).isEqualTo("new image1");
 		assertThat(response.getImages().get(2)).isEqualTo("new image2");
 	}
+
+	@Test
+	@DisplayName("제안 물품 정보 수정 - 수정할 제안 물품이 없을 경우 예외 테스트")
+	void updateSuggestedProductTest_Exception1() {
+		//given
+		UpdateSuggestedProductInfoReqDto request = UpdateSuggestedProductInfoReqDto.builder()
+			.id(1L)
+			.build();
+
+		List<MultipartFile> multipartFiles = new ArrayList<>();
+
+		Long verifiedMemberId = 1L;
+
+		when(suggestedProductRepository.findById(request.getId())).thenThrow(
+			new IllegalArgumentException("Suggested product not found")
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			suggestedProductService.updateSuggestedProductInfo(request, multipartFiles, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Suggested product not found");
+	}
 }
