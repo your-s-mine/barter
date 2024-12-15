@@ -177,4 +177,37 @@ public class SuggestedProductServiceTest {
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("PENDING 상태인 경우에만 제안 물품을 수정할 수 있습니다.");
 	}
+
+	@Test
+	@DisplayName("제안 물품 정보 수정 - 수정 후 이미지 개수 예외 테스트")
+	void updateSuggestedProductTest_Exception4() {
+		//given
+		UpdateSuggestedProductInfoReqDto request = UpdateSuggestedProductInfoReqDto.builder()
+			.id(1L)
+			.deleteImageNames(new ArrayList<>())
+			.build();
+
+		MultipartFile imageFile = new MockMultipartFile("test image", "test".getBytes(StandardCharsets.UTF_8));
+		List<MultipartFile> multipartFiles = List.of(imageFile, imageFile);
+
+		Long verifiedMemberId = 1L;
+
+		when(suggestedProductRepository.findById(request.getId())).thenReturn(
+			Optional.of(SuggestedProduct.builder()
+				.id(1L)
+				.name("test product")
+				.description("test description")
+				.images(new ArrayList<>(Arrays.asList("test image1", "test image2")))
+				.status(SuggestedStatus.PENDING)
+				.member(Member.builder().id(verifiedMemberId).build())
+				.build()
+			)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			suggestedProductService.updateSuggestedProductInfo(request, multipartFiles, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("1 ~ 3개 사이의 이미지를 가져야 합니다.");
+	}
 }
