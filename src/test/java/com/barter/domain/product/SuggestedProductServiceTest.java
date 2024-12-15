@@ -69,4 +69,26 @@ public class SuggestedProductServiceTest {
 		assertThat(response.getId()).isEqualTo(request.getId());
 		assertThat(response.getStatus()).isEqualTo(request.getStatus());
 	}
+
+	@Test
+	@DisplayName("제안 물품 상태 수정 - 수정 제안 물품이 존재하지 않는 경우 예외 테스트")
+	void updateSuggestedProductStatusTest_Exception1() {
+		//given
+		UpdateSuggestedProductStatusReqDto request = UpdateSuggestedProductStatusReqDto.builder()
+			.id(1L)
+			.status("SUGGESTING")
+			.build();
+
+		Long verifiedMemberId = 1L;
+
+		when(suggestedProductRepository.findById(request.getId())).thenThrow(
+			new IllegalArgumentException("Suggested product not found")
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			suggestedProductService.updateSuggestedProductStatus(request, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Suggested product not found");
+	}
 }
