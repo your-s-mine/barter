@@ -95,4 +95,27 @@ public class SuggestedProductServiceTest {
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("권한이 없습니다.");
 	}
+
+	@Test
+	@DisplayName("제안 물품 삭제 - 삭제 가능 상태 예외 테스트")
+	void deleteSuggestedProductTest_Exception3() {
+		//given
+		Long suggestedProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(suggestedProductRepository.findById(suggestedProductId)).thenReturn(
+			Optional.of(SuggestedProduct.builder()
+				.id(1L)
+				.status(SuggestedStatus.ACCEPTED)
+				.member(Member.builder().id(verifiedMemberId).build())
+				.build()
+			)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			suggestedProductService.deleteSuggestedProduct(suggestedProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("PENDING 상태인 경우에만 제안 물품을 삭제할 수 있습니다.");
+	}
 }
