@@ -62,4 +62,21 @@ public class NotificationServiceTest {
 		assertThat(response.getNotificationId()).isEqualTo(notificationId);
 		assertThat(response.isRead()).isEqualTo(true);
 	}
+
+	@Test
+	@DisplayName("알림 상태 수정 - 대상 알림 정보가 존재하지 않는 경우 예외 테스트")
+	void updateNotificationTest_Exception1() {
+		//given
+		Long notificationId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(notificationRepository.findById(notificationId))
+			.thenThrow(new IllegalArgumentException("Notification not found"));
+
+		//when & then
+		assertThatThrownBy(() ->
+			notificationService.updateNotificationStatus(notificationId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Notification not found");
+	}
 }
