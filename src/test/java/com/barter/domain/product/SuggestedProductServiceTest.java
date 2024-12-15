@@ -146,4 +146,35 @@ public class SuggestedProductServiceTest {
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("권한이 없습니다.");
 	}
+
+	@Test
+	@DisplayName("제안 물품 정보 수정 - 수정 가능 상태 예외 테스트")
+	void updateSuggestedProductTest_Exception3() {
+		//given
+		UpdateSuggestedProductInfoReqDto request = UpdateSuggestedProductInfoReqDto.builder()
+			.id(1L)
+			.build();
+
+		List<MultipartFile> multipartFiles = new ArrayList<>();
+
+		Long verifiedMemberId = 1L;
+
+		when(suggestedProductRepository.findById(request.getId())).thenReturn(
+			Optional.of(SuggestedProduct.builder()
+				.id(1L)
+				.name("test product")
+				.description("test description")
+				.images(new ArrayList<>(Arrays.asList("test image1", "test image2")))
+				.status(SuggestedStatus.ACCEPTED)
+				.member(Member.builder().id(verifiedMemberId).build())
+				.build()
+			)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			suggestedProductService.updateSuggestedProductInfo(request, multipartFiles, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("PENDING 상태인 경우에만 제안 물품을 수정할 수 있습니다.");
+	}
 }
