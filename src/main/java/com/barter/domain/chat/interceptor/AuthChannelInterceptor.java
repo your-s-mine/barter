@@ -29,6 +29,10 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
 			log.info("accessor Headers :{}", accessor.getMessageHeaders());
 			log.info("Auth token: {}", authToken);
 			jwtUtil.validateToken(authToken);
+
+			String userId = jwtUtil.getMemberClaims(authToken).getSubject();
+			log.info("userId: {}", userId);
+
 		}
 
 		// 추가로 SUBSCRIBE, DISCONNECT 와 같은 로직도 여기서 구현 가능하다.
