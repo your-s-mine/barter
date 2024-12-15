@@ -72,4 +72,27 @@ public class SuggestedProductServiceTest {
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("Suggested product not found");
 	}
+
+	@Test
+	@DisplayName("제안 물품 삭제 - 수정 권한 예외 테스트")
+	void deleteSuggestedProductTest_Exception2() {
+		//given
+		Long suggestedProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(suggestedProductRepository.findById(suggestedProductId)).thenReturn(
+			Optional.of(SuggestedProduct.builder()
+				.id(1L)
+				.status(SuggestedStatus.PENDING)
+				.member(Member.builder().id(2L).build())
+				.build()
+			)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			suggestedProductService.deleteSuggestedProduct(suggestedProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("권한이 없습니다.");
+	}
 }
