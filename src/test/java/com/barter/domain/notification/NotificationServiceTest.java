@@ -79,4 +79,27 @@ public class NotificationServiceTest {
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("Notification not found");
 	}
+
+	@Test
+	@DisplayName("알림 상태 수정 - 수정 권한 예외 테스트")
+	void updateNotificationTest_Exception2() {
+		//given
+		Long notificationId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(notificationRepository.findById(notificationId)).thenReturn(
+			Optional.of(Notification.builder()
+				.id(1L)
+				.isRead(false)
+				.memberId(2L)
+				.build()
+			)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			notificationService.updateNotificationStatus(notificationId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("권한이 없습니다.");
+	}
 }
