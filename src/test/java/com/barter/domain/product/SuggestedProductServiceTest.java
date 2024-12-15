@@ -55,4 +55,21 @@ public class SuggestedProductServiceTest {
 		//then
 		assertThat(suggestedProductRepository.count()).isEqualTo(0);
 	}
+
+	@Test
+	@DisplayName("제안 물품 삭제 - 대상 제안 물품이 존재하지 않는 경우 예외 테스트")
+	void deleteSuggestedProductTest_Exception1() {
+		//given
+		Long suggestedProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(suggestedProductRepository.findById(suggestedProductId))
+			.thenThrow(new IllegalArgumentException("Suggested product not found"));
+
+		//when & then
+		assertThatThrownBy(() ->
+			suggestedProductService.deleteSuggestedProduct(suggestedProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Suggested product not found");
+	}
 }
