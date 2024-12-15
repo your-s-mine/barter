@@ -81,4 +81,30 @@ public class SuggestedProductServiceTest {
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("Suggested product not found");
 	}
+
+	@Test
+	@DisplayName("제안 물품 단건 조회 - 조회 권한이 없는 경우 예외 테스트")
+	void findSuggestedProductTest_Exception2() {
+		//given
+		Long suggestedProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(suggestedProductRepository.findById(suggestedProductId)).thenReturn(
+			Optional.of(SuggestedProduct.builder()
+				.id(1L)
+				.name("test product")
+				.description("test description")
+				.images(List.of("test image1", "test image2"))
+				.member(Member.builder().id(2L).build())
+				.status(SuggestedStatus.PENDING)
+				.build()
+			)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			suggestedProductService.findSuggestedProduct(suggestedProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("권한이 없습니다.");
+	}
 }
