@@ -1,10 +1,10 @@
 package com.barter.domain.notification;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Optional;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,6 +49,23 @@ public class NotificationServiceTest {
 		notificationService.deleteNotification(notificationId, verifiedNotificationId);
 
 		//then
-		Assertions.assertThat(notificationRepository.count()).isEqualTo(0);
+		assertThat(notificationRepository.count()).isEqualTo(0);
+	}
+
+	@Test
+	@DisplayName("알림 삭제 - 대상 알림이 존재하지 않는 경우 예외 테스트")
+	void deleteNotificationTest_Exception1() {
+		//given
+		Long notificationId = 1L;
+		Long verifiedNotificationId = 1L;
+
+		when(notificationRepository.findById(notificationId))
+			.thenThrow(new IllegalArgumentException("Notification not found"));
+
+		//when & then
+		assertThatThrownBy(() ->
+			notificationService.deleteNotification(notificationId, verifiedNotificationId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Notification not found");
 	}
 }
