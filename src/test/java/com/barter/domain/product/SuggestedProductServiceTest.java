@@ -6,7 +6,6 @@ import static org.mockito.Mockito.*;
 import java.util.List;
 import java.util.Optional;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -76,8 +75,8 @@ public class SuggestedProductServiceTest {
 			.thenThrow(new IllegalArgumentException("Suggested product not found"));
 
 		//when & then
-		Assertions.assertThatThrownBy(() ->
-				suggestedProductService.findSuggestedProduct(suggestedProductId, verifiedMemberId))
+		assertThatThrownBy(() ->
+			suggestedProductService.findSuggestedProduct(suggestedProductId, verifiedMemberId))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("Suggested product not found");
 	}
