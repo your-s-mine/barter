@@ -27,6 +27,7 @@ import com.barter.domain.product.dto.request.SwitchSuggestedProductReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductInfoReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductStatusReqDto;
 import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
+import com.barter.domain.product.dto.response.UpdateSuggestedProductStatusResDto;
 import com.barter.domain.product.service.ProductSwitchService;
 import com.barter.domain.product.service.SuggestedProductService;
 
@@ -83,11 +84,11 @@ public class SuggestedProductController {
 
 	@PatchMapping("/status")
 	@ResponseStatus(HttpStatus.OK)
-	public void updateSuggestedProductStatus(
+	public UpdateSuggestedProductStatusResDto updateSuggestedProductStatus(
 		@RequestBody @Valid UpdateSuggestedProductStatusReqDto request,
 		VerifiedMember verifiedMember
 	) {
-		suggestedProductService.updateSuggestedProductStatus(request, verifiedMember.getId());
+		return suggestedProductService.updateSuggestedProductStatus(request, verifiedMember.getId());
 	}
 
 	@DeleteMapping("/{suggestedProductId}")
