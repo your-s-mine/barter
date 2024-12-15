@@ -35,6 +35,10 @@ public class ChatRoomService {
 		Member suggestMember = memberRepository.findById(member.getId())
 			.orElseThrow(() -> new IllegalArgumentException("해당하는 멤버가 없습니다."));
 
+		if (registerMember.equals(suggestMember)) {
+			throw new IllegalArgumentException("자기 자신을 초대할 수는 없습니다.");
+		}
+
 		// 채팅방 생성
 		ChatRoom chatRoom = ChatRoom.create();
 		chatRoomRepository.save(chatRoom);
