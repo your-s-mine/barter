@@ -81,7 +81,6 @@ public class NotificationServiceTest {
 			.isRead(true)
 			.memberId(2L)
 			.build();
-		notificationRepository.save(notification);
 
 		when(notificationRepository.findById(notificationId)).thenReturn(
 			Optional.of(notification)
@@ -92,5 +91,29 @@ public class NotificationServiceTest {
 			notificationService.deleteNotification(notificationId, verifiedNotificationId))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("권한이 없습니다.");
+	}
+
+	@Test
+	@DisplayName("알림 삭제 - 삭제 가능 상태 예외 테스트")
+	void deleteNotificationTest_Exception3() {
+		//given
+		Long notificationId = 1L;
+		Long verifiedNotificationId = 1L;
+
+		Notification notification = Notification.builder()
+			.id(1L)
+			.isRead(false)
+			.memberId(1L)
+			.build();
+
+		when(notificationRepository.findById(notificationId)).thenReturn(
+			Optional.of(notification)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			notificationService.deleteNotification(notificationId, verifiedNotificationId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("읽은 상태의 알람만 삭제할 수 있습니다.");
 	}
 }
