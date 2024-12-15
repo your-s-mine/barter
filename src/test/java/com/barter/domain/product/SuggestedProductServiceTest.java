@@ -91,4 +91,31 @@ public class SuggestedProductServiceTest {
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("Suggested product not found");
 	}
+
+	@Test
+	@DisplayName("제안 물품 상태 수정 - 수정 권한 예외 테스트")
+	void updateSuggestedProductStatusTest_Exception2() {
+		//given
+		UpdateSuggestedProductStatusReqDto request = UpdateSuggestedProductStatusReqDto.builder()
+			.id(1L)
+			.status("SUGGESTING")
+			.build();
+
+		Long verifiedMemberId = 2L;
+
+		when(suggestedProductRepository.findById(request.getId())).thenReturn(
+			Optional.of(SuggestedProduct.builder()
+				.id(1L)
+				.status(SuggestedStatus.PENDING)
+				.member(Member.builder().id(1L).build())
+				.build()
+			)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			suggestedProductService.updateSuggestedProductStatus(request, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("권한이 없습니다.");
+	}
 }
