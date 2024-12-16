@@ -6,14 +6,14 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class OAuthLoginMemberInfo {
+public class LoginOAuthMemberDto {
 
 	private OAuthProvider provider;
 	private String id;
 	private String nickname;
 
 	@Builder
-	public OAuthLoginMemberInfo(OAuthProvider provider, String id, String nickname) {
+	public LoginOAuthMemberDto(OAuthProvider provider, String id, String nickname) {
 		this.provider = provider;
 		this.id = id;
 		this.nickname = nickname;

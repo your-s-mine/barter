@@ -1,7 +1,7 @@
 package com.barter.domain.member.entity;
 
 import com.barter.domain.BaseTimeStampEntity;
-import com.barter.domain.member.enums.JoinPath;
+import com.barter.domain.oauth.enums.OAuthProvider;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,21 +29,21 @@ public class Member extends BaseTimeStampEntity {
 	private String email;
 	private String nickname;
 	private String password;
-	private String oauthId;
-	private String profileImage;
 	@Enumerated(EnumType.STRING)
-	private JoinPath joinPath;
+	private OAuthProvider provider;
+	private String providerId;
+	private String profileImage;
 
 	@Builder
-	public Member(Long id, String email, String nickname, String password, String oauthId, String profileImage,
-		JoinPath joinPath) {
+	public Member(Long id, String email, String nickname, String password, OAuthProvider provider, String providerId,
+		String profileImage) {
 		this.id = id;
 		this.email = email;
 		this.nickname = nickname;
 		this.password = password;
-		this.oauthId = oauthId;
+		this.provider = provider;
+		this.providerId = providerId;
 		this.profileImage = profileImage;
-		this.joinPath = joinPath;
 	}
 
 	public static Member createBasicMember(String email, String hashedPassword, String nickname) {
@@ -51,7 +51,7 @@ public class Member extends BaseTimeStampEntity {
 			.email(email)
 			.password(hashedPassword)
 			.nickname(nickname)
-			.joinPath(JoinPath.BASIC)
+			.provider(OAuthProvider.BASIC)
 			.build();
 	}
 
