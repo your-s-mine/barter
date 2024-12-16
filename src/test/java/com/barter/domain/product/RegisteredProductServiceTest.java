@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -26,8 +28,10 @@ import org.springframework.web.multipart.MultipartFile;
 import com.barter.common.s3.S3Service;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
+import com.barter.domain.product.dto.request.UpdateRegisteredProductInfoReqDto;
 import com.barter.domain.product.dto.response.CreateRegisteredProductResDto;
 import com.barter.domain.product.dto.response.FindRegisteredProductResDto;
+import com.barter.domain.product.dto.response.UpdateRegisteredProductInfoResDto;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.enums.RegisteredStatus;
 import com.barter.domain.product.repository.RegisteredProductRepository;
@@ -59,9 +63,6 @@ public class RegisteredProductServiceTest {
 		List<MultipartFile> multipartFiles = List.of(imageFile, imageFile);
 
 		Long verifiedMemberId = 1L;
-		Pageable pageable = PageRequest.of(
-			0, 10, Sort.by(Sort.Direction.DESC, "createdAt")
-		);
 
 		when(s3Service.uploadFile(multipartFiles)).thenReturn(List.of("testImage1", "testImage2"));
 
@@ -158,7 +159,7 @@ public class RegisteredProductServiceTest {
 		//when & then
 		assertThatThrownBy(() -> registeredProductService.findRegisteredProduct(registeredProductId, verifiedMemberId))
 			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessageContaining("Registered product not found");
+			.hasMessage("Registered product not found");
 	}
 
 	@Test
@@ -183,7 +184,7 @@ public class RegisteredProductServiceTest {
 		//when & then
 		assertThatThrownBy(() -> registeredProductService.findRegisteredProduct(registeredProductId, verifiedMemberId))
 			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessageContaining("권한이 없습니다.");
+			.hasMessage("권한이 없습니다.");
 	}
 
 	@Test
@@ -239,5 +240,179 @@ public class RegisteredProductServiceTest {
 		assertThat(response.getMetadata().number()).isEqualTo(0);
 		assertThat(Objects.requireNonNull(response.getMetadata()).totalElements()).isEqualTo(3);
 		assertThat(response.getMetadata().totalPages()).isEqualTo(1);
+	}
+
+	@Test
+	@DisplayName("등록 물품 정보 수정 - 성공 테스트")
+	void updateRegisteredProductInfoTest_Success() {
+		//given
+		UpdateRegisteredProductInfoReqDto request = UpdateRegisteredProductInfoReqDto.builder()
+			.id(1L)
+			.name("update product name")
+			.description("update product description")
+			.deleteImageNames(List.of("test image1"))
+			.build();
+
+		MultipartFile imageFile = new MockMultipartFile("test image", "test".getBytes(StandardCharsets.UTF_8));
+		List<MultipartFile> multipartFiles = List.of(imageFile, imageFile);
+
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(request.getId())).thenReturn(
+			Optional.of(RegisteredProduct.builder()
+				.id(1L)
+				.name("test product")
+				.description("test description")
+				.images(new ArrayList<>(Arrays.asList("test image1", "test image2")))
+				.status(RegisteredStatus.PENDING)
+				.member(Member.builder().id(verifiedMemberId).build())
+				.build()
+			)
+		);
+
+		when(s3Service.uploadFile(multipartFiles)).thenReturn(List.of("new image1, new image2"));
+
+		when(registeredProductRepository.save(any())).thenReturn(
+			RegisteredProduct.builder()
+				.id(1L)
+				.name(request.getName())
+				.description(request.getDescription())
+				.images(List.of("test image2", "new image1", "new image2"))
+				.status(RegisteredStatus.PENDING)
+				.member(Member.builder().id(verifiedMemberId).build())
+				.build()
+		);
+
+		//when
+		UpdateRegisteredProductInfoResDto response = registeredProductService.updateRegisteredProductInfo(
+			request, multipartFiles, verifiedMemberId
+		);
+
+		//then
+		assertThat(response).isNotNull();
+		assertThat(response.getName()).isEqualTo(request.getName());
+		assertThat(response.getDescription()).isEqualTo(request.getDescription());
+		assertThat(response.getImages().size()).isEqualTo(3);
+		assertThat(response.getImages().get(0)).isEqualTo("test image2");
+		assertThat(response.getImages().get(1)).isEqualTo("new image1");
+		assertThat(response.getImages().get(2)).isEqualTo("new image2");
+	}
+
+	@Test
+	@DisplayName("등록 물품 정보 수정 - 수정할 등록 물품이 없을 경우 예외 테스트")
+	void updateRegisteredProductInfoTest_Exception1() {
+		//given
+		UpdateRegisteredProductInfoReqDto request = UpdateRegisteredProductInfoReqDto.builder()
+			.id(1L)
+			.build();
+
+		List<MultipartFile> multipartFiles = new ArrayList<>();
+
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(request.getId())).thenThrow(
+			new IllegalArgumentException("Registered product not found")
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			registeredProductService.updateRegisteredProductInfo(request, multipartFiles, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Registered product not found");
+	}
+
+	@Test
+	@DisplayName("등록 물품 정보 수정 - 수정 권한 예외 테스트")
+	void updateRegisteredProductInfoTest_Exception2() {
+		//given
+		UpdateRegisteredProductInfoReqDto request = UpdateRegisteredProductInfoReqDto.builder()
+			.id(1L)
+			.build();
+
+		List<MultipartFile> multipartFiles = new ArrayList<>();
+
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(request.getId())).thenReturn(
+			Optional.of(RegisteredProduct.builder()
+				.id(1L)
+				.name("test product")
+				.description("test description")
+				.images(new ArrayList<>(Arrays.asList("test image1", "test image2")))
+				.status(RegisteredStatus.PENDING)
+				.member(Member.builder().id(2L).build())
+				.build()
+			)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			registeredProductService.updateRegisteredProductInfo(request, multipartFiles, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("권한이 없습니다.");
+	}
+
+	@Test
+	@DisplayName("등록 물품 정보 수정 - 수정 가능 상태 예외 테스트")
+	void updateRegisteredProductInfoTest_Exception3() {
+		//given
+		UpdateRegisteredProductInfoReqDto request = UpdateRegisteredProductInfoReqDto.builder()
+			.id(1L)
+			.build();
+
+		List<MultipartFile> multipartFiles = new ArrayList<>();
+
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(request.getId())).thenReturn(
+			Optional.of(RegisteredProduct.builder()
+				.id(1L)
+				.name("test product")
+				.description("test description")
+				.images(new ArrayList<>(Arrays.asList("test image1", "test image2")))
+				.status(RegisteredStatus.REGISTERING)
+				.member(Member.builder().id(verifiedMemberId).build())
+				.build()
+			)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			registeredProductService.updateRegisteredProductInfo(request, multipartFiles, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("PENDING 상태인 경우에만 등록 물품을 수정할 수 있습니다.");
+	}
+
+	@Test
+	@DisplayName("등록 물품 정보 수정 - 수정 후 이미지 개수 예외 테스트")
+	void updateRegisteredProductInfoTest_Exception4() {
+		//given
+		UpdateRegisteredProductInfoReqDto request = UpdateRegisteredProductInfoReqDto.builder()
+			.id(1L)
+			.deleteImageNames(new ArrayList<>())
+			.build();
+
+		MultipartFile imageFile = new MockMultipartFile("test image", "test".getBytes(StandardCharsets.UTF_8));
+		List<MultipartFile> multipartFiles = List.of(imageFile, imageFile);
+
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(request.getId())).thenReturn(
+			Optional.of(RegisteredProduct.builder()
+				.id(1L)
+				.name("test product")
+				.description("test description")
+				.images(new ArrayList<>(Arrays.asList("test image1", "test image2")))
+				.status(RegisteredStatus.PENDING)
+				.member(Member.builder().id(verifiedMemberId).build())
+				.build()
+			)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			registeredProductService.updateRegisteredProductInfo(request, multipartFiles, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("1 ~ 3개 사이의 이미지를 가져야 합니다.");
 	}
 }
