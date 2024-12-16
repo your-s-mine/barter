@@ -23,7 +23,7 @@ import org.springframework.data.web.PagedModel;
 
 import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.member.entity.Member;
-import com.barter.domain.member.enums.JoinPath;
+import com.barter.domain.oauth.enums.OAuthProvider;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.entity.TradeProduct;
@@ -85,7 +85,7 @@ class PeriodTradeServiceTest {
 			.email("test@email.com")
 			.nickname("100th member")
 			.password("sample123")
-			.joinPath(JoinPath.BASIC)
+			.provider(OAuthProvider.BASIC)
 			.build();
 
 		registeredProduct = RegisteredProduct.builder()
