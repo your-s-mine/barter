@@ -46,7 +46,8 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 	@Builder
 	public RegisteredProduct(
 		Long id, String name, String description, List<String> images, Member member, RegisteredStatus status
-	) {this.id = id;
+	) {
+		this.id = id;
 		this.name = name;
 		this.description = description;
 		this.images = images;
