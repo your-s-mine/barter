@@ -505,4 +505,92 @@ public class SuggestedProductServiceTest {
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("권한이 없습니다.");
 	}
+
+	@Test
+	@DisplayName("제안 물품 삭제 - 성공 테스트")
+	void deleteSuggestedProductTest_Success() {
+		//given
+		Long suggestedProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		SuggestedProduct testProduct = SuggestedProduct.builder()
+			.id(suggestedProductId)
+			.status(SuggestedStatus.PENDING)
+			.images(List.of("image1", "image2"))
+			.member(Member.builder().id(verifiedMemberId).build())
+			.build();
+		suggestedProductRepository.save(testProduct);
+
+		when(suggestedProductRepository.findById(suggestedProductId))
+			.thenReturn(Optional.of(testProduct));
+
+		//when
+		suggestedProductService.deleteSuggestedProduct(suggestedProductId, verifiedMemberId);
+
+		//then
+		assertThat(suggestedProductRepository.count()).isEqualTo(0);
+	}
+
+	@Test
+	@DisplayName("제안 물품 삭제 - 대상 제안 물품이 존재하지 않는 경우 예외 테스트")
+	void deleteSuggestedProductTest_Exception1() {
+		//given
+		Long suggestedProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(suggestedProductRepository.findById(suggestedProductId))
+			.thenThrow(new IllegalArgumentException("Suggested product not found"));
+
+		//when & then
+		assertThatThrownBy(() ->
+			suggestedProductService.deleteSuggestedProduct(suggestedProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Suggested product not found");
+	}
+
+	@Test
+	@DisplayName("제안 물품 삭제 - 수정 권한 예외 테스트")
+	void deleteSuggestedProductTest_Exception2() {
+		//given
+		Long suggestedProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(suggestedProductRepository.findById(suggestedProductId)).thenReturn(
+			Optional.of(SuggestedProduct.builder()
+				.id(1L)
+				.status(SuggestedStatus.PENDING)
+				.member(Member.builder().id(2L).build())
+				.build()
+			)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			suggestedProductService.deleteSuggestedProduct(suggestedProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("권한이 없습니다.");
+	}
+
+	@Test
+	@DisplayName("제안 물품 삭제 - 삭제 가능 상태 예외 테스트")
+	void deleteSuggestedProductTest_Exception3() {
+		//given
+		Long suggestedProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(suggestedProductRepository.findById(suggestedProductId)).thenReturn(
+			Optional.of(SuggestedProduct.builder()
+				.id(1L)
+				.status(SuggestedStatus.ACCEPTED)
+				.member(Member.builder().id(verifiedMemberId).build())
+				.build()
+			)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			suggestedProductService.deleteSuggestedProduct(suggestedProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("PENDING 상태인 경우에만 제안 물품을 삭제할 수 있습니다.");
+	}
 }
