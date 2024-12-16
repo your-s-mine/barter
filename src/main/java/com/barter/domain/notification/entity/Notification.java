@@ -36,9 +36,10 @@ public class Notification extends BaseTimeStampEntity {
 
 	@Builder
 	public Notification(
-		String message, TradeType tradeType, Long tradeId,
+		Long id, String message, TradeType tradeType, Long tradeId,
 		NotificationType notificationType, boolean isRead, Long memberId
 	) {
+		this.id = id;
 		this.message = message;
 		this.tradeType = tradeType;
 		this.tradeId = tradeId;
