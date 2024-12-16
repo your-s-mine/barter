@@ -13,6 +13,7 @@ import com.barter.domain.chat.repository.ChatRoomRepository;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.member.repository.MemberRepository;
 import com.barter.domain.product.entity.TradeProduct;
+import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.repository.TradeProductRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class ChatRoomService {
 	private final ChatRoomRepository chatRoomRepository;
 	private final MemberRepository memberRepository;
 	private final TradeProductRepository tradeProductRepository;
+	private final RegisteredProductRepository registeredProductRepository;
 
 	@Transactional
 	public CreateChatRoomResDto createChatRoom(VerifiedMember member, CreateChatRoomReqDto reqDto) {
@@ -41,6 +43,8 @@ public class ChatRoomService {
 
 		TradeProduct tradeProduct = tradeProductRepository.findById(reqDto.getTradeProductId())
 			.orElseThrow(() -> new IllegalArgumentException("해당하는 교환 제품 정보가 없습니다."));
+
+		// TODO : reqDto 로 들어오는 registerMemberId 가 해당 tradeProductId 값을 가지는 교환의 멤버인지 확인 로직 필요
 
 		// 채팅방 생성
 		ChatRoom chatRoom = ChatRoom.create(tradeProduct);
