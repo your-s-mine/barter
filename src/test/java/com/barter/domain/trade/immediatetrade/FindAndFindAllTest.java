@@ -23,9 +23,6 @@ import org.springframework.data.web.PagedModel;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
 import com.barter.domain.product.entity.RegisteredProduct;
-import com.barter.domain.product.repository.RegisteredProductRepository;
-import com.barter.domain.product.repository.SuggestedProductRepository;
-import com.barter.domain.product.repository.TradeProductRepository;
 import com.barter.domain.trade.enums.TradeStatus;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateImmediateTradeReqDto;
 import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeResDto;
@@ -37,7 +34,6 @@ import com.barter.domain.trade.immediatetrade.service.ImmediateTradeService;
 public class FindAndFindAllTest {
 	@Mock
 	ImmediateTradeRepository immediateTradeRepository;
-
 	@InjectMocks
 	ImmediateTradeService immediateTradeService;
 

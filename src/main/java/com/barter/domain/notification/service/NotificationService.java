@@ -9,6 +9,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.barter.domain.notification.SseEmitters;
 import com.barter.domain.notification.dto.response.FindNotificationResDto;
+import com.barter.domain.notification.dto.response.UpdateNotificationStatusResDto;
 import com.barter.domain.notification.entity.Notification;
 import com.barter.domain.notification.respository.NotificationRepository;
 
@@ -59,14 +60,17 @@ public class NotificationService {
 	}
 
 	@Transactional
-	public void updateNotificationStatus(Long notificationId, Long verifiedMemberId) {
+	public UpdateNotificationStatusResDto updateNotificationStatus(
+		Long notificationId, Long verifiedMemberId
+	) {
 		Notification foundNotification = notificationRepository.findById(notificationId)
 			.orElseThrow(() -> new IllegalArgumentException("Notification not found"));
 
 		foundNotification.checkPermission(verifiedMemberId);
 
 		foundNotification.updateStatus();
-		notificationRepository.save(foundNotification);
+		Notification updatedNotification = notificationRepository.save(foundNotification);
+		return UpdateNotificationStatusResDto.from(updatedNotification);
 	}
 
 	@Transactional
