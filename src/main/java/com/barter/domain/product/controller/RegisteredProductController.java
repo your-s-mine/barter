@@ -26,7 +26,9 @@ import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.SwitchRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductInfoReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductStatusReqDto;
+import com.barter.domain.product.dto.response.CreateRegisteredProductResDto;
 import com.barter.domain.product.dto.response.FindRegisteredProductResDto;
+import com.barter.domain.product.dto.response.UpdateRegisteredProductInfoResDto;
 import com.barter.domain.product.dto.response.UpdateRegisteredProductStatusResDto;
 import com.barter.domain.product.service.ProductSwitchService;
 import com.barter.domain.product.service.RegisteredProductService;
@@ -44,12 +46,12 @@ public class RegisteredProductController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public void createRegisteredProduct(
+	public CreateRegisteredProductResDto createRegisteredProduct(
 		@RequestPart(name = "request") @Valid CreateRegisteredProductReqDto request,
 		@RequestPart(name = "multipartFiles") List<MultipartFile> multipartFiles,
 		VerifiedMember verifiedMember
 	) {
-		registeredProductService.createRegisteredProduct(request, multipartFiles, verifiedMember.getId());
+		return registeredProductService.createRegisteredProduct(request, multipartFiles, verifiedMember.getId());
 	}
 
 	@GetMapping("/{registeredProductId}")
@@ -72,12 +74,12 @@ public class RegisteredProductController {
 
 	@PatchMapping
 	@ResponseStatus(HttpStatus.OK)
-	public void updateRegisteredProductInfo(
+	public UpdateRegisteredProductInfoResDto updateRegisteredProductInfo(
 		@RequestPart(name = "request") @Valid UpdateRegisteredProductInfoReqDto request,
 		@RequestPart(required = false, name = "multipartFiles") List<MultipartFile> multipartFiles,
 		VerifiedMember verifiedMember
 	) {
-		registeredProductService.updateRegisteredProductInfo(
+		return registeredProductService.updateRegisteredProductInfo(
 			request, Objects.requireNonNullElseGet(multipartFiles, ArrayList::new), verifiedMember.getId()
 		);
 	}
