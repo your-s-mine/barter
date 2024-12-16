@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import com.barter.common.s3.S3Service;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
 import com.barter.domain.product.dto.response.CreateRegisteredProductResDto;
+import com.barter.domain.product.dto.response.FindRegisteredProductResDto;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.enums.RegisteredStatus;
 import com.barter.domain.product.repository.RegisteredProductRepository;
@@ -99,5 +101,78 @@ public class RegisteredProductServiceTest {
 			() -> registeredProductService.createRegisteredProduct(request, multipartFiles, verifiedMemberId))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining("1 ~ 3개 사이의 이미지를 가져야 합니다.");
+	}
+
+	@Test
+	@DisplayName("등록 물품 단건 조회 - 성공 테스트")
+	void findRegisteredProductTest_Success() {
+		//given
+		Long registeredProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(registeredProductId)).thenReturn(
+			Optional.of(RegisteredProduct.builder()
+				.id(1L)
+				.name("test product")
+				.description("test product description")
+				.images(List.of("image1", "image2"))
+				.member(Member.builder().id(verifiedMemberId).build())
+				.status(RegisteredStatus.PENDING)
+				.build()
+			)
+		);
+
+		//when
+		FindRegisteredProductResDto response = registeredProductService.findRegisteredProduct(
+			registeredProductId, verifiedMemberId
+		);
+
+		//then
+		assertThat(response).isNotNull();
+		assertThat(response.getName()).isEqualTo("test product");
+		assertThat(response.getDescription()).isEqualTo("test product description");
+		assertThat(response.getImages()).containsExactly("image1", "image2");
+		assertThat(response.getStatus()).isEqualTo(RegisteredStatus.PENDING.name());
+	}
+
+	@Test
+	@DisplayName("등록 물품 단건 조회 - 조회 등록 물품이 없을 경우 예외 테스트")
+	void findRegisteredProductTest_Exception1() {
+		//given
+		Long registeredProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(registeredProductId))
+			.thenThrow(new IllegalArgumentException("Registered product not found"));
+
+		//when & then
+		assertThatThrownBy(() -> registeredProductService.findRegisteredProduct(registeredProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("Registered product not found");
+	}
+
+	@Test
+	@DisplayName("등록 물품 단건 조회 - 조회 권한이 없는 경우 예외 테스트")
+	void findRegisteredProductTest_Exception2() {
+		//given
+		Long registeredProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(registeredProductId)).thenReturn(
+			Optional.of(RegisteredProduct.builder()
+				.id(1L)
+				.name("test product")
+				.description("test product description")
+				.images(List.of("image1", "image2"))
+				.member(Member.builder().id(2L).build())
+				.status(RegisteredStatus.PENDING)
+				.build()
+			)
+		);
+
+		//when & then
+		assertThatThrownBy(() -> registeredProductService.findRegisteredProduct(registeredProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("권한이 없습니다.");
 	}
 }
