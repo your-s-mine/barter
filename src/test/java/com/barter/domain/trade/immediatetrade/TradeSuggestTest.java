@@ -3,7 +3,9 @@ package com.barter.domain.trade.immediatetrade;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -18,12 +20,15 @@ import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
+import com.barter.domain.product.entity.TradeProduct;
 import com.barter.domain.product.enums.SuggestedStatus;
+import com.barter.domain.product.enums.TradeType;
 import com.barter.domain.product.repository.SuggestedProductRepository;
 import com.barter.domain.product.repository.TradeProductRepository;
 import com.barter.domain.trade.enums.TradeStatus;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateTradeSuggestProductReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.UpdateStatusReqDto;
+import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeResDto;
 import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
 import com.barter.domain.trade.immediatetrade.service.ImmediateTradeService;
@@ -111,5 +116,34 @@ public class TradeSuggestTest {
 
 	}
 
+	@Test
+	@DisplayName("즉시 교환 - 제안 수락: 성공")
+	void acceptSuggestSuccess() {
 
+		when(immediateTradeRepository.findById(immediateTrade.getId())).thenReturn(Optional.ofNullable(immediateTrade));
+
+		List<TradeProduct> tradeProducts = new ArrayList<>();
+		tradeProducts.add(TradeProduct.builder()
+			.tradeId(immediateTrade.getId())
+			.tradeType(TradeType.IMMEDIATE)
+			.suggestedProduct(suggestedProduct)
+			.build());
+
+		tradeProducts.add(TradeProduct.builder()
+			.tradeId(immediateTrade.getId())
+			.tradeType(TradeType.IMMEDIATE)
+			.suggestedProduct(suggestedProduct2)
+			.build());
+
+		when(tradeProductRepository.findAllByTradeId(immediateTrade.getId())).thenReturn(tradeProducts);
+
+		String result = immediateTradeService.acceptTradeSuggest(immediateTrade.getId(), verifiedMember);
+
+		assertThat(result).isEqualTo("제안 수락 완료");
+
+		assertThat(immediateTrade.getStatus()).isEqualTo(TradeStatus.IN_PROGRESS);
+		assertThat(suggestedProduct.getStatus()).isEqualTo(SuggestedStatus.ACCEPTED);
+		assertThat(suggestedProduct2.getStatus()).isEqualTo(SuggestedStatus.ACCEPTED);
+
+	}
 }
