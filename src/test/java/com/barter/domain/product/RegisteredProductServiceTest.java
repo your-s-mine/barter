@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
@@ -13,6 +14,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PagedModel;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -52,6 +59,9 @@ public class RegisteredProductServiceTest {
 		List<MultipartFile> multipartFiles = List.of(imageFile, imageFile);
 
 		Long verifiedMemberId = 1L;
+		Pageable pageable = PageRequest.of(
+			0, 10, Sort.by(Sort.Direction.DESC, "createdAt")
+		);
 
 		when(s3Service.uploadFile(multipartFiles)).thenReturn(List.of("testImage1", "testImage2"));
 
@@ -174,5 +184,60 @@ public class RegisteredProductServiceTest {
 		assertThatThrownBy(() -> registeredProductService.findRegisteredProduct(registeredProductId, verifiedMemberId))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining("권한이 없습니다.");
+	}
+
+	@Test
+	@DisplayName("등록 물품 다건 조회 - 성공 테스트")
+	void findRegisteredProductsTest_Success() {
+		//given
+		Long verifiedMemberId = 1L;
+		Pageable pageable = PageRequest.of(
+			0, 10, Sort.by(Sort.Direction.DESC, "createdAt")
+		);
+
+		RegisteredProduct product1 = RegisteredProduct.builder()
+			.id(1L)
+			.name("test product1")
+			.description("test product1 description")
+			.images(List.of("test product1 image1", "test product1 image2"))
+			.status(RegisteredStatus.PENDING)
+			.member(Member.builder().id(verifiedMemberId).build())
+			.build();
+
+		RegisteredProduct product2 = RegisteredProduct.builder()
+			.id(2L)
+			.name("test product2")
+			.description("test product2 description")
+			.images(List.of("test product2 image1", "test product2 image2"))
+			.status(RegisteredStatus.ACCEPTED)
+			.member(Member.builder().id(verifiedMemberId).build())
+			.build();
+
+		RegisteredProduct product3 = RegisteredProduct.builder()
+			.id(3L)
+			.name("test product3")
+			.description("test product3 description")
+			.images(List.of("test product3 image1", "test product3 image2"))
+			.status(RegisteredStatus.REGISTERING)
+			.member(Member.builder().id(verifiedMemberId).build())
+			.build();
+
+		List<RegisteredProduct> products = List.of(product3, product2, product1);
+		Page<RegisteredProduct> foundProducts = new PageImpl<>(products, pageable, products.size());
+		when(registeredProductRepository.findAllByMemberId(pageable, verifiedMemberId))
+			.thenReturn(foundProducts);
+
+		//when
+		PagedModel<FindRegisteredProductResDto> response = registeredProductService.findRegisteredProducts(
+			pageable, verifiedMemberId
+		);
+
+		//then
+		assertThat(response).isNotNull();
+		assertThat(response.getContent()).hasSize(3);
+		assertThat(Objects.requireNonNull(response.getMetadata()).size()).isEqualTo(10);
+		assertThat(response.getMetadata().number()).isEqualTo(0);
+		assertThat(Objects.requireNonNull(response.getMetadata()).totalElements()).isEqualTo(3);
+		assertThat(response.getMetadata().totalPages()).isEqualTo(1);
 	}
 }
