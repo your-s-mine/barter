@@ -14,7 +14,10 @@ import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductInfoReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductStatusReqDto;
+import com.barter.domain.product.dto.response.CreateRegisteredProductResDto;
 import com.barter.domain.product.dto.response.FindRegisteredProductResDto;
+import com.barter.domain.product.dto.response.UpdateRegisteredProductInfoResDto;
+import com.barter.domain.product.dto.response.UpdateRegisteredProductStatusResDto;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.validator.ImageCountValidator;
@@ -28,7 +31,7 @@ public class RegisteredProductService {
 	private final RegisteredProductRepository registeredProductRepository;
 	private final S3Service s3Service;
 
-	public void createRegisteredProduct(
+	public CreateRegisteredProductResDto createRegisteredProduct(
 		CreateRegisteredProductReqDto request, List<MultipartFile> multipartFiles, Long verifiedMemberId
 	) {
 		ImageCountValidator.checkImageCount(multipartFiles.size());
@@ -37,7 +40,9 @@ public class RegisteredProductService {
 		Member requestMember = Member.builder().id(verifiedMemberId).build();
 
 		RegisteredProduct createdProduct = RegisteredProduct.create(request, requestMember, images);
-		registeredProductRepository.save(createdProduct);
+		RegisteredProduct savedProduct = registeredProductRepository.save(createdProduct);
+
+		return CreateRegisteredProductResDto.from(savedProduct);
 	}
 
 	public FindRegisteredProductResDto findRegisteredProduct(Long RegisteredProductId, Long verifiedMemberId) {
@@ -58,7 +63,7 @@ public class RegisteredProductService {
 	}
 
 	@Transactional
-	public void updateRegisteredProductInfo(
+	public UpdateRegisteredProductInfoResDto updateRegisteredProductInfo(
 		UpdateRegisteredProductInfoReqDto request, List<MultipartFile> multipartFiles, Long verifiedMemberId
 	) {
 		RegisteredProduct foundProduct = registeredProductRepository.findById(request.getId())
@@ -79,18 +84,22 @@ public class RegisteredProductService {
 		}
 
 		foundProduct.updateInfo(request);
-		registeredProductRepository.save(foundProduct);
+		RegisteredProduct updatedProduct = registeredProductRepository.save(foundProduct);
+		return UpdateRegisteredProductInfoResDto.from(updatedProduct);
 	}
 
 	@Transactional
-	public void updateRegisteredProductStatus(UpdateRegisteredProductStatusReqDto request, Long verifiedMemberId) {
+	public UpdateRegisteredProductStatusResDto updateRegisteredProductStatus(
+		UpdateRegisteredProductStatusReqDto request, Long verifiedMemberId
+	) {
 		RegisteredProduct foundProduct = registeredProductRepository.findById(request.getId())
 			.orElseThrow(() -> new IllegalArgumentException("Registered product not found"));
 
 		foundProduct.checkPermission(verifiedMemberId);
 
 		foundProduct.updateStatus(request.getStatus());
-		registeredProductRepository.save(foundProduct);
+		RegisteredProduct updatedProduct = registeredProductRepository.save(foundProduct);
+		return UpdateRegisteredProductStatusResDto.form(updatedProduct);
 	}
 
 	@Transactional
