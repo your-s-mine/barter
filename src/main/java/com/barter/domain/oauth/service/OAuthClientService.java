@@ -9,7 +9,9 @@ import com.barter.domain.oauth.dto.LoginOAuthMemberDto;
 import com.barter.domain.oauth.enums.OAuthProvider;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OAuthClientService {
@@ -20,6 +22,10 @@ public class OAuthClientService {
 		OAuthClient oAuth2Client = this.selectClient(provider);
 		String accessToken = oAuth2Client.getAccessToken(authorizationCode);
 		return oAuth2Client.getMemberInfo(accessToken);
+	}
+
+	public String generateLoginPageUrl(OAuthProvider provider) {
+		return this.selectClient(provider).generateLoginPageUrl();
 	}
 
 	private OAuthClient selectClient(OAuthProvider provider) {

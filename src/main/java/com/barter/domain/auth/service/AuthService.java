@@ -49,19 +49,20 @@ public class AuthService {
 			.build();
 	}
 
-	public void signupWithOAuth(OAuthProvider provider, LoginOAuthMemberDto userInfo) {
+	public void signupWithOAuth(OAuthProvider provider, LoginOAuthMemberDto memberInfo) {
 		UUID uuid = UUID.randomUUID();
 		Member socialMember = Member.builder()
 			.provider(provider)
-			.providerId(userInfo.getId())
+			.providerId(memberInfo.getId())
+			.email(memberInfo.getEmail())
 			.password(passwordEncoder.encode(uuid + ""))
-			.nickname(userInfo.getNickname())
+			.nickname(memberInfo.getNickname())
 			.build();
 		memberRepository.save(socialMember);
 	}
 
-	public LoginOAuthMemberResDto signinWithOAuth(OAuthProvider provider, LoginOAuthMemberDto userInfo) {
-		return memberRepository.findByProviderAndProviderId(provider, userInfo.getId())
+	public LoginOAuthMemberResDto signinWithOAuth(OAuthProvider provider, LoginOAuthMemberDto memberInfo) {
+		return memberRepository.findByProviderAndProviderId(provider, memberInfo.getId())
 			.map(member -> {
 				String accessToken = jwtUtil.createToken(member.getId(), member.getEmail());
 				return LoginOAuthMemberResDto.builder()

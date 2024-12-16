@@ -25,4 +25,8 @@ public class OAuthService {
 		}
 		return authService.signinWithOAuth(provider, memberInfo);
 	}
+
+	public String generateLoginPageUrl(OAuthProvider provider) {
+		return oAuthClientService.generateLoginPageUrl(provider);
+	}
 }
