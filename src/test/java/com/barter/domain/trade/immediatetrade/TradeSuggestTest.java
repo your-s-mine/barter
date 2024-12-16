@@ -146,4 +146,34 @@ public class TradeSuggestTest {
 		assertThat(suggestedProduct2.getStatus()).isEqualTo(SuggestedStatus.ACCEPTED);
 
 	}
+
+	@Test
+	@DisplayName("즉시 교환 - 제안 거절: 성공")
+	void denySuggestSuccess() {
+
+		when(immediateTradeRepository.findById(immediateTrade.getId())).thenReturn(Optional.ofNullable(immediateTrade));
+
+		suggestedProduct.changStatusSuggesting();
+		suggestedProduct2.changStatusSuggesting();
+		immediateTrade.changeStatusInProgress();
+
+		List<TradeProduct> tradeProducts = new ArrayList<>();
+
+		tradeProducts.add(TradeProduct.builder()
+			.tradeId(immediateTrade.getId())
+			.tradeType(TradeType.IMMEDIATE)
+			.suggestedProduct(suggestedProduct)
+			.build());
+
+		tradeProducts.add(TradeProduct.builder()
+			.tradeId(immediateTrade.getId())
+			.tradeType(TradeType.IMMEDIATE)
+			.suggestedProduct(suggestedProduct2)
+			.build());
+
+		immediateTradeService.denyTradeSuggest(immediateTrade.getId(), verifiedMember);
+
+		verify(tradeProductRepository, times(1)).deleteAll(any());
+	}
+
 }
