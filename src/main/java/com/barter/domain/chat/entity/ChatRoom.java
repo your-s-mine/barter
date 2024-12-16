@@ -42,11 +42,18 @@ public class ChatRoom {
 		return ChatRoom.builder()
 			.id(UUID.randomUUID().toString())
 			.createdAt(LocalDateTime.now())
-			.personCount(2L)
+			.personCount(0L)
 			.registeredProductId(registeredProductId)
 			.registeredMemberId(registeredMemberId)
 			.roomStatus(RoomStatus.OPEN)
 			.build();
 	}
 
+	public void updateStatus(RoomStatus newStatus) {
+		this.roomStatus = newStatus;
+	}
+
+	public void addMember() {
+		this.personCount++;
+	}
 }

@@ -8,6 +8,8 @@ import com.barter.domain.chat.dto.request.CreateChatRoomReqDto;
 import com.barter.domain.chat.dto.response.CreateChatRoomResDto;
 import com.barter.domain.chat.entity.ChatRoom;
 import com.barter.domain.chat.entity.ChatRoomMember;
+import com.barter.domain.chat.enums.JoinStatus;
+import com.barter.domain.chat.enums.RoomStatus;
 import com.barter.domain.chat.repository.ChatRoomMemberRepository;
 import com.barter.domain.chat.repository.ChatRoomRepository;
 import com.barter.domain.member.entity.Member;
@@ -56,5 +58,33 @@ public class ChatRoomService {
 		return CreateChatRoomResDto.of(chatRoom, suggestMember.getNickname(),
 			registeredProduct.getMember().getNickname());
 
+	}
+
+	@Transactional
+	public void changeRoomStatus(String roomId) {
+
+		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 채팅방 입니다."));
+
+		long userCount = chatRoomMemberRepository.countByChatRoomIdAndJoinStatus(roomId, JoinStatus.IN_ROOM);
+
+		if (userCount == 2) {
+			chatRoom.updateStatus(RoomStatus.IN_PROGRESS);
+		}
+
+	}
+
+	@Transactional
+	public void updateMemberJoinStatus(String roomId, Long memberId, JoinStatus joinStatus) {
+		ChatRoomMember chatRoomMember = chatRoomMemberRepository.findByChatRoomIdAndMemberId(roomId, memberId)
+			.orElseThrow(() -> new IllegalArgumentException("해당하는 채팅방 멤버가 없습니다."));
+
+		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+			.orElseThrow(() -> new IllegalArgumentException("해당하는 채팅방이 없습니다."));
+
+		if (chatRoomMember.getJoinStatus() == JoinStatus.PENDING) {
+			chatRoom.addMember();
+		}
+		chatRoomMember.changeJoinStatus(joinStatus);
 	}
 }
