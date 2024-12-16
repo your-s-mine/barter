@@ -17,6 +17,7 @@ import com.barter.domain.product.dto.request.UpdateSuggestedProductStatusReqDto;
 import com.barter.domain.product.dto.response.CreateSuggestedProductResDto;
 import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
 import com.barter.domain.product.dto.response.UpdateSuggestedProductInfoResDto;
+import com.barter.domain.product.dto.response.UpdateSuggestedProductStatusResDto;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.repository.SuggestedProductRepository;
 import com.barter.domain.product.validator.ImageCountValidator;
@@ -86,14 +87,17 @@ public class SuggestedProductService {
 	}
 
 	@Transactional
-	public void updateSuggestedProductStatus(UpdateSuggestedProductStatusReqDto request, Long verifiedMemberId) {
+	public UpdateSuggestedProductStatusResDto updateSuggestedProductStatus(
+		UpdateSuggestedProductStatusReqDto request, Long verifiedMemberId
+	) {
 		SuggestedProduct foundProduct = suggestedProductRepository.findById(request.getId())
 			.orElseThrow(() -> new IllegalArgumentException("Suggested product not found"));
 
 		foundProduct.checkPermission(verifiedMemberId);
 
 		foundProduct.updateStatus(request.getStatus());
-		suggestedProductRepository.save(foundProduct);
+		SuggestedProduct updatedProduct = suggestedProductRepository.save(foundProduct);
+		return UpdateSuggestedProductStatusResDto.from(updatedProduct);
 	}
 
 	@Transactional
