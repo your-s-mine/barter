@@ -30,6 +30,7 @@ import com.barter.domain.product.dto.response.CreateSuggestedProductResDto;
 import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
 import com.barter.domain.product.dto.response.UpdateSuggestedProductInfoResDto;
 import com.barter.domain.product.dto.response.UpdateSuggestedProductStatusResDto;
+import com.barter.domain.product.dto.response.SwitchSuggestedProductResDto;
 import com.barter.domain.product.service.ProductSwitchService;
 import com.barter.domain.product.service.SuggestedProductService;
 
@@ -103,11 +104,11 @@ public class SuggestedProductController {
 
 	@PostMapping("/switch")
 	@ResponseStatus(HttpStatus.CREATED)
-	public void createSuggestedProductFromRegisteredProduct(
+	public SwitchSuggestedProductResDto createSuggestedProductFromRegisteredProduct(
 		@RequestBody @Valid SwitchSuggestedProductReqDto request,
 		VerifiedMember verifiedMember
 	) {
-		productSwitchService.createSuggestedProductFromRegisteredProduct(
+		return productSwitchService.createSuggestedProductFromRegisteredProduct(
 			request.getRegisteredProductId(), verifiedMember.getId()
 		);
 	}
