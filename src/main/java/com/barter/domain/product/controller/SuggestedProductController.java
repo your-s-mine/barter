@@ -28,6 +28,7 @@ import com.barter.domain.product.dto.request.UpdateSuggestedProductInfoReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductStatusReqDto;
 import com.barter.domain.product.dto.response.CreateSuggestedProductResDto;
 import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
+import com.barter.domain.product.dto.response.UpdateSuggestedProductInfoResDto;
 import com.barter.domain.product.service.ProductSwitchService;
 import com.barter.domain.product.service.SuggestedProductService;
 
@@ -72,12 +73,12 @@ public class SuggestedProductController {
 
 	@PatchMapping
 	@ResponseStatus(HttpStatus.OK)
-	public void updateSuggestedProductInfo(
+	public UpdateSuggestedProductInfoResDto updateSuggestedProductInfo(
 		@RequestPart(name = "request") @Valid UpdateSuggestedProductInfoReqDto request,
 		@RequestPart(required = false, name = "multipartFiles") List<MultipartFile> multipartFiles,
 		VerifiedMember verifiedMember
 	) {
-		suggestedProductService.updateSuggestedProductInfo(
+		return suggestedProductService.updateSuggestedProductInfo(
 			request, Objects.requireNonNullElseGet(multipartFiles, ArrayList::new), verifiedMember.getId()
 		);
 	}

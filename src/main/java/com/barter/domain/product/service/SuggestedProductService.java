@@ -16,6 +16,7 @@ import com.barter.domain.product.dto.request.UpdateSuggestedProductInfoReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductStatusReqDto;
 import com.barter.domain.product.dto.response.CreateSuggestedProductResDto;
 import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
+import com.barter.domain.product.dto.response.UpdateSuggestedProductInfoResDto;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.repository.SuggestedProductRepository;
 import com.barter.domain.product.validator.ImageCountValidator;
@@ -60,7 +61,7 @@ public class SuggestedProductService {
 	}
 
 	@Transactional
-	public void updateSuggestedProductInfo(
+	public UpdateSuggestedProductInfoResDto updateSuggestedProductInfo(
 		UpdateSuggestedProductInfoReqDto request, List<MultipartFile> multipartFiles, Long verifiedMemberId
 	) {
 		SuggestedProduct foundProduct = suggestedProductRepository.findById(request.getId())
@@ -80,7 +81,8 @@ public class SuggestedProductService {
 		}
 
 		foundProduct.updateInfo(request);
-		suggestedProductRepository.save(foundProduct);
+		SuggestedProduct updatedProduct = suggestedProductRepository.save(foundProduct);
+		return UpdateSuggestedProductInfoResDto.from(updatedProduct);
 	}
 
 	@Transactional
