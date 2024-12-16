@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.barter.domain.oauth.enums.OAuthProvider;
-import com.barter.domain.oauth.service.OauthService;
+import com.barter.domain.oauth.service.OAuthService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/oauth")
 public class OAuthController {
 
-	private final OauthService oauthService;
+	private final OAuthService oauthService;
 
 	@GetMapping("/callback/{provider}")
 	public void callback(
