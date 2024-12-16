@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PagedModel;
 
 import com.barter.domain.notification.dto.response.FindNotificationResDto;
+import com.barter.domain.notification.dto.response.UpdateNotificationStatusResDto;
 import com.barter.domain.notification.entity.Notification;
 import com.barter.domain.notification.enums.NotificationType;
 import com.barter.domain.notification.respository.NotificationRepository;
@@ -169,5 +171,80 @@ public class NotificationServiceTest {
 		assertThat(response.getMetadata().number()).isEqualTo(0);
 		assertThat(response.getMetadata().totalElements()).isEqualTo(3);
 		assertThat(response.getMetadata().totalPages()).isEqualTo(1);
+	}
+
+	@Test
+	@DisplayName("알림 상태 수정 - 정상 테스트")
+	void updateNotificationTest_Success() {
+		//given
+		Long notificationId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(notificationRepository.findById(notificationId)).thenReturn(
+			Optional.of(Notification.builder()
+				.id(1L)
+				.isRead(false)
+				.memberId(1L)
+				.build()
+			)
+		);
+
+		when(notificationRepository.save(any())).thenReturn(
+			Notification.builder()
+				.id(1L)
+				.isRead(true)
+				.memberId(1L)
+				.build()
+		);
+
+		//when
+		UpdateNotificationStatusResDto response = notificationService.updateNotificationStatus(
+			notificationId, verifiedMemberId
+		);
+
+		//then
+		assertThat(response).isNotNull();
+		assertThat(response.getNotificationId()).isEqualTo(notificationId);
+		assertThat(response.isRead()).isEqualTo(true);
+	}
+
+	@Test
+	@DisplayName("알림 상태 수정 - 대상 알림 정보가 존재하지 않는 경우 예외 테스트")
+	void updateNotificationTest_Exception1() {
+		//given
+		Long notificationId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(notificationRepository.findById(notificationId))
+			.thenThrow(new IllegalArgumentException("Notification not found"));
+
+		//when & then
+		assertThatThrownBy(() ->
+			notificationService.updateNotificationStatus(notificationId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Notification not found");
+	}
+
+	@Test
+	@DisplayName("알림 상태 수정 - 수정 권한 예외 테스트")
+	void updateNotificationTest_Exception2() {
+		//given
+		Long notificationId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(notificationRepository.findById(notificationId)).thenReturn(
+			Optional.of(Notification.builder()
+				.id(1L)
+				.isRead(false)
+				.memberId(2L)
+				.build()
+			)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			notificationService.updateNotificationStatus(notificationId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("권한이 없습니다.");
 	}
 }
