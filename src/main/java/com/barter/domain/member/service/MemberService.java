@@ -1,7 +1,7 @@
 package com.barter.domain.member.service;
 
-import com.barter.domain.auth.dto.MemberInfoResDto;
-import com.barter.domain.auth.dto.MemberUpdateReqDto;
+import com.barter.domain.member.dto.FindMemberResDto;
+import com.barter.domain.member.dto.UpdateMemberReqDto;
 import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.member.repository.MemberRepository;
@@ -16,11 +16,11 @@ public class MemberService {
 	private final MemberRepository memberRepository;
 
 	// 회원정보 조회
-	public MemberInfoResDto findMemberInfo(VerifiedMember verifiedMember) {
+	public FindMemberResDto findMemberInfo(VerifiedMember verifiedMember) {
 		Member member = memberRepository.findById(verifiedMember.getId())
 				.orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
 
-		return MemberInfoResDto.builder()
+		return FindMemberResDto.builder()
 				.id(member.getId())
 				.email(member.getEmail())
 				.nickname(member.getNickname())
@@ -30,7 +30,7 @@ public class MemberService {
 	}
 
 	// 회원정보 수정
-	public MemberInfoResDto updateMemberInfo(VerifiedMember verifiedMember, MemberUpdateReqDto updateRequestDto) {
+	public FindMemberResDto updateMemberInfo(VerifiedMember verifiedMember, UpdateMemberReqDto updateRequestDto) {
 		Member member = memberRepository.findById(verifiedMember.getId())
 				.orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
 
@@ -43,7 +43,7 @@ public class MemberService {
 
 		memberRepository.save(member);
 
-		return MemberInfoResDto.builder()
+		return FindMemberResDto.builder()
 				.id(member.getId())
 				.email(member.getEmail())
 				.nickname(member.getNickname())

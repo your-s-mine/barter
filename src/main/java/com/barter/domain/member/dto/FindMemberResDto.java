@@ -1,11 +1,11 @@
-    package com.barter.domain.auth.dto;
+    package com.barter.domain.member.dto;
 
     import lombok.Builder;
     import lombok.Getter;
 
     @Getter
     @Builder
-    public class MemberInfoResDto {
+    public class FindMemberResDto {
         private Long id;
         private String email;
         private String nickname;
