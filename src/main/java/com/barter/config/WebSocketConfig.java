@@ -7,6 +7,7 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+import com.barter.domain.chat.handler.StompErrorHandler;
 import com.barter.domain.chat.interceptor.AuthChannelInterceptor;
 
 import lombok.RequiredArgsConstructor;
@@ -17,8 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-	
+
 	private final AuthChannelInterceptor authChannelInterceptor;
+	private final StompErrorHandler stompErrorHandler;
 
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
@@ -37,6 +39,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 		registry.addEndpoint("/ws")
 			.setAllowedOrigins("*");
+
+		registry.setErrorHandler(stompErrorHandler);
+
 	}
 
 	@Override
