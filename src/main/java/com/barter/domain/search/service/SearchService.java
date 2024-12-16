@@ -33,7 +33,7 @@ public class SearchService {
 	private final PeriodTradeRepository periodTradeRepository;
 
 	@Transactional
-	public List<SearchTradeResDto> createSearchKeywordAndFindTrades(String word) {
+	public List<SearchTradeResDto> searchKeywordAndFindTrades(String word) {
 
 		if (word.isBlank()) {
 			List<SearchTradeResDto> blank = new ArrayList<>();
