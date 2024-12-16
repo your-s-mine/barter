@@ -14,6 +14,7 @@ public class CreateChatRoomResDto {
 	private String roomId;
 	private String suggestMemberNickname;
 	private String registerMemberNickname;
+	private Long registeredProductId;
 	private RoomStatus roomStatus;
 	private LocalDateTime createdAt;
 
@@ -24,6 +25,7 @@ public class CreateChatRoomResDto {
 			.roomId(chatRoom.getId())
 			.suggestMemberNickname(suggestMemberNickname)
 			.registerMemberNickname(registerMemberNickname)
+			.registeredProductId(chatRoom.getRegisteredProductId())
 			.createdAt(LocalDateTime.now())
 			.roomStatus(chatRoom.getRoomStatus())
 			.build();

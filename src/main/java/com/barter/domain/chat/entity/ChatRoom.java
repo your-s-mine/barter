@@ -31,14 +31,20 @@ public class ChatRoom {
 
 	private Long personCount; // 추후 확장성 고려
 
+	private Long registeredProductId;
+
+	private Long registeredMemberId;
+
 	@Enumerated(EnumType.STRING)
 	private RoomStatus roomStatus;
 
-	public static ChatRoom create() {
+	public static ChatRoom create(Long registeredProductId, Long registeredMemberId) {
 		return ChatRoom.builder()
 			.id(UUID.randomUUID().toString())
 			.createdAt(LocalDateTime.now())
 			.personCount(2L)
+			.registeredProductId(registeredProductId)
+			.registeredMemberId(registeredMemberId)
 			.roomStatus(RoomStatus.OPEN)
 			.build();
 	}
