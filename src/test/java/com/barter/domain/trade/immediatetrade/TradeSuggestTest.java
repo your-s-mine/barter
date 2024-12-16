@@ -176,4 +176,18 @@ public class TradeSuggestTest {
 		verify(tradeProductRepository, times(1)).deleteAll(any());
 	}
 
+	@Test
+	@DisplayName("즉시 교환 - 상태 변경: 성공")
+	void updateStatusSuccess() {
+		when(immediateTradeRepository.findById(immediateTrade.getId())).thenReturn(Optional.ofNullable(immediateTrade));
+		when(immediateTradeRepository.save(immediateTrade)).thenReturn(immediateTrade);
+
+		updateStatusReqDto = new UpdateStatusReqDto(TradeStatus.IN_PROGRESS);
+
+		FindImmediateTradeResDto resDto = immediateTradeService.updateStatus(immediateTrade.getId(), updateStatusReqDto,
+			verifiedMember);
+
+		assertThat(resDto.getTradeStatus()).isEqualTo(TradeStatus.IN_PROGRESS);
+
+	}
 }
