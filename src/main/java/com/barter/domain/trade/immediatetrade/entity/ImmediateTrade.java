@@ -1,6 +1,7 @@
 package com.barter.domain.trade.immediatetrade.entity;
 
 import com.barter.domain.BaseTimeStampEntity;
+import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.trade.enums.TradeStatus;
 import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeReqDto;

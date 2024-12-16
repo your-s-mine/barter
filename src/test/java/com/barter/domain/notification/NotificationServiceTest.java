@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -36,6 +37,24 @@ public class NotificationServiceTest {
 
 	@InjectMocks
 	private NotificationService notificationService;
+
+	@Test
+	@DisplayName("알림 구독 - 성공 테스트")
+	void subscribeTest_Success() {
+		//given
+		Long verifiedMemberId = 1L;
+
+		SseEmitter newEmitter = new SseEmitter();
+		when(sseEmitters.saveEmitter(verifiedMemberId))
+			.thenReturn(newEmitter);
+
+		//when
+		SseEmitter savedEmitter = notificationService.subscribe(verifiedMemberId);
+
+		//then
+		assertThat(savedEmitter).isNotNull();
+		assertThat(savedEmitter).isEqualTo(newEmitter);
+	}
 
 	@Test
 	@DisplayName("활동 알림 다건 조회 - 성공 테스트")
