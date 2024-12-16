@@ -3,6 +3,7 @@ package com.barter.domain.product.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.barter.domain.product.dto.response.SwitchRegisteredProductResDto;
 import com.barter.domain.product.dto.response.SwitchSuggestedProductResDto;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
@@ -21,7 +22,9 @@ public class ProductSwitchService {
 	private final SuggestedProductRepository suggestedProductRepository;
 
 	@Transactional
-	public void createRegisteredProductFromSuggestedProduct(Long suggestedProductId, Long verifiedMemberId) {
+	public SwitchRegisteredProductResDto createRegisteredProductFromSuggestedProduct(
+		Long suggestedProductId, Long verifiedMemberId
+	) {
 		SuggestedProduct suggestedProduct = suggestedProductRepository.findById(suggestedProductId)
 			.orElseThrow(() -> new IllegalArgumentException("Suggested product not found"));
 
@@ -36,8 +39,9 @@ public class ProductSwitchService {
 			.member(suggestedProduct.getMember())
 			.build();
 
-		registeredProductRepository.save(registeredProduct);
+		RegisteredProduct savedProduct = registeredProductRepository.save(registeredProduct);
 		suggestedProductRepository.delete(suggestedProduct);
+		return SwitchRegisteredProductResDto.from(savedProduct);
 	}
 
 	@Transactional

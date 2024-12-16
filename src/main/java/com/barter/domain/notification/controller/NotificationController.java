@@ -17,6 +17,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.notification.dto.response.FindNotificationResDto;
+import com.barter.domain.notification.dto.response.UpdateNotificationStatusResDto;
 import com.barter.domain.notification.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
@@ -54,10 +55,10 @@ public class NotificationController {
 
 	@PatchMapping("/status/{notificationId}")
 	@ResponseStatus(HttpStatus.OK)
-	public void updateNotificationStatus(
+	public UpdateNotificationStatusResDto updateNotificationStatus(
 		@PathVariable(name = "notificationId") Long notificationId, VerifiedMember verifiedMember
 	) {
-		notificationService.updateNotificationStatus(notificationId, verifiedMember.getId());
+		return notificationService.updateNotificationStatus(notificationId, verifiedMember.getId());
 	}
 
 	@DeleteMapping("/{notificationId}")
