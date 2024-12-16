@@ -1,6 +1,7 @@
 package com.barter.domain.trade.immediatetrade;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
@@ -117,6 +118,44 @@ public class TradeSuggestTest {
 	}
 
 	@Test
+	@DisplayName("즉시 교환 - 제안 생성: 실패 - IN_PROGRESS 상태의 교환에 제안")
+	void createSuggestFailure() {
+
+		immediateTrade = ImmediateTrade.builder()
+			.id(1L)
+			.title("즉시 교환 제목")
+			.description("즉시 교환 설명")
+			.product(registeredProduct)
+			.status(TradeStatus.IN_PROGRESS)
+			.viewCount(0)
+			.build();
+
+		when(immediateTradeRepository.findById(immediateTrade.getId())).thenReturn(Optional.ofNullable(immediateTrade));
+
+		assertThatThrownBy(() ->
+			immediateTradeService.createTradeSuggest(immediateTrade.getId(), reqDto, suggester))
+			.isInstanceOf(IllegalStateException.class).hasMessage("PENDING 상태의 교환에만 제안할 수 있습니다.");
+
+	}
+
+	@Test
+	@DisplayName("즉시 교환 - 제안 생성: 실패 - SUGGESTING 상태의 물품으로 제안")
+	void createSuggestFailure2() {
+
+		suggestedProduct = SuggestedProduct.builder()
+			.id(1L)
+			.status(SuggestedStatus.SUGGESTING)
+			.build();
+
+		when(immediateTradeRepository.findById(immediateTrade.getId())).thenReturn(Optional.ofNullable(immediateTrade));
+		when(suggestedProductRepository.findById(1L)).thenReturn(Optional.of(suggestedProduct));
+
+		assertThatThrownBy(() ->
+			immediateTradeService.createTradeSuggest(immediateTrade.getId(), reqDto, suggester))
+			.isInstanceOf(IllegalArgumentException.class).hasMessage("PENDING 상태의 상품으로만 제안하실 수 있습니다.");
+	}
+
+	@Test
 	@DisplayName("즉시 교환 - 제안 수락: 성공")
 	void acceptSuggestSuccess() {
 
@@ -144,6 +183,16 @@ public class TradeSuggestTest {
 		assertThat(immediateTrade.getStatus()).isEqualTo(TradeStatus.IN_PROGRESS);
 		assertThat(suggestedProduct.getStatus()).isEqualTo(SuggestedStatus.ACCEPTED);
 		assertThat(suggestedProduct2.getStatus()).isEqualTo(SuggestedStatus.ACCEPTED);
+
+	}
+
+	@Test
+	@DisplayName("즉시 교환 - 제안 수락: 실패 - 해당 교환을 찾을 수 없는 경우")
+	void acceptSuggestFailure() {
+
+		assertThatThrownBy(() ->
+			immediateTradeService.denyTradeSuggest(123L, verifiedMember))
+			.isInstanceOf(IllegalArgumentException.class).hasMessage("해당 교환을 찾을 수 없습니다.");
 
 	}
 
@@ -177,6 +226,16 @@ public class TradeSuggestTest {
 	}
 
 	@Test
+	@DisplayName("즉시 교환 - 제안 거절: 실패 - 해당 교환을 찾을 수 없는 경우")
+	void denySuggestFailure() {
+
+		assertThatThrownBy(() ->
+			immediateTradeService.denyTradeSuggest(123L, verifiedMember))
+			.isInstanceOf(IllegalArgumentException.class).hasMessage("해당 교환을 찾을 수 없습니다.");
+
+	}
+
+	@Test
 	@DisplayName("즉시 교환 - 상태 변경: 성공")
 	void updateStatusSuccess() {
 		when(immediateTradeRepository.findById(immediateTrade.getId())).thenReturn(Optional.ofNullable(immediateTrade));
@@ -188,6 +247,29 @@ public class TradeSuggestTest {
 			verifiedMember);
 
 		assertThat(resDto.getTradeStatus()).isEqualTo(TradeStatus.IN_PROGRESS);
+
+	}
+
+	@Test
+	@DisplayName("즉시 교환 - 상태 변경: 실패 - 교환이 완료된 건에 대하여 상태 변경 시도")
+	void updateStatusFailure() {
+
+		immediateTrade = ImmediateTrade.builder()
+			.id(1L)
+			.title("즉시 교환 제목")
+			.description("즉시 교환 설명")
+			.product(registeredProduct)
+			.status(TradeStatus.COMPLETED)
+			.viewCount(0)
+			.build();
+
+		when(immediateTradeRepository.findById(immediateTrade.getId())).thenReturn(Optional.ofNullable(immediateTrade));
+
+		updateStatusReqDto = new UpdateStatusReqDto(TradeStatus.IN_PROGRESS);
+
+		assertThatThrownBy(
+			() -> immediateTradeService.updateStatus(immediateTrade.getId(), updateStatusReqDto, verifiedMember))
+			.isInstanceOf(IllegalStateException.class).hasMessage("교환이 완료된 건에 대해서는 상태 변경을 할 수 없습니다.");
 
 	}
 }
