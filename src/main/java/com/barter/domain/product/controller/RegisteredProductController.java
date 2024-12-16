@@ -29,6 +29,8 @@ import com.barter.domain.product.dto.request.UpdateRegisteredProductStatusReqDto
 import com.barter.domain.product.dto.response.CreateRegisteredProductResDto;
 import com.barter.domain.product.dto.response.FindRegisteredProductResDto;
 import com.barter.domain.product.dto.response.UpdateRegisteredProductInfoResDto;
+import com.barter.domain.product.dto.response.UpdateRegisteredProductStatusResDto;
+import com.barter.domain.product.dto.response.SwitchRegisteredProductResDto;
 import com.barter.domain.product.service.ProductSwitchService;
 import com.barter.domain.product.service.RegisteredProductService;
 
@@ -85,11 +87,11 @@ public class RegisteredProductController {
 
 	@PatchMapping("/status")
 	@ResponseStatus(HttpStatus.OK)
-	public void updateRegisteredProductStatus(
+	public UpdateRegisteredProductStatusResDto updateRegisteredProductStatus(
 		@RequestBody @Valid UpdateRegisteredProductStatusReqDto request,
 		VerifiedMember verifiedMember
 	) {
-		registeredProductService.updateRegisteredProductStatus(request, verifiedMember.getId());
+		return registeredProductService.updateRegisteredProductStatus(request, verifiedMember.getId());
 	}
 
 	@DeleteMapping("/{registeredProductId}")
@@ -102,11 +104,11 @@ public class RegisteredProductController {
 
 	@PostMapping("/switch")
 	@ResponseStatus(HttpStatus.CREATED)
-	public void createRegisteredProductFromSuggestedProduct(
+	public SwitchRegisteredProductResDto createRegisteredProductFromSuggestedProduct(
 		@RequestBody @Valid SwitchRegisteredProductReqDto request,
 		VerifiedMember verifiedMember
 	) {
-		productSwitchService.createRegisteredProductFromSuggestedProduct(
+		return productSwitchService.createRegisteredProductFromSuggestedProduct(
 			request.getSuggestedProductId(), verifiedMember.getId()
 		);
 	}

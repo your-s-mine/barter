@@ -29,9 +29,11 @@ import com.barter.common.s3.S3Service;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductInfoReqDto;
+import com.barter.domain.product.dto.request.UpdateRegisteredProductStatusReqDto;
 import com.barter.domain.product.dto.response.CreateRegisteredProductResDto;
 import com.barter.domain.product.dto.response.FindRegisteredProductResDto;
 import com.barter.domain.product.dto.response.UpdateRegisteredProductInfoResDto;
+import com.barter.domain.product.dto.response.UpdateRegisteredProductStatusResDto;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.enums.RegisteredStatus;
 import com.barter.domain.product.repository.RegisteredProductRepository;
@@ -414,5 +416,179 @@ public class RegisteredProductServiceTest {
 			registeredProductService.updateRegisteredProductInfo(request, multipartFiles, verifiedMemberId))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("1 ~ 3개 사이의 이미지를 가져야 합니다.");
+	}
+
+	@Test
+	@DisplayName("등록 물품 상태 수정 - 성공 테스트")
+	void updateRegisteredProductStatusTest_Success() {
+		//given
+		UpdateRegisteredProductStatusReqDto request = UpdateRegisteredProductStatusReqDto.builder()
+			.id(1L)
+			.status("REGISTERING")
+			.build();
+
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(request.getId())).thenReturn(
+			Optional.of(RegisteredProduct.builder()
+				.id(1L)
+				.status(RegisteredStatus.PENDING)
+				.member(Member.builder().id(1L).build())
+				.build()
+			)
+		);
+
+		when(registeredProductRepository.save(any())).thenReturn(
+			RegisteredProduct.builder()
+				.id(1L)
+				.status(RegisteredStatus.REGISTERING)
+				.build()
+		);
+
+		//when
+		UpdateRegisteredProductStatusResDto response = registeredProductService.updateRegisteredProductStatus(
+			request, verifiedMemberId
+		);
+
+		//then
+		assertThat(response).isNotNull();
+		assertThat(response.getId()).isEqualTo(request.getId());
+		assertThat(response.getStatus()).isEqualTo(request.getStatus());
+	}
+
+	@Test
+	@DisplayName("등록 물품 상태 수정 - 수정 등록 물품이 존재하지 않는 경우 예외 테스트")
+	void updateRegisteredProductStatusTest_Exception1() {
+		//given
+		UpdateRegisteredProductStatusReqDto request = UpdateRegisteredProductStatusReqDto.builder()
+			.id(1L)
+			.status("REGISTERING")
+			.build();
+
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(request.getId()))
+			.thenThrow(new IllegalArgumentException("Registered product not found"));
+
+		//when & then
+		assertThatThrownBy(() ->
+			registeredProductService.updateRegisteredProductStatus(request, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Registered product not found");
+	}
+
+	@Test
+	@DisplayName("등록 물품 상태 수정 - 수정 권환 예외 테스트")
+	void updateRegisteredProductStatusTest_Exception2() {
+		//given
+		UpdateRegisteredProductStatusReqDto request = UpdateRegisteredProductStatusReqDto.builder()
+			.id(1L)
+			.status("REGISTERING")
+			.build();
+
+		Long verifiedMemberId = 2L;
+
+		when(registeredProductRepository.findById(request.getId())).thenReturn(
+			Optional.of(RegisteredProduct.builder()
+				.id(1L)
+				.status(RegisteredStatus.PENDING)
+				.member(Member.builder().id(1L).build())
+				.build()
+			)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			registeredProductService.updateRegisteredProductStatus(request, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("권한이 없습니다.");
+	}
+
+	@Test
+	@DisplayName("등록 물품 삭제 - 성공 테스트")
+	void deleteRegisteredProductTest_Success() {
+		//given
+		Long registeredProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		RegisteredProduct testProduct = RegisteredProduct.builder()
+			.id(registeredProductId)
+			.status(RegisteredStatus.PENDING)
+			.images(List.of("image1", "image2"))
+			.member(Member.builder().id(verifiedMemberId).build())
+			.build();
+		registeredProductRepository.save(testProduct);
+
+		when(registeredProductRepository.findById(registeredProductId))
+			.thenReturn(Optional.of(testProduct));
+
+		//when
+		registeredProductService.deleteRegisteredProduct(registeredProductId, verifiedMemberId);
+
+		//then
+		assertThat(registeredProductRepository.count()).isEqualTo(0L);
+	}
+
+	@Test
+	@DisplayName("등록 물품 삭제 - 대상 등록 물품이 존재하지 않는 경우 예외 테스트")
+	void deleteRegisteredProductTest_Exception1() {
+		//given
+		Long registeredProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(registeredProductId))
+			.thenThrow(new IllegalArgumentException("Registered product not found"));
+
+		//when & then
+		assertThatThrownBy(() ->
+			registeredProductService.deleteRegisteredProduct(registeredProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Registered product not found");
+	}
+
+	@Test
+	@DisplayName("등록 물품 삭제 - 수정 권한 예외 테스트")
+	void deleteRegisteredProductTest_Exception2() {
+		//given
+		Long registeredProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(registeredProductId)).thenReturn(
+			Optional.of(RegisteredProduct.builder()
+				.id(1L)
+				.status(RegisteredStatus.PENDING)
+				.member(Member.builder().id(2L).build())
+				.build()
+			)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			registeredProductService.deleteRegisteredProduct(registeredProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("권한이 없습니다.");
+	}
+
+	@Test
+	@DisplayName("등록 물품 삭제 - 삭제 가능 상태 예외 테스트")
+	void deleteRegisteredProductTest_Exception3() {
+		//given
+		Long registeredProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(registeredProductId)).thenReturn(
+			Optional.of(RegisteredProduct.builder()
+				.id(1L)
+				.status(RegisteredStatus.REGISTERING)
+				.member(Member.builder().id(1L).build())
+				.build()
+			)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			registeredProductService.deleteRegisteredProduct(registeredProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("PENDING 상태인 경우에만 등록 물품을 삭제할 수 있습니다.");
 	}
 }
