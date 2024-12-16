@@ -16,6 +16,7 @@ import com.barter.domain.product.dto.request.UpdateRegisteredProductInfoReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductStatusReqDto;
 import com.barter.domain.product.dto.response.CreateRegisteredProductResDto;
 import com.barter.domain.product.dto.response.FindRegisteredProductResDto;
+import com.barter.domain.product.dto.response.UpdateRegisteredProductInfoResDto;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.validator.ImageCountValidator;
@@ -61,7 +62,7 @@ public class RegisteredProductService {
 	}
 
 	@Transactional
-	public void updateRegisteredProductInfo(
+	public UpdateRegisteredProductInfoResDto updateRegisteredProductInfo(
 		UpdateRegisteredProductInfoReqDto request, List<MultipartFile> multipartFiles, Long verifiedMemberId
 	) {
 		RegisteredProduct foundProduct = registeredProductRepository.findById(request.getId())
@@ -82,7 +83,8 @@ public class RegisteredProductService {
 		}
 
 		foundProduct.updateInfo(request);
-		registeredProductRepository.save(foundProduct);
+		RegisteredProduct updatedProduct = registeredProductRepository.save(foundProduct);
+		return UpdateRegisteredProductInfoResDto.from(updatedProduct);
 	}
 
 	@Transactional
