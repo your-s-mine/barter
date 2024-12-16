@@ -41,6 +41,11 @@ dependencies {
 
     // s3
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
+    // websocket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    // STOMP
+    implementation 'org.webjars:stomp-websocket:2.3.4'
 }
 
 tasks.named('test') {

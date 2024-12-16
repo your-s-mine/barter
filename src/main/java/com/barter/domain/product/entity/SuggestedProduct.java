@@ -45,8 +45,9 @@ public class SuggestedProduct extends BaseTimeStampEntity {
 
 	@Builder
 	public SuggestedProduct(
-		String name, String description, List<String> images, Member member, SuggestedStatus status
+		Long id, String name, String description, List<String> images, Member member, SuggestedStatus status
 	) {
+		this.id = id;
 		this.name = name;
 		this.description = description;
 		this.images = images;
