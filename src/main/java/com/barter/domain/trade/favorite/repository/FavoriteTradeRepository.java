@@ -6,6 +6,7 @@ import com.barter.domain.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface FavoriteTradeRepository extends JpaRepository<FavoriteTrade, Long> {
     // 사용자의 관심 거래 조회
@@ -13,4 +14,7 @@ public interface FavoriteTradeRepository extends JpaRepository<FavoriteTrade, Lo
 
     // 중복 확인 (필드명 변경 반영)
     boolean existsByMemberAndTradeStatusAndTradeId(Member member, TradeStatus tradeStatus, Long tradeId);
+
+    // 특정 사용자의 관심 거래 조회
+    Optional<FavoriteTrade> findByIdAndMember(Long id, Member member);
 }
