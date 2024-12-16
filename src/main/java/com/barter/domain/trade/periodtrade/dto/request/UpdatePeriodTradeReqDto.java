@@ -2,9 +2,11 @@ package com.barter.domain.trade.periodtrade.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor // for test
 public class UpdatePeriodTradeReqDto {
 
 	@NotBlank(message = "타이틀은 필수입니다.")

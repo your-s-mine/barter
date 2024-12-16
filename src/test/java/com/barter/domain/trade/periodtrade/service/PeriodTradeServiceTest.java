@@ -25,12 +25,28 @@ import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.member.enums.JoinPath;
 import com.barter.domain.product.entity.RegisteredProduct;
+import com.barter.domain.product.entity.SuggestedProduct;
+import com.barter.domain.product.entity.TradeProduct;
 import com.barter.domain.product.enums.RegisteredStatus;
+import com.barter.domain.product.enums.SuggestedStatus;
+import com.barter.domain.product.enums.TradeType;
 import com.barter.domain.product.repository.RegisteredProductRepository;
+import com.barter.domain.product.repository.SuggestedProductRepository;
+import com.barter.domain.product.repository.TradeProductRepository;
 import com.barter.domain.trade.enums.TradeStatus;
+import com.barter.domain.trade.periodtrade.dto.request.AcceptPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.CreatePeriodTradeReqDto;
+import com.barter.domain.trade.periodtrade.dto.request.DenyPeriodTradeReqDto;
+import com.barter.domain.trade.periodtrade.dto.request.StatusUpdateReqDto;
+import com.barter.domain.trade.periodtrade.dto.request.SuggestedPeriodTradeReqDto;
+import com.barter.domain.trade.periodtrade.dto.request.UpdatePeriodTradeReqDto;
+import com.barter.domain.trade.periodtrade.dto.response.AcceptPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.CreatePeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.response.DenyPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.response.StatusUpdateResDto;
+import com.barter.domain.trade.periodtrade.dto.response.SuggestedPeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.response.UpdatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 import com.barter.domain.trade.periodtrade.repository.PeriodTradeRepository;
 import com.barter.event.trade.PeriodTradeEvent.PeriodTradeCloseEvent;
@@ -43,6 +59,11 @@ class PeriodTradeServiceTest {
 
 	@Mock
 	private RegisteredProductRepository registeredProductRepository;
+	@Mock
+	private SuggestedProductRepository suggestedProductRepository;
+
+	@Mock
+	private TradeProductRepository tradeProductRepository;
 
 	@Mock
 	private PeriodTradeRepository periodTradeRepository;
@@ -224,6 +245,216 @@ class PeriodTradeServiceTest {
 
 	}
 
+	@Test
+	@DisplayName("등록된 기간 교환에 대해서 물품을 제안 성공")
+	public void 등록된_기간_교환에_대해서_물품을_제안_성공() {
+
+		//given
+		Long tradeId = 1L;
+
+		SuggestedPeriodTradeReqDto reqDto = new SuggestedPeriodTradeReqDto(List.of(101L, 102L));
+
+		PeriodTrade mockPeriodTrade = mock(PeriodTrade.class);
+		SuggestedProduct product1 = mock(SuggestedProduct.class);
+		SuggestedProduct product2 = mock(SuggestedProduct.class);
+
+		when(periodTradeRepository.findById(tradeId)).thenReturn(Optional.of(mockPeriodTrade));
+
+		doNothing().when(mockPeriodTrade).validateSuggestAuthority(member.getId());
+		doNothing().when(mockPeriodTrade).validateIsPending();
+		doNothing().when(mockPeriodTrade).validateIsCompleted();
+
+		when(suggestedProductRepository.findById(101L)).thenReturn(Optional.of(product1));
+		when(suggestedProductRepository.findById(102L)).thenReturn(Optional.of(product2));
+		when(product1.getStatus()).thenReturn(SuggestedStatus.PENDING);
+		when(product2.getStatus()).thenReturn(SuggestedStatus.PENDING);
+
+		when(tradeProductRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+
+		// when
+		SuggestedPeriodTradeResDto result = periodTradeService.suggestPeriodTrade(verifiedMember, tradeId, reqDto);
+
+		// then
+		assertThat(result).isNotNull();
+		assertThat(result.getPeriodTradeId()).isEqualTo(tradeId);
+		assertThat(result.getSuggestedProductIds()).hasSize(2);
+
+		verify(periodTradeRepository, times(1)).findById(tradeId);
+		verify(mockPeriodTrade, times(1)).validateSuggestAuthority(member.getId());
+		verify(mockPeriodTrade, times(1)).validateIsPending();
+		verify(mockPeriodTrade, times(1)).validateIsCompleted();
+		verify(suggestedProductRepository, times(1)).findById(101L);
+		verify(suggestedProductRepository, times(1)).findById(102L);
+		verify(tradeProductRepository, times(1)).saveAll(anyList());
+	}
+
+	@Test
+	@DisplayName("기간 거래 제안 실패 (기간 거래 없음)")
+	public void 기간_거래_제안_실패_기간_거래_없음() {
+
+		// given
+		Long tradeId = 1L;
+
+		SuggestedPeriodTradeReqDto reqDto = new SuggestedPeriodTradeReqDto(List.of(101L, 102L));
+
+		when(periodTradeRepository.findById(tradeId)).thenReturn(Optional.empty());
+
+		// when & then
+		assertThatThrownBy(() -> periodTradeService.suggestPeriodTrade(verifiedMember, tradeId, reqDto))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("해당하는 기간 거래를 찾을 수 없습니다.");
+
+		verify(periodTradeRepository, times(1)).findById(tradeId);
+		verifyNoMoreInteractions(periodTradeRepository);
+	}
+
+	@Test
+	@DisplayName("기간 거래 제안 실패 (제안된 상품 상태 오류)")
+	public void 기간_거래_제안_실패_제안_상품_상태_오류() {
+
+		//given
+		Long tradeId = 1L;
+
+		SuggestedPeriodTradeReqDto reqDto = new SuggestedPeriodTradeReqDto(List.of(101L));
+
+		PeriodTrade mockPeriodTrade = mock(PeriodTrade.class);
+		SuggestedProduct product = mock(SuggestedProduct.class);
+
+		when(periodTradeRepository.findById(tradeId)).thenReturn(Optional.of(mockPeriodTrade));
+		when(suggestedProductRepository.findById(101L)).thenReturn(Optional.of(product));
+		when(product.getStatus()).thenReturn(SuggestedStatus.ACCEPTED);
+
+		doNothing().when(mockPeriodTrade).validateSuggestAuthority(member.getId());
+		doNothing().when(mockPeriodTrade).validateIsPending();
+		doNothing().when(mockPeriodTrade).validateIsCompleted();
+
+		// when & then
+		assertThatThrownBy(() -> periodTradeService.suggestPeriodTrade(verifiedMember, tradeId, reqDto))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("다른 교환에 제안된 상품은 제안 할 수 없습니다.");
+
+		verify(periodTradeRepository, times(1)).findById(tradeId);
+		verify(suggestedProductRepository, times(1)).findById(101L);
+
+	}
+
+	@Test
+	@DisplayName("기간 거래 수락")
+	public void 기간_거래_수락() {
+		//given
+		Long tradeId = 1L;
+
+		Member member = mock(Member.class);
+		when(member.getId()).thenReturn(2L);
+
+		AcceptPeriodTradeReqDto reqDto = new AcceptPeriodTradeReqDto(member.getId()); // 다른 멤버 (2L)
+
+		PeriodTrade mockPeriodTrade = mock(PeriodTrade.class);
+		TradeProduct tradeProduct1 = mock(TradeProduct.class);
+		TradeProduct tradeProduct2 = mock(TradeProduct.class);
+
+		SuggestedProduct suggestedProduct1 = mock(SuggestedProduct.class);
+		SuggestedProduct suggestedProduct2 = mock(SuggestedProduct.class);
+
+		RegisteredProduct registeredProduct = mock(RegisteredProduct.class);
+
+		when(mockPeriodTrade.getRegisteredProduct()).thenReturn(registeredProduct);
+
+		when(periodTradeRepository.findById(tradeId)).thenReturn(Optional.of(mockPeriodTrade));
+
+		// 제안된 물건 2개
+		when(tradeProductRepository.findAllByTradeIdAndTradeType(tradeId, TradeType.PERIOD))
+			.thenReturn(List.of(tradeProduct1, tradeProduct2));
+
+		doNothing().when(mockPeriodTrade).validateAuthority(1L);
+		doNothing().when(mockPeriodTrade).validateInProgress();
+
+		doNothing().when(suggestedProduct1).changStatusAccepted();
+		doNothing().when(suggestedProduct2).changStatusAccepted();
+
+		doNothing().when(mockPeriodTrade).updatePeriodTradeStatusCompleted();
+
+		when(tradeProduct1.getSuggestedProduct()).thenReturn(suggestedProduct1);
+		when(tradeProduct2.getSuggestedProduct()).thenReturn(suggestedProduct2);
+		when(suggestedProduct1.getMember()).thenReturn(member);
+		when(suggestedProduct2.getMember()).thenReturn(member);
+
+		when(suggestedProduct1.getStatus()).thenReturn(SuggestedStatus.SUGGESTING);
+		when(suggestedProduct2.getStatus()).thenReturn(SuggestedStatus.SUGGESTING);
+
+		// when
+
+		AcceptPeriodTradeResDto result = periodTradeService.acceptPeriodTrade(verifiedMember, tradeId, reqDto);
+
+		// then
+		assertThat(result).isNotNull();
+		verify(periodTradeRepository, times(1)).findById(tradeId);
+		verify(tradeProductRepository, times(1)).findAllByTradeIdAndTradeType(tradeId, TradeType.PERIOD);
+		verify(mockPeriodTrade, times(1)).validateAuthority(1L);
+		verify(mockPeriodTrade, times(1)).validateInProgress();
+		verify(suggestedProduct1, times(1)).changStatusAccepted();
+		verify(suggestedProduct2, times(1)).changStatusAccepted();
+		verify(mockPeriodTrade, times(1)).updatePeriodTradeStatusCompleted();
+
+	}
+
+	@Test
+	@DisplayName("기간 거래 거절")
+	public void 기간_거래_거절() {
+		//given
+		Long tradeId = 1L;
+
+		Member member = mock(Member.class);
+		when(member.getId()).thenReturn(2L);
+
+		DenyPeriodTradeReqDto reqDto = new DenyPeriodTradeReqDto(member.getId()); // 다른 멤버 (2L)
+
+		PeriodTrade mockPeriodTrade = mock(PeriodTrade.class);
+		TradeProduct tradeProduct1 = mock(TradeProduct.class);
+		TradeProduct tradeProduct2 = mock(TradeProduct.class);
+
+		SuggestedProduct suggestedProduct1 = mock(SuggestedProduct.class);
+		SuggestedProduct suggestedProduct2 = mock(SuggestedProduct.class);
+
+		RegisteredProduct registeredProduct = mock(RegisteredProduct.class);
+
+		when(mockPeriodTrade.getRegisteredProduct()).thenReturn(registeredProduct);
+
+		when(periodTradeRepository.findById(tradeId)).thenReturn(Optional.of(mockPeriodTrade));
+
+		// 제안된 물건 2개
+		when(tradeProductRepository.findAllByTradeIdAndTradeType(tradeId, TradeType.PERIOD))
+			.thenReturn(List.of(tradeProduct1, tradeProduct2));
+
+		doNothing().when(mockPeriodTrade).validateAuthority(1L);
+		doNothing().when(mockPeriodTrade).validateInProgress();
+
+		doNothing().when(suggestedProduct1).changStatusPending();
+		doNothing().when(suggestedProduct2).changStatusPending();
+
+		when(tradeProduct1.getSuggestedProduct()).thenReturn(suggestedProduct1);
+		when(tradeProduct2.getSuggestedProduct()).thenReturn(suggestedProduct2);
+		when(suggestedProduct1.getMember()).thenReturn(member);
+		when(suggestedProduct2.getMember()).thenReturn(member);
+
+		when(suggestedProduct1.getStatus()).thenReturn(SuggestedStatus.SUGGESTING);
+		when(suggestedProduct2.getStatus()).thenReturn(SuggestedStatus.SUGGESTING);
+
+		// when
+
+		DenyPeriodTradeResDto result = periodTradeService.denyPeriodTrade(verifiedMember, tradeId, reqDto);
+
+		// then
+		assertThat(result).isNotNull();
+		verify(periodTradeRepository, times(1)).findById(tradeId);
+		verify(tradeProductRepository, times(1)).findAllByTradeIdAndTradeType(tradeId, TradeType.PERIOD);
+		verify(mockPeriodTrade, times(1)).validateAuthority(1L);
+		verify(mockPeriodTrade, times(1)).validateInProgress();
+		verify(suggestedProduct1, times(1)).changStatusPending();
+		verify(suggestedProduct2, times(1)).changStatusPending();
+
+	}
+
 	// -----------------------------------------------------------------
 	@Test
 	@DisplayName("기간 교환 다건 조회")
@@ -236,7 +467,7 @@ class PeriodTradeServiceTest {
 			.title("test title")
 			.description("test description")
 			.status(TradeStatus.PENDING)
-			.product(registeredProduct)
+			.registeredProduct(registeredProduct)
 			.viewCount(0)
 			.endedAt(LocalDateTime.now().plusDays(5))
 			.build();
@@ -274,7 +505,7 @@ class PeriodTradeServiceTest {
 			.title("test title")
 			.description("test description")
 			.status(TradeStatus.PENDING)
-			.product(registeredProduct)
+			.registeredProduct(registeredProduct)
 			.viewCount(0)
 			.endedAt(LocalDateTime.now().plusDays(5))
 			.build();
@@ -310,6 +541,97 @@ class PeriodTradeServiceTest {
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining("해당하는 기간 거래를 찾을 수 없습니다.");
 		verify(periodTradeRepository, times(1)).findById(id);
+	}
+
+	@Test
+	@DisplayName("기간 교환 상태 변경")
+	public void 기간_교환_상태_변경() {
+
+		// given
+		Long tradeId = 1L;
+
+		PeriodTrade periodTrade = mock(PeriodTrade.class);
+		when(periodTrade.getId()).thenReturn(tradeId);
+		when(periodTrade.getStatus()).thenReturn(TradeStatus.PENDING);
+
+		StatusUpdateReqDto reqDto = new StatusUpdateReqDto(TradeStatus.CLOSED);
+
+		when(periodTradeRepository.findById(tradeId)).thenReturn(Optional.of(periodTrade));
+
+		doNothing().when(periodTrade).validateAuthority(1L);
+		doNothing().when(periodTrade).validateIsCompleted();
+
+		when(periodTrade.updatePeriodTradeStatus(TradeStatus.CLOSED)).thenReturn(true);
+
+		// when
+		StatusUpdateResDto result = periodTradeService.updatePeriodTradeStatus(verifiedMember, tradeId, reqDto);
+
+		// then
+		verify(periodTradeRepository, times(1)).findById(tradeId);
+		verify(periodTrade, times(1)).validateAuthority(1L);
+		verify(periodTrade, times(1)).validateIsCompleted();
+		verify(periodTrade, times(1)).updatePeriodTradeStatus(TradeStatus.CLOSED);
+
+	}
+
+	@Test
+	@DisplayName("기간 거래 삭제")
+	public void 기간_거래_삭제() {
+
+		// given
+		Long tradeId = 1L;
+
+		PeriodTrade periodTrade = mock(PeriodTrade.class);
+
+		when(periodTradeRepository.findById(tradeId)).thenReturn(Optional.of(periodTrade));
+
+		doNothing().when(periodTrade).validateAuthority(1L);
+		doNothing().when(periodTrade).validateIsCompleted();
+
+		// when
+		periodTradeService.deletePeriodTrade(verifiedMember, tradeId);
+
+		// then
+
+		verify(periodTradeRepository, times(1)).delete(periodTrade);
+		verify(periodTrade, times(1)).validateAuthority(1L);
+		verify(periodTrade, times(1)).validateIsCompleted();
+		verify(periodTradeRepository, times(1)).findById(tradeId);
+	}
+
+	@Test
+	@DisplayName("기간 거래 업데이트")
+	public void 기간_거래_업데이트() {
+
+		// given
+		Long tradeId = 1L;
+		VerifiedMember member = mock(VerifiedMember.class);
+		when(member.getId()).thenReturn(1L);
+
+		String newTitle = "새 제목";
+		String newDescription = "새 설명";
+		UpdatePeriodTradeReqDto reqDto = new UpdatePeriodTradeReqDto(newTitle, newDescription);
+
+		PeriodTrade periodTrade = PeriodTrade.builder()
+			.id(1L)
+			.title("title")
+			.description("description")
+			.registeredProduct(registeredProduct)
+			.status(TradeStatus.PENDING)
+			.viewCount(0)
+			.build();
+
+		when(periodTradeRepository.findById(tradeId)).thenReturn(Optional.of(periodTrade));
+
+		// when
+		UpdatePeriodTradeResDto result = periodTradeService.updatePeriodTrade(member, tradeId, reqDto);
+
+		// then
+
+		assertThat(result.getTitle()).isEqualTo("새 제목");
+		assertThat(periodTrade.getDescription()).isEqualTo("새 설명");
+		verify(periodTradeRepository, times(1)).findById(tradeId);
+
 	}
 
 }

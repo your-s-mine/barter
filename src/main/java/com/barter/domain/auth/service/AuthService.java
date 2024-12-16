@@ -1,10 +1,8 @@
 package com.barter.domain.auth.service;
 
+import com.barter.domain.auth.dto.*;
 import org.springframework.stereotype.Service;
 
-import com.barter.domain.auth.dto.SignInReqDto;
-import com.barter.domain.auth.dto.SignInResDto;
-import com.barter.domain.auth.dto.SignUpReqDto;
 import com.barter.domain.auth.exception.DuplicateEmailException;
 import com.barter.domain.auth.exception.InvalidCredentialsException;
 import com.barter.domain.member.entity.Member;
@@ -43,4 +41,5 @@ public class AuthService {
 			.accessToken(token)
 			.build();
 	}
+
 }

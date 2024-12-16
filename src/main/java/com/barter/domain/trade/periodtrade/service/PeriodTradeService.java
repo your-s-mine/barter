@@ -167,9 +167,7 @@ public class PeriodTradeService {
 		if (!isStatusUpdatable) {
 			throw new IllegalArgumentException("불가능한 상태 변경 입니다.");
 		}
-
-		// TODO : PeriodTrade 엔티티의 endedAt 이 현재 시간과 비교시 이후인 경우 CLOSED 되도록 하는 기능 구현 필요
-
+		
 		return StatusUpdateResDto.from(periodTrade);
 	}
 
@@ -187,7 +185,8 @@ public class PeriodTradeService {
 		for (TradeProduct tradeProduct : tradeProducts) {
 			SuggestedProduct suggestedProduct = tradeProduct.getSuggestedProduct();
 
-			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId())) {
+			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId()) && suggestedProduct.getStatus()
+				.equals(SuggestedStatus.SUGGESTING)) {
 				suggestedProduct.changStatusAccepted();
 				periodTrade.getRegisteredProduct()
 					.updateStatus(RegisteredStatus.ACCEPTED.toString());// enum 타입이 아니어도 검증 로직이 구현되어 있기 때문에 일단 이렇게 구현함
@@ -218,7 +217,8 @@ public class PeriodTradeService {
 		for (TradeProduct tradeProduct : tradeProducts) {
 			SuggestedProduct suggestedProduct = tradeProduct.getSuggestedProduct();
 
-			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId())) {
+			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId()) && suggestedProduct.getStatus()
+				.equals(SuggestedStatus.SUGGESTING)) {
 				suggestedProduct.changStatusPending();
 				periodTrade.getRegisteredProduct()
 					.updateStatus(RegisteredStatus.PENDING.toString());
