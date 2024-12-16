@@ -14,7 +14,9 @@ import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateSuggestedProductReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductInfoReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductStatusReqDto;
+import com.barter.domain.product.dto.response.CreateSuggestedProductResDto;
 import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
+import com.barter.domain.product.dto.response.UpdateSuggestedProductInfoResDto;
 import com.barter.domain.product.dto.response.UpdateSuggestedProductStatusResDto;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.repository.SuggestedProductRepository;
@@ -29,7 +31,7 @@ public class SuggestedProductService {
 	private final SuggestedProductRepository suggestedProductRepository;
 	private final S3Service s3Service;
 
-	public void createSuggestedProduct(
+	public CreateSuggestedProductResDto createSuggestedProduct(
 		CreateSuggestedProductReqDto request, List<MultipartFile> multipartFiles, Long verifiedMemberId
 	) {
 		ImageCountValidator.checkImageCount(multipartFiles.size());
@@ -38,7 +40,8 @@ public class SuggestedProductService {
 		Member requestMember = Member.builder().id(verifiedMemberId).build();
 
 		SuggestedProduct createdProduct = SuggestedProduct.create(request, requestMember, images);
-		suggestedProductRepository.save(createdProduct);
+		SuggestedProduct savedProduct = suggestedProductRepository.save(createdProduct);
+		return CreateSuggestedProductResDto.from(savedProduct);
 	}
 
 	public FindSuggestedProductResDto findSuggestedProduct(Long suggestedProductId, Long verifiedMemberId) {
@@ -59,7 +62,7 @@ public class SuggestedProductService {
 	}
 
 	@Transactional
-	public void updateSuggestedProductInfo(
+	public UpdateSuggestedProductInfoResDto updateSuggestedProductInfo(
 		UpdateSuggestedProductInfoReqDto request, List<MultipartFile> multipartFiles, Long verifiedMemberId
 	) {
 		SuggestedProduct foundProduct = suggestedProductRepository.findById(request.getId())
@@ -79,7 +82,8 @@ public class SuggestedProductService {
 		}
 
 		foundProduct.updateInfo(request);
-		suggestedProductRepository.save(foundProduct);
+		SuggestedProduct updatedProduct = suggestedProductRepository.save(foundProduct);
+		return UpdateSuggestedProductInfoResDto.from(updatedProduct);
 	}
 
 	@Transactional

@@ -3,7 +3,11 @@ package com.barter.domain.chat.entity;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.barter.domain.chat.enums.RoomStatus;
+
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -25,10 +29,23 @@ public class ChatRoom {
 
 	private LocalDateTime createdAt;
 
-	public static ChatRoom create() {
+	private Long personCount; // 추후 확장성 고려
+
+	private Long registeredProductId;
+
+	private Long registeredMemberId;
+
+	@Enumerated(EnumType.STRING)
+	private RoomStatus roomStatus;
+
+	public static ChatRoom create(Long registeredProductId, Long registeredMemberId) {
 		return ChatRoom.builder()
 			.id(UUID.randomUUID().toString())
 			.createdAt(LocalDateTime.now())
+			.personCount(2L)
+			.registeredProductId(registeredProductId)
+			.registeredMemberId(registeredMemberId)
+			.roomStatus(RoomStatus.OPEN)
 			.build();
 	}
 
