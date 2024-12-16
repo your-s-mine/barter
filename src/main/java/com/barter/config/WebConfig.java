@@ -3,10 +3,12 @@ package com.barter.config;
 import java.util.List;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import com.barter.converter.OAuthProviderConverter;
 import com.barter.interceptor.AuthInterceptor;
 import com.barter.resolver.MemberArgumentResolver;
 
@@ -28,7 +30,12 @@ public class WebConfig implements WebMvcConfigurer {
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(authInterceptor)
 			.addPathPatterns("/**")
-			.excludePathPatterns("/auth/**");
+			.excludePathPatterns("/auth/**", "/oauth/**", "/favicon.ico", "/error");
+	}
+
+	@Override
+	public void addFormatters(FormatterRegistry registry) {
+		registry.addConverter(new OAuthProviderConverter());
 	}
 }
 

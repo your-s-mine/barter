@@ -1,12 +1,19 @@
 package com.barter.domain.auth.service;
 
-import com.barter.domain.auth.dto.*;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
+import com.barter.domain.auth.dto.SignInReqDto;
+import com.barter.domain.auth.dto.SignInResDto;
+import com.barter.domain.auth.dto.SignUpReqDto;
 import com.barter.domain.auth.exception.DuplicateEmailException;
 import com.barter.domain.auth.exception.InvalidCredentialsException;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.member.repository.MemberRepository;
+import com.barter.domain.oauth.dto.LoginOAuthMemberDto;
+import com.barter.domain.oauth.dto.LoginOAuthMemberResDto;
+import com.barter.domain.oauth.enums.OAuthProvider;
 import com.barter.security.JwtUtil;
 import com.barter.security.PasswordEncoder;
 
@@ -40,6 +47,29 @@ public class AuthService {
 		return SignInResDto.builder()
 			.accessToken(token)
 			.build();
+	}
+
+	public void signupWithOAuth(OAuthProvider provider, LoginOAuthMemberDto memberInfo) {
+		UUID uuid = UUID.randomUUID();
+		Member socialMember = Member.builder()
+			.provider(provider)
+			.providerId(memberInfo.getId())
+			.email(memberInfo.getEmail())
+			.password(passwordEncoder.encode(uuid + ""))
+			.nickname(memberInfo.getNickname())
+			.build();
+		memberRepository.save(socialMember);
+	}
+
+	public LoginOAuthMemberResDto signinWithOAuth(OAuthProvider provider, LoginOAuthMemberDto memberInfo) {
+		return memberRepository.findByProviderAndProviderId(provider, memberInfo.getId())
+			.map(member -> {
+				String accessToken = jwtUtil.createToken(member.getId(), member.getEmail());
+				return LoginOAuthMemberResDto.builder()
+					.accessToken(accessToken)
+					.build();
+			})
+			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 멤버입니다."));
 	}
 
 }
