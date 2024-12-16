@@ -26,7 +26,11 @@ import com.barter.domain.product.dto.request.CreateSuggestedProductReqDto;
 import com.barter.domain.product.dto.request.SwitchSuggestedProductReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductInfoReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductStatusReqDto;
+import com.barter.domain.product.dto.response.CreateSuggestedProductResDto;
 import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
+import com.barter.domain.product.dto.response.UpdateSuggestedProductInfoResDto;
+import com.barter.domain.product.dto.response.UpdateSuggestedProductStatusResDto;
+import com.barter.domain.product.dto.response.SwitchSuggestedProductResDto;
 import com.barter.domain.product.service.ProductSwitchService;
 import com.barter.domain.product.service.SuggestedProductService;
 
@@ -43,12 +47,12 @@ public class SuggestedProductController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public void createSuggestedProduct(
+	public CreateSuggestedProductResDto createSuggestedProduct(
 		@RequestPart(name = "request") @Valid CreateSuggestedProductReqDto request,
 		@RequestPart(name = "multipartFiles") List<MultipartFile> multipartFiles,
 		VerifiedMember verifiedMember
 	) {
-		suggestedProductService.createSuggestedProduct(request, multipartFiles, verifiedMember.getId());
+		return suggestedProductService.createSuggestedProduct(request, multipartFiles, verifiedMember.getId());
 	}
 
 	@GetMapping("/{suggestedProductId}")
@@ -71,23 +75,23 @@ public class SuggestedProductController {
 
 	@PatchMapping
 	@ResponseStatus(HttpStatus.OK)
-	public void updateSuggestedProductInfo(
+	public UpdateSuggestedProductInfoResDto updateSuggestedProductInfo(
 		@RequestPart(name = "request") @Valid UpdateSuggestedProductInfoReqDto request,
 		@RequestPart(required = false, name = "multipartFiles") List<MultipartFile> multipartFiles,
 		VerifiedMember verifiedMember
 	) {
-		suggestedProductService.updateSuggestedProductInfo(
+		return suggestedProductService.updateSuggestedProductInfo(
 			request, Objects.requireNonNullElseGet(multipartFiles, ArrayList::new), verifiedMember.getId()
 		);
 	}
 
 	@PatchMapping("/status")
 	@ResponseStatus(HttpStatus.OK)
-	public void updateSuggestedProductStatus(
+	public UpdateSuggestedProductStatusResDto updateSuggestedProductStatus(
 		@RequestBody @Valid UpdateSuggestedProductStatusReqDto request,
 		VerifiedMember verifiedMember
 	) {
-		suggestedProductService.updateSuggestedProductStatus(request, verifiedMember.getId());
+		return suggestedProductService.updateSuggestedProductStatus(request, verifiedMember.getId());
 	}
 
 	@DeleteMapping("/{suggestedProductId}")
@@ -100,11 +104,11 @@ public class SuggestedProductController {
 
 	@PostMapping("/switch")
 	@ResponseStatus(HttpStatus.CREATED)
-	public void createSuggestedProductFromRegisteredProduct(
+	public SwitchSuggestedProductResDto createSuggestedProductFromRegisteredProduct(
 		@RequestBody @Valid SwitchSuggestedProductReqDto request,
 		VerifiedMember verifiedMember
 	) {
-		productSwitchService.createSuggestedProductFromRegisteredProduct(
+		return productSwitchService.createSuggestedProductFromRegisteredProduct(
 			request.getRegisteredProductId(), verifiedMember.getId()
 		);
 	}

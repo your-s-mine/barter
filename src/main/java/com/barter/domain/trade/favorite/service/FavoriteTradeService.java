@@ -7,6 +7,7 @@ import com.barter.domain.trade.favorite.dto.CreateFavoriteTradeReqDto;
 import com.barter.domain.trade.favorite.dto.FavoriteTradeResDto;
 import com.barter.domain.trade.favorite.repository.FavoriteTradeRepository;
 import com.barter.domain.member.entity.FavoriteTrade;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,5 +54,20 @@ public class FavoriteTradeService {
         return favoriteTradeRepository.findByMember(member).stream()
                 .map(FavoriteTradeResDto::from)
                 .collect(Collectors.toList());
+    }
+
+    // 관심 거래 삭제
+    @Transactional
+    public void deleteFavoriteTrade(VerifiedMember verifiedMember, Long favoriteTradeId) {
+        // 사용자 조회
+        Member member = memberRepository.findById(verifiedMember.getId())
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        // 관심 거래 조회 및 소유 확인
+        FavoriteTrade favoriteTrade = favoriteTradeRepository.findByIdAndMember(favoriteTradeId, member)
+                .orElseThrow(() -> new IllegalArgumentException("해당 관심 거래를 찾을 수 없습니다."));
+
+        // 삭제
+        favoriteTradeRepository.delete(favoriteTrade);
     }
 }

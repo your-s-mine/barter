@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.response.SwitchRegisteredProductResDto;
+import com.barter.domain.product.dto.response.SwitchSuggestedProductResDto;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.enums.RegisteredStatus;
@@ -153,5 +154,126 @@ public class ProductSwitchServiceTest {
 			productSwitchService.createRegisteredProductFromSuggestedProduct(suggestedProductId, verifiedMemberId))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("PENDING 상태인 경우에만 제안 물품을 삭제할 수 있습니다.");
+	}
+
+	@Test
+	@DisplayName("제안 물품 생성(등록물품을 제안물품으로) - 성공 테스트")
+	void createSuggestedProductFromRegisteredProductTest_Success() {
+		//given
+		Long registeredProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		RegisteredProduct registeredProduct = RegisteredProduct.builder()
+			.id(registeredProductId)
+			.name("test product")
+			.description("test description")
+			.images(List.of("test image1", "test image2"))
+			.status(RegisteredStatus.PENDING)
+			.member(Member.builder().id(verifiedMemberId).build())
+			.build();
+		registeredProductRepository.save(registeredProduct);
+
+		when(registeredProductRepository.findById(registeredProductId)).thenReturn(
+			Optional.of(registeredProduct)
+		);
+
+		when(suggestedProductRepository.save(any())).thenReturn(
+			SuggestedProduct.builder()
+				.id(1L)
+				.name(registeredProduct.getName())
+				.description(registeredProduct.getDescription())
+				.images(registeredProduct.getImages())
+				.status(SuggestedStatus.PENDING)
+				.member(registeredProduct.getMember())
+				.build()
+		);
+
+		//when
+		SwitchSuggestedProductResDto response = productSwitchService.createSuggestedProductFromRegisteredProduct(
+			registeredProductId, verifiedMemberId
+		);
+
+		//then
+		assertThat(response).isNotNull();
+		assertThat(response.getName()).isEqualTo(registeredProduct.getName());
+		assertThat(response.getDescription()).isEqualTo(registeredProduct.getDescription());
+		assertThat(response.getImages()).isEqualTo(registeredProduct.getImages());
+		assertThat(response.getStatus()).isEqualTo(registeredProduct.getStatus().name());
+		assertThat(response.getMemberId()).isEqualTo(registeredProduct.getMember().getId());
+		assertThat(registeredProductRepository.count()).isEqualTo(0L);
+	}
+
+	@Test
+	@DisplayName("제안 물품 생성(등록물품을 제안물품으로) - 대상 등록 물품이 존재하지 않는 경우 예외 테스트")
+	void createSuggestedProductFromRegisteredProductTest_Exception1() {
+		//given
+		Long registeredProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		when(registeredProductRepository.findById(registeredProductId)).thenThrow(
+			new IllegalArgumentException("Registered product not found")
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			productSwitchService.createSuggestedProductFromRegisteredProduct(registeredProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Registered product not found");
+	}
+
+	@Test
+	@DisplayName("제안 물품 생성(등록물품을 제안물품으로) - 권한 예외 테스트")
+	void createSuggestedProductFromRegisteredProductTest_Exception2() {
+		//given
+		Long registeredProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		RegisteredProduct registeredProduct = RegisteredProduct.builder()
+			.id(registeredProductId)
+			.name("test product")
+			.description("test description")
+			.images(List.of("test image1", "test image2"))
+			.status(RegisteredStatus.PENDING)
+			.member(Member.builder().id(2L).build())
+			.build();
+		registeredProductRepository.save(registeredProduct);
+
+		when(registeredProductRepository.findById(registeredProductId)).thenReturn(
+			Optional.of(registeredProduct)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			productSwitchService.createSuggestedProductFromRegisteredProduct(registeredProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("권한이 없습니다.");
+	}
+
+	@Test
+	@DisplayName("제안 물품 생성(등록물품을 제안물품으로) - 삭제 가능 상태 예외 테스트")
+	void createSuggestedProductFromRegisteredProductTest_Exception3() {
+		//given
+		Long registeredProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		RegisteredProduct registeredProduct = RegisteredProduct.builder()
+			.id(registeredProductId)
+			.name("test product")
+			.description("test description")
+			.images(List.of("test image1", "test image2"))
+			.status(RegisteredStatus.REGISTERING)
+			.member(Member.builder().id(verifiedMemberId).build())
+			.build();
+		registeredProductRepository.save(registeredProduct);
+
+		when(registeredProductRepository.findById(registeredProductId)).thenReturn(
+			Optional.of(registeredProduct)
+		);
+
+		//when & then
+		assertThatThrownBy(() ->
+			productSwitchService.createSuggestedProductFromRegisteredProduct(registeredProductId, verifiedMemberId))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("PENDING 상태인 경우에만 등록 물품을 삭제할 수 있습니다.");
 	}
 }
