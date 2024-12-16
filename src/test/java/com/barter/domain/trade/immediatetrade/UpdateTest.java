@@ -1,4 +1,4 @@
-package com.barter.domain.trade.immediatetrade.service;
+package com.barter.domain.trade.immediatetrade;
 
 import static org.assertj.core.api.AssertionsForClassTypes.*;
 import static org.mockito.Mockito.*;
@@ -22,6 +22,7 @@ import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeRe
 import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeResDto;
 import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
+import com.barter.domain.trade.immediatetrade.service.ImmediateTradeService;
 
 @ExtendWith(MockitoExtension.class)
 public class UpdateTest {
