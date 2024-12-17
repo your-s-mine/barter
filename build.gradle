@@ -51,3 +51,9 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+// 파라미터 인식 오류로 추가
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs.add("-parameters")
+}
+
