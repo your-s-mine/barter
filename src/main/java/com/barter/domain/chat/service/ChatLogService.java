@@ -15,10 +15,10 @@ public class ChatLogService {
 
 	private final ChattingRepository chattingRepository;
 
-	public List<ChatMessageResDto> findChatLogs(String roomId) {
+	public List<ChatMessageResDto> findChatsByRoom(String roomId) {
 
 		return ChatMessageResDto.from(chattingRepository.findByRoomIdOrderByChatTimeDesc(roomId));
-		// TODO : 추후 개수 제한이나 Page 객체로 묶을 생각입니다.
+
 	}
 
 }

@@ -1,5 +1,6 @@
 package com.barter.domain.chat.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,4 +12,6 @@ public interface ChatRoomMemberRepository extends JpaRepository<ChatRoomMember, 
 	long countByChatRoomIdAndJoinStatus(String roomId, JoinStatus joinStatus);
 
 	Optional<ChatRoomMember> findByChatRoomIdAndMemberId(String roomId, Long memberId);
+
+	List<ChatRoomMember> findAllByMemberId(Long id);
 }

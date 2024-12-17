@@ -15,6 +15,7 @@ import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.chat.dto.request.CreateChatRoomReqDto;
 import com.barter.domain.chat.dto.response.ChatMessageResDto;
 import com.barter.domain.chat.dto.response.CreateChatRoomResDto;
+import com.barter.domain.chat.dto.response.FindChatRoomResDto;
 import com.barter.domain.chat.service.ChatLogService;
 import com.barter.domain.chat.service.ChatRoomService;
 
@@ -36,6 +37,11 @@ public class ChatRoomController {
 
 	@GetMapping("/{roomId}")
 	public ResponseEntity<List<ChatMessageResDto>> findChatsByRoom(@PathVariable String roomId) {
-		return ResponseEntity.status(HttpStatus.OK).body(chatLogService.findChatLogs(roomId));
+		return ResponseEntity.status(HttpStatus.OK).body(chatLogService.findChatsByRoom(roomId));
+	}
+
+	@GetMapping
+	public ResponseEntity<List<FindChatRoomResDto>> findRoomByMember(VerifiedMember member) {
+		return ResponseEntity.status(HttpStatus.OK).body(chatRoomService.findRoomByMember(member));
 	}
 }

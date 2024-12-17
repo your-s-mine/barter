@@ -1,12 +1,14 @@
 package com.barter.domain.chat.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.chat.dto.request.CreateChatRoomReqDto;
 import com.barter.domain.chat.dto.response.CreateChatRoomResDto;
+import com.barter.domain.chat.dto.response.FindChatRoomResDto;
 import com.barter.domain.chat.entity.ChatRoom;
 import com.barter.domain.chat.entity.ChatRoomMember;
 import com.barter.domain.chat.enums.JoinStatus;
@@ -28,7 +30,6 @@ public class ChatRoomService {
 	private final ChatRoomRepository chatRoomRepository;
 	private final MemberRepository memberRepository;
 	private final RegisteredProductRepository registeredProductRepository;
-	private final TransactionTemplate transactionTemplate;
 
 	@Transactional
 	public CreateChatRoomResDto createChatRoom(VerifiedMember member, CreateChatRoomReqDto reqDto) {
@@ -101,5 +102,13 @@ public class ChatRoomService {
 			chatRoom.updateStatus(RoomStatus.CLOSED); // 한 명이라도 나가면 CLOSED
 		}
 		chatRoomMember.changeJoinStatus(joinStatus);
+	}
+
+	@Transactional
+	public List<FindChatRoomResDto> findRoomByMember(VerifiedMember member) {
+
+		List<ChatRoomMember> chatRoomMembers = chatRoomMemberRepository.findAllByMemberId(member.getId());
+
+		return FindChatRoomResDto.from(chatRoomMembers);
 	}
 }
