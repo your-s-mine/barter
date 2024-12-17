@@ -70,7 +70,7 @@ public class ChatRoomService {
 
 		long userCount = chatRoomMemberRepository.countByChatRoomIdAndJoinStatus(roomId, JoinStatus.IN_ROOM);
 
-		if (userCount == 2) {
+		if (userCount == 1) { // (이전 값 : 2), 1명이 들어가고 또 한명이 들어감과 동시에 IN_PROGRESS 가 되어야 하는데, 2 라면, 3명을 기대하는 꼴이 된다.
 			chatRoom.updateStatus(RoomStatus.IN_PROGRESS);
 		}
 
