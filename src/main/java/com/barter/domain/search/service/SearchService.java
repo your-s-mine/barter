@@ -47,6 +47,7 @@ public class SearchService {
 			.orElseGet(() ->
 				searchKeywordRepository.save(SearchKeyword.builder()
 					.word(word)
+					.count(0L)
 					.build()
 				));
 
