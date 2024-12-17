@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.barter.domain.auth.dto.VerifiedMember;
+import com.barter.domain.notification.enums.EventKind;
+import com.barter.domain.notification.service.NotificationService;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.entity.TradeProduct;
@@ -35,6 +37,7 @@ public class ImmediateTradeService {
 	private final RegisteredProductRepository registeredProductRepository;
 	private final TradeProductRepository tradeProductRepository;
 	private final SuggestedProductRepository suggestedProductRepository;
+	private final NotificationService notificationService;
 
 	public FindImmediateTradeResDto create(CreateImmediateTradeReqDto reqDto) {
 		RegisteredProduct registeredProduct = registeredProductRepository
@@ -140,6 +143,12 @@ public class ImmediateTradeService {
 		}
 
 		tradeProductRepository.saveAll(tradeProducts);
+
+		// 이벤트 저장 및 전달
+		notificationService.saveTradeEvent(
+			EventKind.IMMEDIATE_TRADE_SUGGEST, immediateTrade.getProduct().getMember().getId(),
+			TradeType.IMMEDIATE, immediateTrade.getId(), immediateTrade.getTitle()
+		);
 		return "제안 완료";
 	}
 
