@@ -27,8 +27,25 @@ public class ChatRoomEventListener {
 			log.info("멤버 채팅방 구독 성공 : {} 유저가 {} 방에 구독 중", event.getMemberId(), event.getRoomId());
 
 		} catch (Exception e) {
-			log.error("에러 이벤트 발생 : {}", e.getMessage());
+			log.error("구독 에러 이벤트 발생 : {}", e.getMessage());
 			throw e;
 		}
+	}
+
+	@EventListener
+	public void handleUserUnsubscribedEvent(MemberUnsubscribedEvent event) {
+		log.info("멤버 채팅방 구독 취소 >> userId : {}, roomId : {}", event.getMemberId(), event.getRoomId());
+
+		try {
+			chatRoomService.changeRoomStatus(event.getRoomId());
+			chatRoomService.updateMemberJoinStatus(event.getRoomId(), event.getMemberId(), JoinStatus.LEAVE);
+
+			log.info("멤버 채팅방 구독 취소 : {} 유저가 {} 방 구독 취소", event.getMemberId(), event.getRoomId());
+
+		} catch (Exception e) {
+			log.error("구독 취소 에러 이벤트 발생 : {}", e.getMessage());
+			throw e;
+		}
+
 	}
 }

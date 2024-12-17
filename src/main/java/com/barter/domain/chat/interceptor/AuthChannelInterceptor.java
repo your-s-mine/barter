@@ -9,6 +9,7 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.stereotype.Component;
 
 import com.barter.domain.chat.event.MemberSubscribedEvent;
+import com.barter.domain.chat.event.MemberUnsubscribedEvent;
 import com.barter.domain.chat.service.ChatRoomService;
 import com.barter.security.JwtUtil;
 
@@ -52,11 +53,27 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
 
 			if (destination != null && destination.startsWith("/topic/chat/room")) {
 				String roomId = destination.split("/topic/chat/room/")[1];
-				log.info("roomId: {}", roomId);
+				log.info("subscribed roomId: {}", roomId);
 
 				eventPublisher.publishEvent(new MemberSubscribedEvent(Long.valueOf(userId), roomId));
 
 			}
+		}
+
+		if (StompCommand.UNSUBSCRIBE == accessor.getCommand()) {
+			String destination = accessor.getDestination();
+			String userId = (String)accessor.getSessionAttributes().get("userId");
+
+			log.info("User {} is unsubscribing from {}", userId, destination);
+
+			if (destination != null && destination.startsWith("/topic/chat/room")) {
+				String roomId = destination.split("/topic/chat/room/")[1];
+				log.info("unsubscribed roomId: {}", roomId);
+
+				eventPublisher.publishEvent(new MemberUnsubscribedEvent(Long.valueOf(userId), roomId));
+
+			}
+
 		}
 
 		log.info("message: {}", message);

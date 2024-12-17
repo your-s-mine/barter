@@ -2,6 +2,7 @@ package com.barter.domain.chat.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.chat.dto.request.CreateChatRoomReqDto;
@@ -27,6 +28,7 @@ public class ChatRoomService {
 	private final ChatRoomRepository chatRoomRepository;
 	private final MemberRepository memberRepository;
 	private final RegisteredProductRepository registeredProductRepository;
+	private final TransactionTemplate transactionTemplate;
 
 	@Transactional
 	public CreateChatRoomResDto createChatRoom(VerifiedMember member, CreateChatRoomReqDto reqDto) {
@@ -74,7 +76,7 @@ public class ChatRoomService {
 
 	}
 
-	@Transactional
+	@Transactional(noRollbackFor = {IllegalStateException.class})
 	public void updateMemberJoinStatus(String roomId, Long memberId, JoinStatus joinStatus) {
 		ChatRoomMember chatRoomMember = chatRoomMemberRepository.findByChatRoomIdAndMemberId(roomId, memberId)
 			.orElseThrow(() -> new IllegalArgumentException("해당하는 채팅방 멤버가 없습니다."));
@@ -82,8 +84,21 @@ public class ChatRoomService {
 		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
 			.orElseThrow(() -> new IllegalArgumentException("해당하는 채팅방이 없습니다."));
 
+		if (chatRoom.getRoomStatus() == RoomStatus.CLOSED) {
+			chatRoomMember.changeJoinStatus(JoinStatus.LEAVE);
+			chatRoomMemberRepository.save(chatRoomMember); // 변경 사항 저장
+
+			// custom exception 으로 수정 예정
+			// 닫힌 채팅방에 IN_ROOM 상태의 멤버가 들어오려고 하면 멤버의 상태 LEAVE 상태로 변경
+			throw new IllegalStateException("채팅방이 이미 CLOSED 상태입니다.");
+		}
+
 		if (chatRoomMember.getJoinStatus() == JoinStatus.PENDING) {
 			chatRoom.addMember();
+		}
+
+		if (chatRoomMember.getJoinStatus() == JoinStatus.IN_ROOM && joinStatus == JoinStatus.LEAVE) {
+			chatRoom.updateStatus(RoomStatus.CLOSED); // 한 명이라도 나가면 CLOSED
 		}
 		chatRoomMember.changeJoinStatus(joinStatus);
 	}
