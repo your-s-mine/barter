@@ -1,12 +1,15 @@
 package com.barter.domain.chat.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.chat.dto.request.CreateChatRoomReqDto;
 import com.barter.domain.chat.dto.response.CreateChatRoomResDto;
+import com.barter.domain.chat.dto.response.FindChatRoomResDto;
 import com.barter.domain.chat.entity.ChatRoom;
 import com.barter.domain.chat.entity.ChatRoomMember;
 import com.barter.domain.chat.enums.JoinStatus;
@@ -28,7 +31,6 @@ public class ChatRoomService {
 	private final ChatRoomRepository chatRoomRepository;
 	private final MemberRepository memberRepository;
 	private final RegisteredProductRepository registeredProductRepository;
-	private final TransactionTemplate transactionTemplate;
 
 	@Transactional
 	public CreateChatRoomResDto createChatRoom(VerifiedMember member, CreateChatRoomReqDto reqDto) {
@@ -70,7 +72,7 @@ public class ChatRoomService {
 
 		long userCount = chatRoomMemberRepository.countByChatRoomIdAndJoinStatus(roomId, JoinStatus.IN_ROOM);
 
-		if (userCount == 2) {
+		if (userCount == 1) { // (이전 값 : 2), 1명이 들어가고 또 한명이 들어감과 동시에 IN_PROGRESS 가 되어야 하는데, 2 라면, 3명을 기대하는 꼴이 된다.
 			chatRoom.updateStatus(RoomStatus.IN_PROGRESS);
 		}
 
@@ -101,5 +103,14 @@ public class ChatRoomService {
 			chatRoom.updateStatus(RoomStatus.CLOSED); // 한 명이라도 나가면 CLOSED
 		}
 		chatRoomMember.changeJoinStatus(joinStatus);
+	}
+
+	@Transactional
+	public PagedModel<FindChatRoomResDto> findRoomsByMember(VerifiedMember member, Pageable pageable) {
+
+		Page<FindChatRoomResDto> chatRoomMembers = chatRoomMemberRepository.findAllByMemberId(member.getId(), pageable)
+			.map(FindChatRoomResDto::from);
+		return new PagedModel<>(chatRoomMembers);
+
 	}
 }
