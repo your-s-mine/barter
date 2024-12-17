@@ -1,7 +1,6 @@
 package com.barter.domain.chat.dto.response;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import com.barter.domain.chat.entity.ChatRoomMember;
 
@@ -19,15 +18,12 @@ public class FindChatRoomResDto {
 		this.createdAt = createdAt;
 	}
 
-	public static List<FindChatRoomResDto> from(List<ChatRoomMember> chatRoomMembers) {
+	public static FindChatRoomResDto from(ChatRoomMember chatRoomMember) {
 
-		return chatRoomMembers.stream()
-			.map(chatRoomMember ->
-				FindChatRoomResDto.builder()
-					.roomId(chatRoomMember.getChatRoom().getId())
-					.createdAt(chatRoomMember.getChatRoom().getCreatedAt())
-					.build()
-			).toList();
+		return FindChatRoomResDto.builder()
+			.roomId(chatRoomMember.getChatRoom().getId())
+			.createdAt(chatRoomMember.getMember().getCreatedAt())
+			.build();
 
 	}
 

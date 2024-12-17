@@ -2,6 +2,9 @@ package com.barter.domain.chat.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,7 +44,8 @@ public class ChatRoomController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<FindChatRoomResDto>> findRoomByMember(VerifiedMember member) {
-		return ResponseEntity.status(HttpStatus.OK).body(chatRoomService.findRoomByMember(member));
+	public ResponseEntity<PagedModel<FindChatRoomResDto>> findRoomsByMember(VerifiedMember member,
+		@PageableDefault Pageable pageable) {
+		return ResponseEntity.status(HttpStatus.OK).body(chatRoomService.findRoomsByMember(member, pageable));
 	}
 }

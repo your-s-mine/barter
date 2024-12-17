@@ -1,7 +1,8 @@
 package com.barter.domain.chat.service;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -105,10 +106,11 @@ public class ChatRoomService {
 	}
 
 	@Transactional
-	public List<FindChatRoomResDto> findRoomByMember(VerifiedMember member) {
+	public PagedModel<FindChatRoomResDto> findRoomsByMember(VerifiedMember member, Pageable pageable) {
 
-		List<ChatRoomMember> chatRoomMembers = chatRoomMemberRepository.findAllByMemberId(member.getId());
+		Page<FindChatRoomResDto> chatRoomMembers = chatRoomMemberRepository.findAllByMemberId(member.getId(), pageable)
+			.map(FindChatRoomResDto::from);
+		return new PagedModel<>(chatRoomMembers);
 
-		return FindChatRoomResDto.from(chatRoomMembers);
 	}
 }
