@@ -49,15 +49,30 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
 			log.info("User {} is subscribing to {}", userId, destination);
 
 			if (destination != null && destination.startsWith("/topic/chat/room")) {
-				System.out.println("이거 실행됨");
 				String roomId = destination.split("/topic/chat/room/")[1];
+				log.info("roomId: {}", roomId);
 
-				chatRoomService.changeRoomStatus(roomId);
-				chatRoomService.updateMemberJoinStatus(roomId, Long.valueOf(userId), JoinStatus.IN_ROOM);
+				try {
+					chatRoomService.changeRoomStatus(roomId);
+					chatRoomService.updateMemberJoinStatus(roomId, Long.valueOf(userId), JoinStatus.IN_ROOM);
+
+				} catch (IllegalArgumentException e) {
+					// log.error("Error occurred while subscribing to room: {}", e.getMessage(), e);
+					// StompHeaderAccessor errorAccessor = StompHeaderAccessor.create(StompCommand.ERROR);
+					// errorAccessor.setMessage("Error: " + e.getMessage());
+					// errorAccessor.addNativeHeader("error", e.getMessage());
+					// log.info("errorAccessor: {}", errorAccessor);
+					// Message<?> errorMessage = MessageBuilder.createMessage("Error: " + e.getMessage(),
+					// 	errorAccessor.getMessageHeaders());
+					// log.info("errorMessage: {}", errorMessage);
+					// 삽 푼 코드
+					throw e;
+				}
 
 			}
 		}
 
+		log.info("message: {}", message);
 		return message;
 	}
 }
