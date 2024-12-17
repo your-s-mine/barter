@@ -18,21 +18,6 @@ public class ChatController {
 
 	private final SimpMessageSendingOperations template;
 
-	// @MessageMapping("/enter-user")
-	// public void enterUser(@Payload ChatMessageDto chatMessageDto, SimpMessageHeaderAccessor headerAccessor) {
-	//
-	// 	// chatRoom 상태가 변화해야 한다. (OPEN -> IN_PROGRESS) : 두 명 모두 들어온 경우
-	//
-	// 	String userId = (String)headerAccessor.getSessionAttributes().get("userId");
-	//
-	// 	chatRoomService.changeRoomStatus(chatMessageDto.getRoomId());
-	// 	chatRoomService.updateMemberJoinStatus(chatMessageDto.getRoomId(), Long.valueOf(userId), JoinStatus.IN_ROOM);
-	//
-	// 	// 해당 방의 유저에게 입장을 알림
-	// 	chatMessageDto.setMessage(userId + "님이 입장!");
-	// 	template.convertAndSend("/topic/chat/room/" + chatMessageDto.getRoomId(), chatMessageDto);
-	// }
-
 	@MessageMapping("/send-message")
 	public void sendMessage(@Payload ChatMessageDto chatMessageDto, MessageHeaderAccessor headerAccessor) {
 
