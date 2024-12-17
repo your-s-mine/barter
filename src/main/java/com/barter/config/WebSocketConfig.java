@@ -38,7 +38,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 		// 웹소켓 (STOMP)  접속 주소 설정
 
 		registry.addEndpoint("/ws")
-			.setAllowedOrigins("*");
+			.setAllowedOrigins("*")
+			.withSockJS(); // js 로 테스트 시
 
 		registry.setErrorHandler(stompErrorHandler);
 

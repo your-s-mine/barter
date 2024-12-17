@@ -47,6 +47,7 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
 		// SUBSCRIBE 처리
 		if (StompCommand.SUBSCRIBE == accessor.getCommand()) {
 			String destination = accessor.getDestination();
+			log.info("accessor:{}", accessor);
 			String userId = (String)accessor.getSessionAttributes().get("userId");
 
 			log.info("User {} is subscribing to {}", userId, destination);
@@ -55,21 +56,24 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
 				String roomId = destination.split("/topic/chat/room/")[1];
 				log.info("subscribed roomId: {}", roomId);
 
+				accessor.getSessionAttributes().put("roomId", roomId);
+
 				eventPublisher.publishEvent(new MemberSubscribedEvent(Long.valueOf(userId), roomId));
 
 			}
 		}
 
 		if (StompCommand.UNSUBSCRIBE == accessor.getCommand()) {
-			String destination = accessor.getDestination();
+			String subscriptionId = accessor.getSubscriptionId();
+			log.info("accessor:{}", subscriptionId);
 			String userId = (String)accessor.getSessionAttributes().get("userId");
 
-			log.info("User {} is unsubscribing from {}", userId, destination);
+			log.info("User {} is unsubscribing from {}", userId, subscriptionId);
+			String roomId = (String)accessor.getSessionAttributes().get("roomId");
+			log.info("roomId: {}", roomId);
 
-			if (destination != null && destination.startsWith("/topic/chat/room")) {
-				String roomId = destination.split("/topic/chat/room/")[1];
+			if (subscriptionId != null && subscriptionId.startsWith("sub-")) {
 				log.info("unsubscribed roomId: {}", roomId);
-
 				eventPublisher.publishEvent(new MemberUnsubscribedEvent(Long.valueOf(userId), roomId));
 
 			}

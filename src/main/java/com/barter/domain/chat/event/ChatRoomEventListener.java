@@ -37,7 +37,6 @@ public class ChatRoomEventListener {
 		log.info("멤버 채팅방 구독 취소 >> userId : {}, roomId : {}", event.getMemberId(), event.getRoomId());
 
 		try {
-			chatRoomService.changeRoomStatus(event.getRoomId());
 			chatRoomService.updateMemberJoinStatus(event.getRoomId(), event.getMemberId(), JoinStatus.LEAVE);
 
 			log.info("멤버 채팅방 구독 취소 : {} 유저가 {} 방 구독 취소", event.getMemberId(), event.getRoomId());
