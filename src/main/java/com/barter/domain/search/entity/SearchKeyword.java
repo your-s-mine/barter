@@ -30,8 +30,7 @@ public class SearchKeyword extends BaseTimeStampEntity {
 	private Long count = 0L;
 
 	@Builder
-	public SearchKeyword(Long id, String word, Long count) {
-		this.id = id;
+	public SearchKeyword(String word, Long count) {
 		this.word = word;
 		this.count = count;
 	}

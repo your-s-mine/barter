@@ -18,4 +18,6 @@ public interface SearchKeywordRepository extends JpaRepository<SearchKeyword, Lo
 	Optional<SearchKeyword> findByWord(@Param("word") String word);
 
 	List<SearchKeyword> findTop10ByOrderByCountDesc();
+
+	Long countByword(String word);
 }
