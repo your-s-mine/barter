@@ -1,5 +1,7 @@
 package com.barter.domain.chat.collections;
 
+import java.time.LocalDateTime;
+
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import jakarta.persistence.Id;
@@ -17,13 +19,15 @@ public class ChattingContent {
 	@Id
 	private String id;
 	private String roomId;
-	private String content;
+	private String message;
 	private Long userId;
+	private LocalDateTime chatTime;
 
 	@Builder
-	public ChattingContent(String roomId, String content, Long userId) {
+	public ChattingContent(String roomId, String message, Long userId) {
 		this.roomId = roomId;
-		this.content = content;
+		this.message = message;
 		this.userId = userId;
+		this.chatTime = LocalDateTime.now();
 	}
 }
