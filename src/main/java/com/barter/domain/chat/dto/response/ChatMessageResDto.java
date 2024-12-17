@@ -1,7 +1,6 @@
 package com.barter.domain.chat.dto.response;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import com.barter.domain.chat.collections.ChattingContent;
 
@@ -16,10 +15,10 @@ public class ChatMessageResDto {
 	private LocalDateTime chatTime;
 
 	@Builder
-	public ChatMessageResDto(String roomId, String message, LocalDateTime time) {
+	public ChatMessageResDto(String roomId, String message, LocalDateTime chatTime) {
 		this.roomId = roomId;
 		this.message = message;
-		this.chatTime = time;
+		this.chatTime = chatTime;
 	}
 
 	@Override
@@ -27,14 +26,12 @@ public class ChatMessageResDto {
 		return "ChatMessageDto [roomId=" + roomId + ", message=" + message + ", chatTime=" + chatTime + "]";
 	}
 
-	public static List<ChatMessageResDto> from(List<ChattingContent> chats) {
+	public static ChatMessageResDto from(ChattingContent chattingContent) {
 
-		return chats.stream()
-			.map(chat -> ChatMessageResDto.builder()
-				.roomId(chat.getRoomId())
-				.message(chat.getMessage())
-				.time(chat.getChatTime())
-				.build())
-			.toList();
+		return ChatMessageResDto.builder()
+			.roomId(chattingContent.getRoomId())
+			.message(chattingContent.getMessage())
+			.chatTime(chattingContent.getChatTime())
+			.build();
 	}
 }

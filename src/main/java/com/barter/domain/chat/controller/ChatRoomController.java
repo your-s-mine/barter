@@ -1,7 +1,5 @@
 package com.barter.domain.chat.controller;
 
-import java.util.List;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
@@ -39,8 +37,9 @@ public class ChatRoomController {
 	}
 
 	@GetMapping("/{roomId}")
-	public ResponseEntity<List<ChatMessageResDto>> findChatsByRoom(@PathVariable String roomId) {
-		return ResponseEntity.status(HttpStatus.OK).body(chatLogService.findChatsByRoom(roomId));
+	public ResponseEntity<PagedModel<ChatMessageResDto>> findChatsByRoom(@PathVariable String roomId,
+		@PageableDefault Pageable pageable) {
+		return ResponseEntity.status(HttpStatus.OK).body(chatLogService.findChatsByRoom(roomId, pageable));
 	}
 
 	@GetMapping

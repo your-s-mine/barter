@@ -1,11 +1,11 @@
 package com.barter.domain.chat.repository;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import com.barter.domain.chat.collections.ChattingContent;
 
 public interface ChattingRepository extends MongoRepository<ChattingContent, String> {
-	List<ChattingContent> findByRoomIdOrderByChatTimeDesc(String roomId);
+	Page<ChattingContent> findByRoomIdOrderByChatTimeDesc(String roomId, Pageable pageable);
 }
