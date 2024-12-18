@@ -265,6 +265,7 @@ class PeriodTradeServiceTest {
 		when(periodTradeRepository.findById(tradeId)).thenReturn(Optional.of(mockPeriodTrade));
 
 		doNothing().when(mockPeriodTrade).validateSuggestAuthority(member.getId());
+		doNothing().when(mockPeriodTrade).validateIsPending();
 		doNothing().when(mockPeriodTrade).validateIsCompleted();
 
 		when(suggestedProductRepository.findById(101L)).thenReturn(Optional.of(product1));
@@ -548,8 +549,8 @@ class PeriodTradeServiceTest {
 		SuggestedProduct suggestedProduct1 = mock(SuggestedProduct.class);
 		SuggestedProduct suggestedProduct2 = mock(SuggestedProduct.class);
 
-		doNothing().when(suggestedProduct1).changStatusPending();
-		doNothing().when(suggestedProduct2).changStatusPending();
+		doNothing().when(suggestedProduct1).changeStatusPending();
+		doNothing().when(suggestedProduct2).changeStatusPending();
 
 		when(mockTradeProducts.get(0).getSuggestedProduct()).thenReturn(suggestedProduct1);
 		when(mockTradeProducts.get(1).getSuggestedProduct()).thenReturn(suggestedProduct2);
@@ -567,7 +568,7 @@ class PeriodTradeServiceTest {
 		verify(tradeProductRepository, times(1)).deleteAll(mockTradeProducts);
 
 		mockTradeProducts.forEach(tradeProduct -> {
-			verify(tradeProduct.getSuggestedProduct(), times(1)).changStatusPending();
+			verify(tradeProduct.getSuggestedProduct(), times(1)).changeStatusPending();
 		});
 
 	}

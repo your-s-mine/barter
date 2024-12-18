@@ -13,6 +13,7 @@ import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.entity.TradeProduct;
+import com.barter.domain.product.enums.SuggestedStatus;
 import com.barter.domain.product.enums.TradeType;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.repository.SuggestedProductRepository;
@@ -36,6 +37,7 @@ public class ImmediateTradeService {
 	private final TradeProductRepository tradeProductRepository;
 	private final SuggestedProductRepository suggestedProductRepository;
 
+	@Transactional
 	public FindImmediateTradeResDto create(CreateImmediateTradeReqDto reqDto) {
 		RegisteredProduct registeredProduct = registeredProductRepository
 			.findById(reqDto.getRegisteredProduct().getId()).orElseThrow(
@@ -50,6 +52,7 @@ public class ImmediateTradeService {
 			.viewCount(0)
 			.build();
 
+		registeredProduct.changStatusRegistering();
 		ImmediateTrade savedTrade = immediateTradeRepository.save(immediateTrade);
 		return FindImmediateTradeResDto.from(savedTrade);
 	}
@@ -99,6 +102,9 @@ public class ImmediateTradeService {
 			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
 
 		immediateTrade.validateAuthority(member.getId());
+		if (!(immediateTrade.getStatus() == TradeStatus.PENDING)) {
+			throw new IllegalStateException("PENDING 상태의 교환만 삭제할 수 있습니다.");
+		}
 
 		immediateTradeRepository.delete(immediateTrade);
 
@@ -176,7 +182,7 @@ public class ImmediateTradeService {
 
 		for (TradeProduct tradeProduct : tradeProducts) {
 			SuggestedProduct suggestedProduct = tradeProduct.getSuggestedProduct();
-			suggestedProduct.changStatusPending();
+			suggestedProduct.changeStatusPending();
 		}
 
 		tradeProductRepository.deleteAll(tradeProducts);
@@ -185,20 +191,57 @@ public class ImmediateTradeService {
 	}
 
 	@Transactional
-	public FindImmediateTradeResDto updateStatus(Long tradeId, UpdateStatusReqDto reqDto, VerifiedMember member) {
+	public FindImmediateTradeResDto updateStatusCompleted(Long tradeId, UpdateStatusReqDto reqDto,
+		VerifiedMember member) {
 
 		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
 
 		immediateTrade.validateAuthority(member.getId());
 
-		if ((immediateTrade.isCompleted())) {
-			throw new IllegalStateException("교환이 완료된 건에 대해서는 상태 변경을 할 수 없습니다.");
+		if (!(immediateTrade.isInProgress()) || !(reqDto.getTradeStatus() == TradeStatus.COMPLETED)) {
+			throw new IllegalArgumentException("IN_PROGRESS 상태의 교환만을 COMPLETED 상태로 변경하실 수 있습니다.");
 		}
 
-		immediateTrade.changeStatus(reqDto.getTradeStatus());
+		immediateTrade.changeStatusCompleted();
+		immediateTrade.getProduct().changeStatusCompleted();
+
+		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(tradeId,
+			TradeType.IMMEDIATE);
+		for (TradeProduct tradeProduct : tradeProducts) {
+			if (tradeProduct.getSuggestedProduct().getStatus() == SuggestedStatus.ACCEPTED) {
+				tradeProduct.getSuggestedProduct().changeStatusCompleted();
+			}
+
+			if (tradeProduct.getSuggestedProduct().getStatus() == SuggestedStatus.SUGGESTING) {
+				tradeProduct.getSuggestedProduct().changeStatusPending();
+				tradeProductRepository.delete(tradeProduct);
+			}
+		}
 
 		ImmediateTrade updatedTrade = immediateTradeRepository.save(immediateTrade);
 		return FindImmediateTradeResDto.from(updatedTrade);
+	}
+
+	public String cancelAcceptanceOfSuggest(Long tradeId, VerifiedMember member) {
+		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
+
+		immediateTrade.validateAuthority(member.getId());
+
+		if (!(immediateTrade.isInProgress())) {
+			throw new IllegalArgumentException("IN_PROGRESS 상태의 교환만을 수락 취소할 수 있습니다.");
+		}
+
+		immediateTrade.changeStatusPending();
+
+		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(tradeId,
+			TradeType.IMMEDIATE);
+		for (TradeProduct tradeProduct : tradeProducts) {
+			tradeProduct.getSuggestedProduct().changeStatusPending();
+			tradeProductRepository.delete(tradeProduct);
+		}
+
+		return "추후 제안 다건 조회되도록 변경";
 	}
 }

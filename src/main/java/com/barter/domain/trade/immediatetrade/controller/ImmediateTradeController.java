@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.barter.domain.auth.dto.VerifiedMember;
+import com.barter.domain.trade.immediatetrade.dto.request.CancelAcceptanceReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateImmediateTradeReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateTradeSuggestProductReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeReqDto;
@@ -79,7 +80,14 @@ public class ImmediateTradeController {
 	@PatchMapping("/status/{tradeId}")
 	public ResponseEntity<FindImmediateTradeResDto> updateStatus(@PathVariable Long tradeId,
 		@Valid @RequestBody UpdateStatusReqDto reqDto, VerifiedMember member) {
-		return new ResponseEntity<>(immediateTradeService.updateStatus(tradeId, reqDto, member),
+		return new ResponseEntity<>(immediateTradeService.updateStatusCompleted(tradeId, reqDto, member),
 			HttpStatus.OK);
+	}
+
+	// todo: 추후 제안 다건 조회되도록 변경
+	@PatchMapping("/cancelling-acceptance")
+	public String cancelAcceptanceOfSuggest(@RequestBody CancelAcceptanceReqDto reqDto, VerifiedMember verifiedMember) {
+		Long tradeId = reqDto.getTradeId();
+		return immediateTradeService.cancelAcceptanceOfSuggest(tradeId, verifiedMember);
 	}
 }
