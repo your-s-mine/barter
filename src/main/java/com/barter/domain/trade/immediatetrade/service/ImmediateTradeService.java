@@ -169,6 +169,12 @@ public class ImmediateTradeService {
 			suggestedProduct.changStatusAccepted();
 		}
 
+		// 이벤트 저장 및 전달
+		Long suggesterId = tradeProducts.get(0).getSuggestedProduct().getMember().getId();
+		notificationService.saveTradeEvent(
+			EventKind.IMMEDIATE_TRADE_SUGGEST_ACCEPT, suggesterId,
+			TradeType.IMMEDIATE, immediateTrade.getId(), immediateTrade.getTitle()
+		);
 		return "제안 수락 완료";
 	}
 
