@@ -192,10 +192,16 @@ public class PeriodTradeService {
 		}
 
 		if (reqDto.getTradeStatus().equals(TradeStatus.COMPLETED)) {
+
+			// ACCEPTED 경우 제외하고 조회하여 삭제
 			List<TradeProduct> tradeProducts = tradeProductRepository.findTradeProductsByTradeTypeAndTradeIdAndNotSuggestedStatus(
 				TradeType.PERIOD, periodTrade.getId(), SuggestedStatus.ACCEPTED);
 
+			List<TradeProduct> acceptedTradeProducts = tradeProductRepository.findTradeProductsByTradeTypeAndTradeIdAndSuggestedStatus(
+				TradeType.PERIOD, periodTrade.getId(), SuggestedStatus.ACCEPTED);
+
 			tradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changStatusPending());
+			acceptedTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusCompleted());
 			tradeProductRepository.deleteAll(allTradeProducts);
 		}
 

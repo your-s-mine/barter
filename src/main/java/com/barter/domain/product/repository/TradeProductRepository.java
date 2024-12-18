@@ -30,4 +30,12 @@ public interface TradeProductRepository extends JpaRepository<TradeProduct, Long
 		@Param("tradeId") Long tradeId,
 		@Param("suggestedStatus") SuggestedStatus suggestedStatus);
 
+	@Query("SELECT tp FROM TradeProduct tp " +
+		"JOIN FETCH tp.suggestedProduct sp " +
+		"WHERE tp.tradeType = :tradeType AND tp.tradeId = :tradeId AND sp.status = :suggestedStatus")
+	List<TradeProduct> findTradeProductsByTradeTypeAndTradeIdAndSuggestedStatus(
+		@Param("tradeType") TradeType tradeType,
+		@Param("tradeId") Long tradeId,
+		@Param("suggestedStatus") SuggestedStatus suggestedStatus);
+
 }
