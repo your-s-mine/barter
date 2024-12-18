@@ -79,7 +79,7 @@ public class ImmediateTradeController {
 	@PatchMapping("/status/{tradeId}")
 	public ResponseEntity<FindImmediateTradeResDto> updateStatus(@PathVariable Long tradeId,
 		@Valid @RequestBody UpdateStatusReqDto reqDto, VerifiedMember member) {
-		return new ResponseEntity<>(immediateTradeService.updateStatus(tradeId, reqDto, member),
+		return new ResponseEntity<>(immediateTradeService.updateStatusCompleted(tradeId, reqDto, member),
 			HttpStatus.OK);
 	}
 }

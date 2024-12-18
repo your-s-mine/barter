@@ -180,7 +180,7 @@ public class PeriodTradeService {
 
 		if (reqDto.getTradeStatus().equals(TradeStatus.CLOSED)) {
 
-			allTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changStatusPending());
+			allTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusPending());
 			tradeProductRepository.deleteAll(allTradeProducts);
 		}
 
@@ -193,7 +193,7 @@ public class PeriodTradeService {
 			List<TradeProduct> acceptedTradeProducts = tradeProductRepository.findTradeProductsByTradeTypeAndTradeIdAndSuggestedStatus(
 				TradeType.PERIOD, periodTrade.getId(), SuggestedStatus.ACCEPTED);
 
-			tradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changStatusPending());
+			tradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusPending());
 			acceptedTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusCompleted());
 			tradeProductRepository.deleteAll(allTradeProducts);
 		}
@@ -227,7 +227,7 @@ public class PeriodTradeService {
 
 			// 기존 수락된 제안이 있다면 이를 취소 (PENDING으로 상태 변경)
 			if (suggestedProduct.getStatus().equals(SuggestedStatus.ACCEPTED)) {
-				suggestedProduct.changStatusPending(); // 기존 수락 상태를 PENDING으로 변경
+				suggestedProduct.changeStatusPending(); // 기존 수락 상태를 PENDING으로 변경
 			}
 
 			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId()) && suggestedProduct.getStatus()
@@ -270,7 +270,7 @@ public class PeriodTradeService {
 
 			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId()) && !suggestedProduct.getStatus()
 				.equals(SuggestedStatus.PENDING)) {
-				suggestedProduct.changStatusPending();
+				suggestedProduct.changeStatusPending();
 				periodTrade.getRegisteredProduct()
 					.updateStatus(RegisteredStatus.PENDING.toString());
 			}
