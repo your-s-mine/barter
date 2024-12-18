@@ -24,7 +24,7 @@ public class SseEmitters {
 
 		setCallbacks(memberId, emitter);
 
-		sendEvent(memberId, DEFAULT.getName(), DEFAULT.getMessage());
+		sendEvent(memberId, DEFAULT.getEventName(), DEFAULT.getEventMessage());
 
 		return emitter;
 	}

@@ -1,7 +1,7 @@
 package com.barter.domain.product.enums;
 
 public enum SuggestedStatus {
-	PENDING, SUGGESTING, ACCEPTED;
+	PENDING, SUGGESTING, ACCEPTED, COMPLETED;
 
 	public static SuggestedStatus findSuggestedStatus(String status) {
 		for (SuggestedStatus suggestedStatus : SuggestedStatus.values()) {
