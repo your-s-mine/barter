@@ -106,11 +106,11 @@ public class PeriodTrade extends BaseTimeStampEntity {
 		}
 	}
 
-	 public void validateIsPending() {
-	 	if (this.status.equals(TradeStatus.PENDING)) {
-	 		throw new IllegalArgumentException("아직 시작되지 않은 기간 거래 입니다.");
-	 	}
-	 }
+	// public void validateIsPending() {
+	// 	if (this.status.equals(TradeStatus.PENDING)) {
+	// 		throw new IllegalArgumentException("아직 시작되지 않은 기간 거래 입니다.");
+	// 	}
+	// }
 
 	public void validateAuthority(Long userId) {
 		if (!this.registeredProduct.getMember().getId().equals(userId)) {
