@@ -101,6 +101,9 @@ public class ImmediateTradeService {
 			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
 
 		immediateTrade.validateAuthority(member.getId());
+		if(!(immediateTrade.getStatus() == TradeStatus.PENDING)) {
+			throw new IllegalStateException("PENDING 상태의 교환만 삭제할 수 있습니다.");
+		}
 
 		immediateTradeRepository.delete(immediateTrade);
 
