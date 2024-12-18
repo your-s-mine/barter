@@ -206,7 +206,7 @@ public class PeriodTradeService {
 
 	}
 
-	// TODO : Deny 부분이 Accept 랑 구조가 비슷해서 단순화 시킬 필요 있다.
+	// 이미 수락한 제안에 대해서도 거절 할 수 있도록 수정
 	@Transactional
 	public DenyPeriodTradeResDto denyPeriodTrade(VerifiedMember member, Long id, DenyPeriodTradeReqDto reqDto) {
 
@@ -214,15 +214,17 @@ public class PeriodTradeService {
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
 		periodTrade.validateAuthority(member.getId());
-		periodTrade.validateInProgress();
+
+		periodTrade.validateIsCompleted();
+		periodTrade.validateIsClosed();
 
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(id, TradeType.PERIOD);
 
 		for (TradeProduct tradeProduct : tradeProducts) {
 			SuggestedProduct suggestedProduct = tradeProduct.getSuggestedProduct();
 
-			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId()) && suggestedProduct.getStatus()
-				.equals(SuggestedStatus.SUGGESTING)) {
+			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId()) && !suggestedProduct.getStatus()
+				.equals(SuggestedStatus.PENDING)) {
 				suggestedProduct.changStatusPending();
 				periodTrade.getRegisteredProduct()
 					.updateStatus(RegisteredStatus.PENDING.toString());
