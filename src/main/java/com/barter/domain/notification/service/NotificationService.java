@@ -1,5 +1,8 @@
 package com.barter.domain.notification.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
@@ -72,7 +75,7 @@ public class NotificationService {
 		notificationRepository.delete(foundNotification);
 	}
 
-	public void saveTradeEvent(
+	public void saveTradeNotification(
 		EventKind eventKind, Long memberId, TradeType tradeType, Long tradeId, String tradeTitle
 	) {
 		String completedEventMessage = EventKind.completeEventMessage(eventKind, tradeTitle);
@@ -83,5 +86,23 @@ public class NotificationService {
 		Notification savedNotification = notificationRepository.save(createdNotification);
 
 		sseEmitters.sendEvent(memberId, eventKind.getEventName(), SendTradeEventResDto.from(savedNotification));
+	}
+
+	public void saveKeywordNotification(
+		EventKind eventKind, List<Long> memberIds, TradeType tradeType, Long tradeId
+	) {
+		String completedEventMessage = eventKind.getEventMessage();
+
+		List<Notification> createdNotifications = new ArrayList<>();
+		for (Long memberId : memberIds) {
+			Notification createdNotification = Notification.createKeywordNotification(
+				completedEventMessage, tradeType, tradeId, memberId
+			);
+			createdNotifications.add(createdNotification);
+		}
+		List<Notification> savedNotifications = notificationRepository.saveAll(createdNotifications);
+
+		List<SendTradeEventResDto> data = savedNotifications.stream().map(SendTradeEventResDto::from).toList();
+		sseEmitters.sendAllSameEvent(eventKind.getEventName(), data);
 	}
 }

@@ -118,7 +118,7 @@ public class DonationTradeService {
 		donationProductMemberRepository.save(donationProductMember);
 
 		// 이벤트 정보 저장 및 전달
-		notificationService.saveTradeEvent(
+		notificationService.saveTradeNotification(
 			EventKind.DONATION_TRADE_SUGGEST, donationTrade.getProduct().getMember().getId(),
 			TradeType.DONATION, donationTrade.getId(), donationTrade.getTitle()
 		);
