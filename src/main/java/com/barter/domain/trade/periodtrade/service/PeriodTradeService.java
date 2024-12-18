@@ -129,6 +129,8 @@ public class PeriodTradeService {
 	public SuggestedPeriodTradeResDto suggestPeriodTrade(VerifiedMember member, Long id,
 		SuggestedPeriodTradeReqDto reqDto) {
 
+		// 알림 추가
+
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
@@ -167,7 +169,9 @@ public class PeriodTradeService {
 		if (!isStatusUpdatable) {
 			throw new IllegalArgumentException("불가능한 상태 변경 입니다.");
 		}
-		
+
+		// 알림 추가
+
 		return StatusUpdateResDto.from(periodTrade);
 	}
 
@@ -195,6 +199,7 @@ public class PeriodTradeService {
 			// 한 교환에 대해서 여러번의 교환은 불가능 (회의 때 말한 같은 물건으로 여러번 다른 교환 시도 방지 위함)
 
 		}
+		// 알림 (제안자에게 알림)
 
 		periodTrade.updatePeriodTradeStatusCompleted();
 
@@ -225,6 +230,7 @@ public class PeriodTradeService {
 			}
 
 		}
+		// 알림 (제안자에게 알림)
 		return DenyPeriodTradeResDto.from(periodTrade);
 	}
 
