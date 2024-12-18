@@ -98,6 +98,7 @@ class PeriodTradeServiceTest {
 			.status(RegisteredStatus.PENDING)
 			.member(member)
 			.build();
+
 	}
 
 	@Test
@@ -399,59 +400,38 @@ class PeriodTradeServiceTest {
 	}
 
 	@Test
-	@DisplayName("기간 거래 거절")
-	public void 기간_거래_거절() {
-		//given
-		Long tradeId = 1L;
+	@DisplayName("기간 거래 거절: 정상적으로 거래가 거절되었을 때 반환값 확인")
+	void 기간_거절_성공() {
 
-		Member member = mock(Member.class);
-		when(member.getId()).thenReturn(2L);
+		// given
+		SuggestedProduct suggestedProduct = mock(SuggestedProduct.class);
+		when(suggestedProduct.getMember()).thenReturn(mock(Member.class));
 
-		DenyPeriodTradeReqDto reqDto = new DenyPeriodTradeReqDto(member.getId()); // 다른 멤버 (2L)
+		PeriodTrade periodTrade = PeriodTrade.builder()
+			.id(1L)
+			.status(TradeStatus.PENDING)
+			.registeredProduct(registeredProduct)
+			.build();
 
-		PeriodTrade mockPeriodTrade = mock(PeriodTrade.class);
-		TradeProduct tradeProduct1 = mock(TradeProduct.class);
-		TradeProduct tradeProduct2 = mock(TradeProduct.class);
+		TradeProduct tradeProduct = TradeProduct.builder()
+			.tradeId(1L)
+			.tradeType(TradeType.PERIOD)
+			.suggestedProduct(suggestedProduct)
+			.build();
 
-		SuggestedProduct suggestedProduct1 = mock(SuggestedProduct.class);
-		SuggestedProduct suggestedProduct2 = mock(SuggestedProduct.class);
+		DenyPeriodTradeReqDto reqDto = new DenyPeriodTradeReqDto(2L);
 
-		RegisteredProduct registeredProduct = mock(RegisteredProduct.class);
-
-		when(mockPeriodTrade.getRegisteredProduct()).thenReturn(registeredProduct);
-
-		when(periodTradeRepository.findById(tradeId)).thenReturn(Optional.of(mockPeriodTrade));
-
-		// 제안된 물건 2개
-		when(tradeProductRepository.findAllByTradeIdAndTradeType(tradeId, TradeType.PERIOD))
-			.thenReturn(List.of(tradeProduct1, tradeProduct2));
-
-		doNothing().when(mockPeriodTrade).validateAuthority(1L);
-		doNothing().when(mockPeriodTrade).validateInProgress();
-
-		doNothing().when(suggestedProduct1).changStatusPending();
-		doNothing().when(suggestedProduct2).changStatusPending();
-
-		when(tradeProduct1.getSuggestedProduct()).thenReturn(suggestedProduct1);
-		when(tradeProduct2.getSuggestedProduct()).thenReturn(suggestedProduct2);
-		when(suggestedProduct1.getMember()).thenReturn(member);
-		when(suggestedProduct2.getMember()).thenReturn(member);
-
-		when(suggestedProduct1.getStatus()).thenReturn(SuggestedStatus.SUGGESTING);
-		when(suggestedProduct2.getStatus()).thenReturn(SuggestedStatus.SUGGESTING);
+		when(periodTradeRepository.findById(1L)).thenReturn(Optional.of(periodTrade));
+		when(tradeProductRepository.findAllByTradeIdAndTradeType(1L, TradeType.PERIOD)).thenReturn(
+			List.of(tradeProduct));
 
 		// when
-
-		DenyPeriodTradeResDto result = periodTradeService.denyPeriodTrade(verifiedMember, tradeId, reqDto);
+		DenyPeriodTradeResDto response = periodTradeService.denyPeriodTrade(verifiedMember, 1L, reqDto);
 
 		// then
-		assertThat(result).isNotNull();
-		verify(periodTradeRepository, times(1)).findById(tradeId);
-		verify(tradeProductRepository, times(1)).findAllByTradeIdAndTradeType(tradeId, TradeType.PERIOD);
-		verify(mockPeriodTrade, times(1)).validateAuthority(1L);
-		verify(suggestedProduct1, times(1)).changStatusPending();
-		verify(suggestedProduct2, times(1)).changStatusPending();
-
+		assertThat(response).isNotNull();
+		assertThat(response.getPeriodTradeId()).isEqualTo(1L);
+		assertThat(response.getTradeStatus()).isEqualTo(TradeStatus.PENDING);
 	}
 
 	// -----------------------------------------------------------------
@@ -690,6 +670,5 @@ class PeriodTradeServiceTest {
 	// 테스트 코드 작성 목록
 	// 1. 기간 거래 상태 업데이트 (수정 필요)
 	// 2. 기간 거래 수락 및 거절 업데이트 (수정 필요)
-	// 3. 기간 거래 제안 목록 조회 테스트 코드 추가 (추가 필요)
 
 }
