@@ -1,6 +1,7 @@
 package com.barter.domain.trade.periodtrade.service;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
@@ -24,6 +25,7 @@ import org.springframework.data.web.PagedModel;
 import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.oauth.enums.OAuthProvider;
+import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.entity.TradeProduct;
@@ -44,6 +46,7 @@ import com.barter.domain.trade.periodtrade.dto.response.AcceptPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.CreatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.DenyPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeSuggestionResDto;
 import com.barter.domain.trade.periodtrade.dto.response.StatusUpdateResDto;
 import com.barter.domain.trade.periodtrade.dto.response.SuggestedPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.UpdatePeriodTradeResDto;
@@ -646,6 +649,41 @@ class PeriodTradeServiceTest {
 		assertThat(result.getTitle()).isEqualTo("새 제목");
 		assertThat(periodTrade.getDescription()).isEqualTo("새 설명");
 		verify(periodTradeRepository, times(1)).findById(tradeId);
+
+	}
+
+	@Test
+	@DisplayName("기간 거래 제안 목록 조회")
+	public void 기간_거래_제안_목록_조회() {
+		// Given
+		Long tradeId = 123L; // Example tradeId
+		SuggestedProduct suggestedProduct1 = new SuggestedProduct(1L, "Product 1", "Description 1", List.of("img1.jpg"),
+			member, SuggestedStatus.ACCEPTED);
+		SuggestedProduct suggestedProduct2 = new SuggestedProduct(2L, "Product 2", "Description 2", List.of("img2.jpg"),
+			member, SuggestedStatus.PENDING);
+		List<SuggestedProduct> suggestedProducts = List.of(suggestedProduct1, suggestedProduct2);
+
+		// Mock the repository call
+		when(suggestedProductRepository.findSuggestedProductsByTradeTypeAndTradeId(TradeType.PERIOD, tradeId))
+			.thenReturn(suggestedProducts);
+
+		// When
+		List<FindPeriodTradeSuggestionResDto> result = periodTradeService.findPeriodTradesSuggestion(tradeId);
+
+		// Then
+		assertNotNull(result);
+		assertEquals(1, result.size());  // Since both products are by the same member, expect one entry
+		FindPeriodTradeSuggestionResDto dto = result.get(0);
+		assertEquals(1L, dto.getMemberId());
+		assertEquals(2, dto.getSuggestedProducts().size());  // We expect two products in the list
+
+		FindSuggestedProductResDto suggestedProductDto1 = dto.getSuggestedProducts().get(0);
+		assertEquals("Product 1", suggestedProductDto1.getName());
+		assertEquals("Description 1", suggestedProductDto1.getDescription());
+
+		FindSuggestedProductResDto suggestedProductDto2 = dto.getSuggestedProducts().get(1);
+		assertEquals("Product 2", suggestedProductDto2.getName());
+		assertEquals("Description 2", suggestedProductDto2.getDescription());
 
 	}
 
