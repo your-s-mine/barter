@@ -75,7 +75,7 @@ public class NotificationService {
 		notificationRepository.delete(foundNotification);
 	}
 
-	public void saveTradeEvent(
+	public void saveTradeNotification(
 		EventKind eventKind, Long memberId, TradeType tradeType, Long tradeId, String tradeTitle
 	) {
 		String completedEventMessage = EventKind.completeEventMessage(eventKind, tradeTitle);
