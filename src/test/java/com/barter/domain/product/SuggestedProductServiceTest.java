@@ -7,8 +7,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,23 +16,23 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PagedModel;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.barter.common.s3.S3Service;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateSuggestedProductReqDto;
+import com.barter.domain.product.dto.request.UpdateSuggestedProductInfoReqDto;
+import com.barter.domain.product.dto.request.UpdateSuggestedProductStatusReqDto;
 import com.barter.domain.product.dto.response.CreateSuggestedProductResDto;
 import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
-import com.barter.domain.product.dto.request.UpdateSuggestedProductInfoReqDto;
 import com.barter.domain.product.dto.response.UpdateSuggestedProductInfoResDto;
-import com.barter.domain.product.dto.request.UpdateSuggestedProductStatusReqDto;
 import com.barter.domain.product.dto.response.UpdateSuggestedProductStatusResDto;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.enums.SuggestedStatus;
@@ -507,8 +507,8 @@ public class SuggestedProductServiceTest {
 	}
 
 	@Test
-	@DisplayName("제안 물품 삭제 - 성공 테스트")
-	void deleteSuggestedProductTest_Success() {
+	@DisplayName("제안 물품 삭제 - 성공 테스트1")
+	void deleteSuggestedProductTest_Success1() {
 		//given
 		Long suggestedProductId = 1L;
 		Long verifiedMemberId = 1L;
@@ -516,6 +516,31 @@ public class SuggestedProductServiceTest {
 		SuggestedProduct testProduct = SuggestedProduct.builder()
 			.id(suggestedProductId)
 			.status(SuggestedStatus.PENDING)
+			.images(List.of("image1", "image2"))
+			.member(Member.builder().id(verifiedMemberId).build())
+			.build();
+		suggestedProductRepository.save(testProduct);
+
+		when(suggestedProductRepository.findById(suggestedProductId))
+			.thenReturn(Optional.of(testProduct));
+
+		//when
+		suggestedProductService.deleteSuggestedProduct(suggestedProductId, verifiedMemberId);
+
+		//then
+		assertThat(suggestedProductRepository.count()).isEqualTo(0);
+	}
+
+	@Test
+	@DisplayName("제안 물품 삭제 - 성공 테스트2")
+	void deleteSuggestedProductTest_Success2() {
+		//given
+		Long suggestedProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		SuggestedProduct testProduct = SuggestedProduct.builder()
+			.id(suggestedProductId)
+			.status(SuggestedStatus.COMPLETED)
 			.images(List.of("image1", "image2"))
 			.member(Member.builder().id(verifiedMemberId).build())
 			.build();
