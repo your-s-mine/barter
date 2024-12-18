@@ -195,7 +195,7 @@ public class PeriodTradeService {
 			// 기존 제안자들의 ID 값이 필요해 위의 코드를 아래와 같이 수정하였습니다.
 			Set<Long> suggesterIds = new HashSet<>();
 			for (TradeProduct tradeProduct : allTradeProducts) {
-				tradeProduct.getSuggestedProduct().changStatusSuggesting();
+				tradeProduct.getSuggestedProduct().changeStatusPending();
 				suggesterIds.add(tradeProduct.getSuggestedProduct().getMember().getId());
 			}
 			tradeProductRepository.deleteAll(allTradeProducts);
@@ -218,7 +218,13 @@ public class PeriodTradeService {
 			List<TradeProduct> acceptedTradeProducts = tradeProductRepository.findTradeProductsByTradeTypeAndTradeIdAndSuggestedStatus(
 				TradeType.PERIOD, periodTrade.getId(), SuggestedStatus.ACCEPTED);
 
-			tradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusPending());
+			// tradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusPending());
+			// 기존 제안자들의 ID 값이 필요해 위의 코드를 아래와 같이 수정하였습니다.
+			Set<Long> suggesterIds = new HashSet<>();
+			for (TradeProduct tradeProduct : tradeProducts) {
+				tradeProduct.getSuggestedProduct().changeStatusPending();
+				suggesterIds.add(tradeProduct.getSuggestedProduct().getMember().getId());
+			}
 			acceptedTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusCompleted());
 			tradeProductRepository.deleteAll(allTradeProducts);
 
@@ -227,12 +233,19 @@ public class PeriodTradeService {
 				EventKind.PERIOD_TRADE_COMPLETE, periodTrade.getRegisteredProduct().getMember().getId(),
 				TradeType.PERIOD, periodTrade.getId(), periodTrade.getTitle()
 			);
-			// 알림 (교환 제안자에게)
+			// 알림 (교환에 성공한 제안자에게)
 			Long finalSuggesterId = acceptedTradeProducts.get(0).getSuggestedProduct().getMember().getId();
 			notificationService.saveTradeNotification(
 				EventKind.PERIOD_TRADE_COMPLETE, finalSuggesterId,
 				TradeType.PERIOD, periodTrade.getId(), periodTrade.getTitle()
 			);
+			// 알림 (기존 제안자들에게)
+			for (Long suggesterId : suggesterIds) {
+				notificationService.saveTradeNotification(
+					EventKind.PERIOD_TRADE_SUGGEST_DENY, suggesterId,
+					TradeType.PERIOD, periodTrade.getId(), periodTrade.getTitle()
+				);
+			}
 		}
 
 		return StatusUpdateResDto.from(periodTrade);
