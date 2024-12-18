@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.barter.domain.auth.dto.VerifiedMember;
+import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.entity.TradeProduct;
@@ -30,6 +31,7 @@ import com.barter.domain.trade.periodtrade.dto.response.AcceptPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.CreatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.DenyPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeSuggestionResDto;
 import com.barter.domain.trade.periodtrade.dto.response.StatusUpdateResDto;
 import com.barter.domain.trade.periodtrade.dto.response.SuggestedPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.UpdatePeriodTradeResDto;
@@ -92,6 +94,17 @@ public class PeriodTradeService {
 		periodTrade.addViewCount();
 
 		return FindPeriodTradeResDto.from(periodTrade);
+	}
+
+	public FindPeriodTradeSuggestionResDto findPeriodTradesSuggestion(Long tradeId, Long memberId) {
+		List<SuggestedProduct> suggestedProducts = suggestedProductRepository.findSuggestedProductsByTradeTypeAndTradeId(
+			TradeType.PERIOD, tradeId);
+		List<FindSuggestedProductResDto> suggestionResDtos = suggestedProducts.stream()
+			.map(FindSuggestedProductResDto::from)
+			.toList();
+
+		return FindPeriodTradeSuggestionResDto.from(memberId, suggestionResDtos);
+
 	}
 
 	@Transactional
@@ -166,13 +179,13 @@ public class PeriodTradeService {
 		if (!isStatusUpdatable) {
 			throw new IllegalArgumentException("불가능한 상태 변경 입니다.");
 		}
+		List<TradeProduct> allTradeProducts = tradeProductRepository.findTradeProductsWithSuggestedProductByPeriodTradeId(
+			TradeType.PERIOD, periodTrade.getId());
 
 		if (reqDto.getTradeStatus().equals(TradeStatus.CLOSED)) {
-			List<TradeProduct> tradeProducts = tradeProductRepository.findTradeProductsWithSuggestedProductByPeriodTradeId(
-				TradeType.PERIOD, periodTrade.getId());
 
-			tradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changStatusPending());
-			tradeProductRepository.deleteAll(tradeProducts);
+			allTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changStatusPending());
+			tradeProductRepository.deleteAll(allTradeProducts);
 		}
 
 		if (reqDto.getTradeStatus().equals(TradeStatus.COMPLETED)) {
@@ -180,7 +193,7 @@ public class PeriodTradeService {
 				TradeType.PERIOD, periodTrade.getId(), SuggestedStatus.ACCEPTED);
 
 			tradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changStatusPending());
-			tradeProductRepository.deleteAll(tradeProducts);
+			tradeProductRepository.deleteAll(allTradeProducts);
 		}
 
 		// 알림 추가
@@ -235,7 +248,7 @@ public class PeriodTradeService {
 	// 수락을 여러번 하지 못하도록 함 (다른 수락을 하면 기존 수락은 삭제)
 	@Transactional
 	public DenyPeriodTradeResDto denyPeriodTrade(VerifiedMember member, Long id, DenyPeriodTradeReqDto reqDto) {
-		
+
 		if (member.getId().equals(reqDto.getMemberId())) {
 			throw new IllegalArgumentException("자기 자신을 거절할 수는 없습니다.");
 		}

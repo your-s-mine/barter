@@ -24,6 +24,7 @@ import com.barter.domain.trade.periodtrade.dto.response.AcceptPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.CreatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.DenyPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeSuggestionResDto;
 import com.barter.domain.trade.periodtrade.dto.response.StatusUpdateResDto;
 import com.barter.domain.trade.periodtrade.dto.response.SuggestedPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.UpdatePeriodTradeResDto;
@@ -57,6 +58,15 @@ public class PeriodTradeController {
 	public ResponseEntity<FindPeriodTradeResDto> findPeriodTrade(@PathVariable Long id) {
 		return ResponseEntity.status(HttpStatus.OK).body(
 			periodTradeService.findPeriodTradeById(id)
+		);
+	}
+
+	@GetMapping("/period-trades/{tradeId}/suggestion/{memberId}") // 제안 온 물품 조회 (최대 3개라 paging 미적용)
+	public ResponseEntity<FindPeriodTradeSuggestionResDto> findPeriodTradeSuggestion(
+		@PathVariable Long tradeId,
+		@PathVariable Long memberId) {
+		return ResponseEntity.status(HttpStatus.OK).body(
+			periodTradeService.findPeriodTradesSuggestion(tradeId, memberId)
 		);
 	}
 
