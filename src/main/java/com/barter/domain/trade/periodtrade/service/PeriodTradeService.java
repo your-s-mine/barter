@@ -1,7 +1,9 @@
 package com.barter.domain.trade.periodtrade.service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationEventPublisher;
@@ -189,8 +191,22 @@ public class PeriodTradeService {
 
 		if (reqDto.getTradeStatus().equals(TradeStatus.CLOSED)) {
 
-			allTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changStatusPending());
+			// allTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changStatusPending());
+			// 위의 코드가 아래와 같이 변경, 기존 제안자들의 ID 값이 필요해서 변경하게 되었습니다.
+			Set<Long> suggesterIds = new HashSet<>();
+			for (TradeProduct tradeProduct : allTradeProducts) {
+				tradeProduct.getSuggestedProduct().changStatusSuggesting();
+				suggesterIds.add(tradeProduct.getSuggestedProduct().getMember().getId());
+			}
 			tradeProductRepository.deleteAll(allTradeProducts);
+
+			// 알림 (제안신청 했던 제안자들에게)
+			for (Long suggesterId : suggesterIds) {
+				notificationService.saveTradeNotification(
+					EventKind.PERIOD_TRADE_CLOSE, suggesterId,
+					TradeType.PERIOD, periodTrade.getId(), periodTrade.getTitle()
+				);
+			}
 		}
 
 		if (reqDto.getTradeStatus().equals(TradeStatus.COMPLETED)) {
@@ -206,8 +222,6 @@ public class PeriodTradeService {
 			acceptedTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusCompleted());
 			tradeProductRepository.deleteAll(allTradeProducts);
 		}
-
-		// 알림 추가
 
 		return StatusUpdateResDto.from(periodTrade);
 	}
