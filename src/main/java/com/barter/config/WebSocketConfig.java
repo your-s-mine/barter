@@ -39,6 +39,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 		registry.addEndpoint("/ws")
 			.setAllowedOrigins("*");
+		//.withSockJS(); // js 로 테스트 시
 
 		registry.setErrorHandler(stompErrorHandler);
 

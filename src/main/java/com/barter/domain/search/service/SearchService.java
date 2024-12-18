@@ -33,7 +33,7 @@ public class SearchService {
 	private final PeriodTradeRepository periodTradeRepository;
 
 	@Transactional
-	public List<SearchTradeResDto> createSearchKeywordAndFindTrades(String word) {
+	public List<SearchTradeResDto> searchKeywordAndFindTrades(String word) {
 
 		if (word.isBlank()) {
 			List<SearchTradeResDto> blank = new ArrayList<>();
@@ -47,6 +47,7 @@ public class SearchService {
 			.orElseGet(() ->
 				searchKeywordRepository.save(SearchKeyword.builder()
 					.word(word)
+					.count(0L)
 					.build()
 				));
 

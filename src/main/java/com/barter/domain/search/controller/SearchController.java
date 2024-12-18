@@ -22,7 +22,7 @@ public class SearchController {
 
 	@GetMapping("/{word}")
 	public ResponseEntity<List<SearchTradeResDto>> findTrades(@PathVariable String word) {
-		return new ResponseEntity<>(searchService.createSearchKeywordAndFindTrades(word), HttpStatus.OK);
+		return new ResponseEntity<>(searchService.searchKeywordAndFindTrades(word), HttpStatus.OK);
 	}
 
 	@GetMapping("/popular")

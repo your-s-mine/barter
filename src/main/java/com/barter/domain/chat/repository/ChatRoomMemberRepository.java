@@ -2,6 +2,8 @@ package com.barter.domain.chat.repository;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.barter.domain.chat.entity.ChatRoomMember;
@@ -11,4 +13,6 @@ public interface ChatRoomMemberRepository extends JpaRepository<ChatRoomMember, 
 	long countByChatRoomIdAndJoinStatus(String roomId, JoinStatus joinStatus);
 
 	Optional<ChatRoomMember> findByChatRoomIdAndMemberId(String roomId, Long memberId);
+
+	Page<ChatRoomMember> findAllByMemberId(Long id, Pageable pageable);
 }
