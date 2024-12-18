@@ -265,7 +265,6 @@ class PeriodTradeServiceTest {
 		when(periodTradeRepository.findById(tradeId)).thenReturn(Optional.of(mockPeriodTrade));
 
 		doNothing().when(mockPeriodTrade).validateSuggestAuthority(member.getId());
-		doNothing().when(mockPeriodTrade).validateIsPending();
 		doNothing().when(mockPeriodTrade).validateIsCompleted();
 
 		when(suggestedProductRepository.findById(101L)).thenReturn(Optional.of(product1));
