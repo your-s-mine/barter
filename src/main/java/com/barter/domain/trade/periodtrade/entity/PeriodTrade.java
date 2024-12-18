@@ -106,11 +106,11 @@ public class PeriodTrade extends BaseTimeStampEntity {
 		}
 	}
 
-	public void validateIsPending() {
-		if (this.status.equals(TradeStatus.PENDING)) {
-			throw new IllegalArgumentException("아직 시작되지 않은 기간 거래 입니다.");
-		}
-	}
+	// public void validateIsPending() {
+	// 	if (this.status.equals(TradeStatus.PENDING)) {
+	// 		throw new IllegalArgumentException("아직 시작되지 않은 기간 거래 입니다.");
+	// 	}
+	// }
 
 	public void validateAuthority(Long userId) {
 		if (!this.registeredProduct.getMember().getId().equals(userId)) {
@@ -130,32 +130,37 @@ public class PeriodTrade extends BaseTimeStampEntity {
 	}
 
 	public boolean updatePeriodTradeStatus(TradeStatus status) {
+		if (status.equals(TradeStatus.COMPLETED)) {
+			if (!this.status.equals(TradeStatus.IN_PROGRESS)) {
+				return false;
+			}
+			this.status = status;
+			this.registeredProduct.updateStatus(RegisteredStatus.COMPLETED.toString());
+			return true;
+		}
 
 		if (status.equals(TradeStatus.CLOSED)) { // CLOSED : 교환 등록자의 물품이 만료되거나 취소된 경우
+			if (this.status.equals(TradeStatus.COMPLETED)) {
+				return false;
+			}
 			this.status = status;
 			this.registeredProduct.updateStatus(RegisteredStatus.PENDING.toString());
 			return true;
+			// 추가적으로 다른 제안 물품은 pending 상태로 변경해야 한다.
 		}
-		if (status.equals(TradeStatus.IN_PROGRESS) && this.status.equals(TradeStatus.PENDING)) {
-			this.status = status;
-			this.registeredProduct.updateStatus(RegisteredStatus.REGISTERING.toString());
-
+		if (status.equals(this.status)) {
 			return true;
 		}
-		return status.equals(this.status); // 같은 경우는 일단 통과
-
-		/*
-		가능한 status 업데이트 목록
-		: PENDING -> IN_PROGRESS
-		: PENDING -> CLOSED
-		: IN_PROGRESS -> CLOSED
-		: PENDING -> CLOSED
-		 */
+		return false;
 
 	}
 
 	public void updatePeriodTradeStatusCompleted() {
 		this.status = TradeStatus.COMPLETED;
+	}
+
+	public void updatePeriodTradeStatusInProgress() {
+		this.status = TradeStatus.IN_PROGRESS;
 	}
 }
 

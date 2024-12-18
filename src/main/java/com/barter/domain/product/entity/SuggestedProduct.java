@@ -118,4 +118,8 @@ public class SuggestedProduct extends BaseTimeStampEntity {
 		}
 	}
 
+	public void changeStatusCompleted() {
+		this.status = SuggestedStatus.COMPLETED;
+	}
+
 }
