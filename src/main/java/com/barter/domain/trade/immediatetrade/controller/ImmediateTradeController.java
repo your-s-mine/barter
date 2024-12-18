@@ -1,5 +1,7 @@
 package com.barter.domain.trade.immediatetrade.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
@@ -18,9 +20,11 @@ import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.trade.immediatetrade.dto.request.CancelAcceptanceReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateImmediateTradeReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateTradeSuggestProductReqDto;
+import com.barter.domain.trade.immediatetrade.dto.request.FindSuggestForImmediateTradeReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.UpdateStatusReqDto;
 import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeResDto;
+import com.barter.domain.trade.immediatetrade.dto.response.FindSuggestForImmediateTradeResDto;
 import com.barter.domain.trade.immediatetrade.service.ImmediateTradeService;
 
 import jakarta.validation.Valid;
@@ -89,5 +93,13 @@ public class ImmediateTradeController {
 	public String cancelAcceptanceOfSuggest(@RequestBody CancelAcceptanceReqDto reqDto, VerifiedMember verifiedMember) {
 		Long tradeId = reqDto.getTradeId();
 		return immediateTradeService.cancelAcceptanceOfSuggest(tradeId, verifiedMember);
+	}
+
+	@GetMapping("/suggest")
+	public ResponseEntity<List<FindSuggestForImmediateTradeResDto>> findSuggestForImmediateTrade(
+		@RequestBody FindSuggestForImmediateTradeReqDto reqDto, VerifiedMember member) {
+		Long tradeId = reqDto.getTradeId();
+		return new ResponseEntity<>(immediateTradeService.findSuggestForImmediateTrade(tradeId, member),
+			HttpStatus.OK);
 	}
 }

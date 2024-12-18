@@ -508,8 +508,8 @@ public class SuggestedProductServiceTest {
 	}
 
 	@Test
-	@DisplayName("제안 물품 삭제 - 성공 테스트")
-	void deleteSuggestedProductTest_Success() {
+	@DisplayName("제안 물품 삭제 - 성공 테스트1")
+	void deleteSuggestedProductTest_Success1() {
 		//given
 		Long suggestedProductId = 1L;
 		Long verifiedMemberId = 1L;
@@ -517,6 +517,31 @@ public class SuggestedProductServiceTest {
 		SuggestedProduct testProduct = SuggestedProduct.builder()
 			.id(suggestedProductId)
 			.status(SuggestedStatus.PENDING)
+			.images(List.of("image1", "image2"))
+			.member(Member.builder().id(verifiedMemberId).build())
+			.build();
+		suggestedProductRepository.save(testProduct);
+
+		when(suggestedProductRepository.findById(suggestedProductId))
+			.thenReturn(Optional.of(testProduct));
+
+		//when
+		suggestedProductService.deleteSuggestedProduct(suggestedProductId, verifiedMemberId);
+
+		//then
+		assertThat(suggestedProductRepository.count()).isEqualTo(0);
+	}
+
+	@Test
+	@DisplayName("제안 물품 삭제 - 성공 테스트2")
+	void deleteSuggestedProductTest_Success2() {
+		//given
+		Long suggestedProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		SuggestedProduct testProduct = SuggestedProduct.builder()
+			.id(suggestedProductId)
+			.status(SuggestedStatus.COMPLETED)
 			.images(List.of("image1", "image2"))
 			.member(Member.builder().id(verifiedMemberId).build())
 			.build();

@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ import com.barter.domain.trade.immediatetrade.dto.request.CreateTradeSuggestProd
 import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.UpdateStatusReqDto;
 import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeResDto;
+import com.barter.domain.trade.immediatetrade.dto.response.FindSuggestForImmediateTradeResDto;
 import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
 
@@ -243,5 +245,26 @@ public class ImmediateTradeService {
 		}
 
 		return "추후 제안 다건 조회되도록 변경";
+	}
+	public List<FindSuggestForImmediateTradeResDto> findSuggestForImmediateTrade(
+		Long tradeId, VerifiedMember member) {
+
+		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
+
+		immediateTrade.validateAuthority(member.getId());
+
+		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(
+			tradeId, TradeType.IMMEDIATE);
+
+		List<FindSuggestForImmediateTradeResDto> resDtos = new ArrayList<>();
+
+		for (TradeProduct tp : tradeProducts) {
+			SuggestedProduct suggestedProduct = suggestedProductRepository.findById(tp.getSuggestedProduct().getId())
+				.orElseThrow(() -> new IllegalArgumentException("제안 물품을 찾을 수 없습니다"));
+
+			resDtos.add(FindSuggestForImmediateTradeResDto.from(suggestedProduct));
+		}
+		return resDtos;
 	}
 }

@@ -105,8 +105,8 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 	}
 
 	public void checkPossibleDelete() {
-		if (this.status != RegisteredStatus.PENDING) {
-			throw new IllegalArgumentException("PENDING 상태인 경우에만 등록 물품을 삭제할 수 있습니다.");
+		if (this.status != RegisteredStatus.PENDING && this.status != RegisteredStatus.COMPLETED) {
+			throw new IllegalArgumentException("PENDING 또는 COMPLETED 상태인 경우에만 등록 물품을 삭제할 수 있습니다.");
 		}
 	}
 
