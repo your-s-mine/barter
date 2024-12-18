@@ -13,6 +13,7 @@ import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.entity.TradeProduct;
+import com.barter.domain.product.enums.SuggestedStatus;
 import com.barter.domain.product.enums.TradeType;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.repository.SuggestedProductRepository;
@@ -205,9 +206,15 @@ public class ImmediateTradeService {
 		immediateTrade.changeStatusCompleted();
 		immediateTrade.getProduct().changeStatusCompleted();
 
-		List<TradeProduct> tradeProducts = tradeProductRepository.findByTradeId(tradeId);
+		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(tradeId, TradeType.IMMEDIATE);
 		for (TradeProduct tradeProduct : tradeProducts) {
-			tradeProduct.getSuggestedProduct().changStatusCompleted();
+			if(tradeProduct.getSuggestedProduct().getStatus() == SuggestedStatus.ACCEPTED) {
+				tradeProduct.getSuggestedProduct().changStatusCompleted();
+			}
+
+			if(tradeProduct.getSuggestedProduct().getStatus() == SuggestedStatus.SUGGESTING) {
+				tradeProduct.getSuggestedProduct().changStatusPending();
+			}
 		}
 
 		ImmediateTrade updatedTrade = immediateTradeRepository.save(immediateTrade);
