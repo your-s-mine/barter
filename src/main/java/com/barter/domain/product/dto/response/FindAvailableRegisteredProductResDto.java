@@ -7,13 +7,13 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class FindAvailableRegisteredProductsResDto {
+public class FindAvailableRegisteredProductResDto {
 
 	private Long id;
 	private String name;
 
-	public static FindAvailableRegisteredProductsResDto from(RegisteredProduct registeredProduct) {
-		return FindAvailableRegisteredProductsResDto.builder()
+	public static FindAvailableRegisteredProductResDto from(RegisteredProduct registeredProduct) {
+		return FindAvailableRegisteredProductResDto.builder()
 			.id(registeredProduct.getId())
 			.name(registeredProduct.getName())
 			.build();

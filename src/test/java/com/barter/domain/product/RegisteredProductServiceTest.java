@@ -31,7 +31,7 @@ import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductInfoReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductStatusReqDto;
 import com.barter.domain.product.dto.response.CreateRegisteredProductResDto;
-import com.barter.domain.product.dto.response.FindAvailableRegisteredProductsResDto;
+import com.barter.domain.product.dto.response.FindAvailableRegisteredProductResDto;
 import com.barter.domain.product.dto.response.FindRegisteredProductResDto;
 import com.barter.domain.product.dto.response.UpdateRegisteredProductInfoResDto;
 import com.barter.domain.product.dto.response.UpdateRegisteredProductStatusResDto;
@@ -631,7 +631,7 @@ public class RegisteredProductServiceTest {
 		);
 
 		//when
-		List<FindAvailableRegisteredProductsResDto> response = registeredProductService.findAvailableRegisteredProducts(
+		List<FindAvailableRegisteredProductResDto> response = registeredProductService.findAvailableRegisteredProducts(
 			verifiedMemberId);
 
 		//then
