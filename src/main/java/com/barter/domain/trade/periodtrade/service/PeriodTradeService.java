@@ -167,6 +167,22 @@ public class PeriodTradeService {
 			throw new IllegalArgumentException("불가능한 상태 변경 입니다.");
 		}
 
+		if (reqDto.getTradeStatus().equals(TradeStatus.CLOSED)) {
+			List<TradeProduct> tradeProducts = tradeProductRepository.findTradeProductsWithSuggestedProductByPeriodTradeId(
+				TradeType.PERIOD, periodTrade.getId());
+
+			tradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changStatusPending());
+			tradeProductRepository.deleteAll(tradeProducts);
+		}
+
+		if (reqDto.getTradeStatus().equals(TradeStatus.COMPLETED)) {
+			List<TradeProduct> tradeProducts = tradeProductRepository.findTradeProductsByTradeTypeAndTradeIdAndNotSuggestedStatus(
+				TradeType.PERIOD, periodTrade.getId(), SuggestedStatus.ACCEPTED);
+
+			tradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changStatusPending());
+			tradeProductRepository.deleteAll(tradeProducts);
+		}
+
 		// 알림 추가
 
 		return StatusUpdateResDto.from(periodTrade);
@@ -174,6 +190,10 @@ public class PeriodTradeService {
 
 	@Transactional
 	public AcceptPeriodTradeResDto acceptPeriodTrade(VerifiedMember member, Long id, AcceptPeriodTradeReqDto reqDto) {
+
+		if (member.getId().equals(reqDto.getMemberId())) {
+			throw new IllegalArgumentException("자기 자신을 수락할 수는 없습니다.");
+		}
 
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
@@ -190,6 +210,11 @@ public class PeriodTradeService {
 		for (TradeProduct tradeProduct : tradeProducts) {
 			SuggestedProduct suggestedProduct = tradeProduct.getSuggestedProduct();
 
+			// 기존 수락된 제안이 있다면 이를 취소 (PENDING으로 상태 변경)
+			if (suggestedProduct.getStatus().equals(SuggestedStatus.ACCEPTED)) {
+				suggestedProduct.changStatusPending(); // 기존 수락 상태를 PENDING으로 변경
+			}
+
 			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId()) && suggestedProduct.getStatus()
 				.equals(SuggestedStatus.SUGGESTING)) {
 				suggestedProduct.changStatusAccepted();
@@ -200,15 +225,20 @@ public class PeriodTradeService {
 		}
 		// 알림 (제안자에게 알림)
 
-		periodTrade.updatePeriodTradeStatus(TradeStatus.IN_PROGRESS);
+		periodTrade.updatePeriodTradeStatusInProgress();
 
 		return AcceptPeriodTradeResDto.from(periodTrade);
 
 	}
 
 	// 이미 수락한 제안에 대해서도 거절 할 수 있도록 수정
+	// 수락을 여러번 하지 못하도록 함 (다른 수락을 하면 기존 수락은 삭제)
 	@Transactional
 	public DenyPeriodTradeResDto denyPeriodTrade(VerifiedMember member, Long id, DenyPeriodTradeReqDto reqDto) {
+		
+		if (member.getId().equals(reqDto.getMemberId())) {
+			throw new IllegalArgumentException("자기 자신을 거절할 수는 없습니다.");
+		}
 
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
