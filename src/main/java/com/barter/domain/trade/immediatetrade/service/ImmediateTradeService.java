@@ -36,6 +36,7 @@ public class ImmediateTradeService {
 	private final TradeProductRepository tradeProductRepository;
 	private final SuggestedProductRepository suggestedProductRepository;
 
+	@Transactional
 	public FindImmediateTradeResDto create(CreateImmediateTradeReqDto reqDto) {
 		RegisteredProduct registeredProduct = registeredProductRepository
 			.findById(reqDto.getRegisteredProduct().getId()).orElseThrow(
@@ -50,6 +51,7 @@ public class ImmediateTradeService {
 			.viewCount(0)
 			.build();
 
+		registeredProduct.changStatusRegistering();
 		ImmediateTrade savedTrade = immediateTradeRepository.save(immediateTrade);
 		return FindImmediateTradeResDto.from(savedTrade);
 	}
