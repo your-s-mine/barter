@@ -127,6 +127,10 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 			throw new IllegalArgumentException("PENDING 상태만 업로드 가능합니다.");
 		}
 	}
+
+	public void changeStatusCompleted() {
+		this.status = RegisteredStatus.COMPLETED;
+	}
 }
 
 

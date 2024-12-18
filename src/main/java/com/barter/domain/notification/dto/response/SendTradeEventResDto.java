@@ -14,6 +14,7 @@ public class SendTradeEventResDto {
 	private String tradeType;
 	private Long tradeId;
 	private String notificationType;
+	private Long memberId;
 
 	public static SendTradeEventResDto from(Notification notification) {
 		return SendTradeEventResDto.builder()
@@ -22,6 +23,7 @@ public class SendTradeEventResDto {
 			.tradeType(notification.getTradeType().name())
 			.tradeId(notification.getTradeId())
 			.notificationType(notification.getNotificationType().name())
+			.memberId(notification.getMemberId())
 			.build();
 	}
 }

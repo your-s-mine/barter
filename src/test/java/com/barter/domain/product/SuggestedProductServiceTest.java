@@ -31,6 +31,7 @@ import com.barter.domain.product.dto.request.CreateSuggestedProductReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductInfoReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductStatusReqDto;
 import com.barter.domain.product.dto.response.CreateSuggestedProductResDto;
+import com.barter.domain.product.dto.response.FindAvailableSuggestedProductResDto;
 import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
 import com.barter.domain.product.dto.response.UpdateSuggestedProductInfoResDto;
 import com.barter.domain.product.dto.response.UpdateSuggestedProductStatusResDto;
@@ -617,5 +618,55 @@ public class SuggestedProductServiceTest {
 			suggestedProductService.deleteSuggestedProduct(suggestedProductId, verifiedMemberId))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("PENDING 상태인 경우에만 제안 물품을 삭제할 수 있습니다.");
+	}
+
+	@Test
+	@DisplayName("사용 가능한 제안 물품 다건 조회 - 성공 테스트")
+	void findAvailableSuggestedProductsTest_Success() {
+		//given
+		Long verifiedMemberId = 1L;
+
+		SuggestedProduct product1 = SuggestedProduct.builder()
+			.id(1L)
+			.name("test product1")
+			.description("product1 description")
+			.images(List.of("product1 image1", "product1 image2"))
+			.status(SuggestedStatus.PENDING)
+			.member(Member.builder().id(verifiedMemberId).build())
+			.build();
+
+		SuggestedProduct product2 = SuggestedProduct.builder()
+			.id(2L)
+			.name("test product2")
+			.description("product2 description")
+			.images(List.of("product2 image1"))
+			.status(SuggestedStatus.PENDING)
+			.member(Member.builder().id(verifiedMemberId).build())
+			.build();
+
+		SuggestedProduct product3 = SuggestedProduct.builder()
+			.id(3L)
+			.name("test product3")
+			.description("product3 description")
+			.images(List.of("product3 image1", "product3 image2", "product3 image3"))
+			.status(SuggestedStatus.ACCEPTED)
+			.member(Member.builder().id(verifiedMemberId).build())
+			.build();
+
+		when(suggestedProductRepository.findAllAvailableSuggestedProduct(verifiedMemberId)).thenReturn(
+			List.of(product1, product2)
+		);
+
+		//when
+		List<FindAvailableSuggestedProductResDto> response = suggestedProductService.findAvailableSuggestedProducts(
+			verifiedMemberId);
+
+		//then
+		assertThat(response).isNotNull();
+		assertThat(response).hasSize(2);
+		assertThat(response.get(0).getId()).isEqualTo(1L);
+		assertThat(response.get(0).getName()).isEqualTo("test product1");
+		assertThat(response.get(1).getId()).isEqualTo(2L);
+		assertThat(response.get(1).getName()).isEqualTo("test product2");
 	}
 }
