@@ -1,15 +1,9 @@
 package com.barter.domain.auth;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 import com.barter.domain.auth.dto.SignUpReqDto;
-import com.barter.domain.auth.exception.DuplicateEmailException;
 import com.barter.domain.auth.service.AuthService;
-import com.barter.domain.member.entity.Member;
 import com.barter.domain.member.repository.MemberRepository;
 import com.barter.security.PasswordEncoder;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,8 +11,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 @ExtendWith(MockitoExtension.class)
-class AuthServiceTest {
+class SignInTest {
 
     @Mock
     private MemberRepository memberRepository;

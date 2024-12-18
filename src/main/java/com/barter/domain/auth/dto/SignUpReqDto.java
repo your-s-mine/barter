@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
 public class SignUpReqDto {
 
 	@NotBlank(message = "이메일은 필수 입력값입니다.")
@@ -19,13 +20,6 @@ public class SignUpReqDto {
 	@Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d).+$", message = "비밀번호는 숫자와 문자를 포함해야 합니다.")
 	private String password;
 
-	@NotBlank(message = "사용자 이름은 필수 입력값입니다.")
+	@NotBlank(message = "닉네임은 필수 입력값입니다.")
 	private String nickname;
-
-	@Builder
-	public SignUpReqDto(String email, String password, String nickname) {
-		this.email = email;
-		this.password = password;
-		this.nickname = nickname;
-	}
 }
