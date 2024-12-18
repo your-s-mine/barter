@@ -10,6 +10,7 @@ import com.barter.domain.member.entity.FavoriteKeyword;
 import com.barter.domain.member.entity.MemberFavoriteKeyword;
 import com.barter.domain.member.repository.FavoriteKeywordRepository;
 import com.barter.domain.member.repository.MemberFavoriteKeywordRepository;
+import com.barter.domain.notification.enums.EventKind;
 import com.barter.domain.notification.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,9 +31,11 @@ public class TradeNotificationEventListener {
 		List<FavoriteKeyword> existsKeywords = favoriteKeywordRepository.findByKeywordIn(keywords);
 		List<MemberFavoriteKeyword> keywordMembers = memberFavoriteKeywordRepository
 			.findByFavoriteKeywordIn(existsKeywords);
-		keywordMembers.forEach(member -> {
-			// TODO: 알림 전송 개발되면 추가 예정.
-			log.info("관심 키워드로 등록한 물품 {}이(가) 교환에 등록되었습니다.", event.getProductName());
-		});
+
+		List<Long> memberIds = keywordMembers.stream()
+			.map(keywordMember -> keywordMember.getMember().getId()).toList();
+		notificationService.saveKeywordNotification(
+			EventKind.KEYWORD, memberIds, event.getType(), event.getTradeId()
+		);
 	}
 }

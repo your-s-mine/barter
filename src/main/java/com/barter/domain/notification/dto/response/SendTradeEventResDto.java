@@ -10,16 +10,20 @@ import lombok.Getter;
 public class SendTradeEventResDto {
 
 	private Long notificationId;
+	private String message;
 	private String tradeType;
 	private Long tradeId;
 	private String notificationType;
+	private Long memberId;
 
 	public static SendTradeEventResDto from(Notification notification) {
 		return SendTradeEventResDto.builder()
 			.notificationId(notification.getId())
+			.message(notification.getMessage())
 			.tradeType(notification.getTradeType().name())
 			.tradeId(notification.getTradeId())
 			.notificationType(notification.getNotificationType().name())
+			.memberId(notification.getMemberId())
 			.build();
 	}
 }

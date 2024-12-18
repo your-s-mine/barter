@@ -15,6 +15,7 @@ import com.barter.domain.notification.service.NotificationService;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.entity.TradeProduct;
+import com.barter.domain.product.enums.SuggestedStatus;
 import com.barter.domain.product.enums.TradeType;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.repository.SuggestedProductRepository;
@@ -25,6 +26,7 @@ import com.barter.domain.trade.immediatetrade.dto.request.CreateTradeSuggestProd
 import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeReqDto;
 import com.barter.domain.trade.immediatetrade.dto.request.UpdateStatusReqDto;
 import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeResDto;
+import com.barter.domain.trade.immediatetrade.dto.response.FindSuggestForImmediateTradeResDto;
 import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
 
@@ -39,6 +41,7 @@ public class ImmediateTradeService {
 	private final SuggestedProductRepository suggestedProductRepository;
 	private final NotificationService notificationService;
 
+	@Transactional
 	public FindImmediateTradeResDto create(CreateImmediateTradeReqDto reqDto) {
 		RegisteredProduct registeredProduct = registeredProductRepository
 			.findById(reqDto.getRegisteredProduct().getId()).orElseThrow(
@@ -53,6 +56,7 @@ public class ImmediateTradeService {
 			.viewCount(0)
 			.build();
 
+		registeredProduct.changStatusRegistering();
 		ImmediateTrade savedTrade = immediateTradeRepository.save(immediateTrade);
 		return FindImmediateTradeResDto.from(savedTrade);
 	}
@@ -102,6 +106,9 @@ public class ImmediateTradeService {
 			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
 
 		immediateTrade.validateAuthority(member.getId());
+		if (!(immediateTrade.getStatus() == TradeStatus.PENDING)) {
+			throw new IllegalStateException("PENDING 상태의 교환만 삭제할 수 있습니다.");
+		}
 
 		immediateTradeRepository.delete(immediateTrade);
 
@@ -145,7 +152,7 @@ public class ImmediateTradeService {
 		tradeProductRepository.saveAll(tradeProducts);
 
 		// 이벤트 저장 및 전달
-		notificationService.saveTradeEvent(
+		notificationService.saveTradeNotification(
 			EventKind.IMMEDIATE_TRADE_SUGGEST, immediateTrade.getProduct().getMember().getId(),
 			TradeType.IMMEDIATE, immediateTrade.getId(), immediateTrade.getTitle()
 		);
@@ -171,7 +178,7 @@ public class ImmediateTradeService {
 
 		// 이벤트 저장 및 전달
 		Long suggesterId = tradeProducts.get(0).getSuggestedProduct().getMember().getId();
-		notificationService.saveTradeEvent(
+		notificationService.saveTradeNotification(
 			EventKind.IMMEDIATE_TRADE_SUGGEST_ACCEPT, suggesterId,
 			TradeType.IMMEDIATE, immediateTrade.getId(), immediateTrade.getTitle()
 		);
@@ -191,14 +198,14 @@ public class ImmediateTradeService {
 
 		for (TradeProduct tradeProduct : tradeProducts) {
 			SuggestedProduct suggestedProduct = tradeProduct.getSuggestedProduct();
-			suggestedProduct.changStatusPending();
+			suggestedProduct.changeStatusPending();
 		}
 
 		tradeProductRepository.deleteAll(tradeProducts);
 
 		// 이벤트 저장 및 전달
 		Long suggesterId = tradeProducts.get(0).getSuggestedProduct().getMember().getId();
-		notificationService.saveTradeEvent(
+		notificationService.saveTradeNotification(
 			EventKind.IMMEDIATE_TRADE_SUGGEST_DENY, suggesterId,
 			TradeType.IMMEDIATE, immediateTrade.getId(), immediateTrade.getTitle()
 		);
@@ -206,20 +213,79 @@ public class ImmediateTradeService {
 	}
 
 	@Transactional
-	public FindImmediateTradeResDto updateStatus(Long tradeId, UpdateStatusReqDto reqDto, VerifiedMember member) {
+	public FindImmediateTradeResDto updateStatusCompleted(Long tradeId, UpdateStatusReqDto reqDto,
+		VerifiedMember member) {
 
 		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
 
 		immediateTrade.validateAuthority(member.getId());
 
-		if ((immediateTrade.isCompleted())) {
-			throw new IllegalStateException("교환이 완료된 건에 대해서는 상태 변경을 할 수 없습니다.");
+		if (!(immediateTrade.isInProgress()) || !(reqDto.getTradeStatus() == TradeStatus.COMPLETED)) {
+			throw new IllegalArgumentException("IN_PROGRESS 상태의 교환만을 COMPLETED 상태로 변경하실 수 있습니다.");
 		}
 
-		immediateTrade.changeStatus(reqDto.getTradeStatus());
+		immediateTrade.changeStatusCompleted();
+		immediateTrade.getProduct().changeStatusCompleted();
+
+		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(tradeId,
+			TradeType.IMMEDIATE);
+		for (TradeProduct tradeProduct : tradeProducts) {
+			if (tradeProduct.getSuggestedProduct().getStatus() == SuggestedStatus.ACCEPTED) {
+				tradeProduct.getSuggestedProduct().changeStatusCompleted();
+			}
+
+			if (tradeProduct.getSuggestedProduct().getStatus() == SuggestedStatus.SUGGESTING) {
+				tradeProduct.getSuggestedProduct().changeStatusPending();
+				tradeProductRepository.delete(tradeProduct);
+			}
+		}
 
 		ImmediateTrade updatedTrade = immediateTradeRepository.save(immediateTrade);
 		return FindImmediateTradeResDto.from(updatedTrade);
+	}
+
+	public String cancelAcceptanceOfSuggest(Long tradeId, VerifiedMember member) {
+		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
+
+		immediateTrade.validateAuthority(member.getId());
+
+		if (!(immediateTrade.isInProgress())) {
+			throw new IllegalArgumentException("IN_PROGRESS 상태의 교환만을 수락 취소할 수 있습니다.");
+		}
+
+		immediateTrade.changeStatusPending();
+
+		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(tradeId,
+			TradeType.IMMEDIATE);
+		for (TradeProduct tradeProduct : tradeProducts) {
+			tradeProduct.getSuggestedProduct().changeStatusPending();
+			tradeProductRepository.delete(tradeProduct);
+		}
+
+		return "추후 제안 다건 조회되도록 변경";
+	}
+
+	public List<FindSuggestForImmediateTradeResDto> findSuggestForImmediateTrade(
+		Long tradeId, VerifiedMember member) {
+
+		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
+
+		immediateTrade.validateAuthority(member.getId());
+
+		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(
+			tradeId, TradeType.IMMEDIATE);
+
+		List<FindSuggestForImmediateTradeResDto> resDtos = new ArrayList<>();
+
+		for (TradeProduct tp : tradeProducts) {
+			SuggestedProduct suggestedProduct = suggestedProductRepository.findById(tp.getSuggestedProduct().getId())
+				.orElseThrow(() -> new IllegalArgumentException("제안 물품을 찾을 수 없습니다"));
+
+			resDtos.add(FindSuggestForImmediateTradeResDto.from(suggestedProduct));
+		}
+		return resDtos;
 	}
 }

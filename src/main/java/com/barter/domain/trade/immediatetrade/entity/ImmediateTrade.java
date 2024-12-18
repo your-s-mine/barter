@@ -1,7 +1,7 @@
 package com.barter.domain.trade.immediatetrade.entity;
 
+import com.amazonaws.services.cloudformation.model.ListStackSetsRequest;
 import com.barter.domain.BaseTimeStampEntity;
-import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.trade.enums.TradeStatus;
 import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeReqDto;
@@ -68,12 +68,8 @@ public class ImmediateTrade extends BaseTimeStampEntity {
 		this.status = TradeStatus.PENDING;
 	}
 
-	public void changeStatus(TradeStatus tradeStatus) {
-		this.status = tradeStatus;
-	}
-
-	public boolean isCompleted() {
-		return this.status == TradeStatus.COMPLETED;
+	public void changeStatusCompleted() {
+		this.status = TradeStatus.COMPLETED;
 	}
 
 	public void validateAuthority(Long userId) {
@@ -86,5 +82,9 @@ public class ImmediateTrade extends BaseTimeStampEntity {
 		if (this.product.getMember().getId().equals(userId)) {
 			throw new IllegalArgumentException("본인이 등록한 물품에 교환을 제안할 수 없습니다.");
 		}
+	}
+
+	public boolean isInProgress() {
+		return this.status == TradeStatus.IN_PROGRESS;
 	}
 }
