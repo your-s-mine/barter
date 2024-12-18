@@ -15,6 +15,7 @@ import com.barter.domain.product.dto.request.CreateSuggestedProductReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductInfoReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductStatusReqDto;
 import com.barter.domain.product.dto.response.CreateSuggestedProductResDto;
+import com.barter.domain.product.dto.response.FindAvailableSuggestedProductResDto;
 import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
 import com.barter.domain.product.dto.response.UpdateSuggestedProductInfoResDto;
 import com.barter.domain.product.dto.response.UpdateSuggestedProductStatusResDto;
@@ -113,5 +114,12 @@ public class SuggestedProductService {
 			foundProduct.getImages().forEach(s3Service::deleteFile);
 		}
 		suggestedProductRepository.delete(foundProduct);
+	}
+
+	public List<FindAvailableSuggestedProductResDto> findAvailableSuggestedProducts(Long verifiedMemberId) {
+		List<SuggestedProduct> foundProducts = suggestedProductRepository.findAllAvailableSuggestedProduct(
+			verifiedMemberId);
+
+		return foundProducts.stream().map(FindAvailableSuggestedProductResDto::from).toList();
 	}
 }

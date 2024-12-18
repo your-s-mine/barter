@@ -15,6 +15,7 @@ import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductInfoReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductStatusReqDto;
 import com.barter.domain.product.dto.response.CreateRegisteredProductResDto;
+import com.barter.domain.product.dto.response.FindAvailableRegisteredProductResDto;
 import com.barter.domain.product.dto.response.FindRegisteredProductResDto;
 import com.barter.domain.product.dto.response.UpdateRegisteredProductInfoResDto;
 import com.barter.domain.product.dto.response.UpdateRegisteredProductStatusResDto;
@@ -117,4 +118,10 @@ public class RegisteredProductService {
 		registeredProductRepository.delete(foundProduct);
 	}
 
+	public List<FindAvailableRegisteredProductResDto> findAvailableRegisteredProducts(Long verifiedMemberId) {
+		List<RegisteredProduct> foundProducts = registeredProductRepository.findAllAvailableRegisteredProduct(
+			verifiedMemberId);
+
+		return foundProducts.stream().map(FindAvailableRegisteredProductResDto::from).toList();
+	}
 }
