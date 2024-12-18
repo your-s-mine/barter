@@ -303,7 +303,13 @@ public class PeriodTradeService {
 			}
 
 		}
+
 		// 알림 (제안자에게 알림)
+		notificationService.saveTradeNotification(
+			EventKind.PERIOD_TRADE_SUGGEST_DENY, reqDto.getSuggestedMemberId(),
+			TradeType.PERIOD, periodTrade.getId(), periodTrade.getTitle()
+		);
+
 		return DenyPeriodTradeResDto.from(periodTrade);
 	}
 
