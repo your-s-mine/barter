@@ -1,5 +1,7 @@
 package com.barter.domain.trade.periodtrade.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
@@ -61,12 +63,11 @@ public class PeriodTradeController {
 		);
 	}
 
-	@GetMapping("/period-trades/{tradeId}/suggestion/{memberId}") // 제안 온 물품 조회 (최대 3개라 paging 미적용)
-	public ResponseEntity<FindPeriodTradeSuggestionResDto> findPeriodTradeSuggestion(
-		@PathVariable Long tradeId,
-		@PathVariable Long memberId) {
+	@GetMapping("/period-trades/{tradeId}/suggestion") // 제안 온 물품 조회
+	public ResponseEntity<List<FindPeriodTradeSuggestionResDto>> findPeriodTradeSuggestion(
+		@PathVariable Long tradeId) {
 		return ResponseEntity.status(HttpStatus.OK).body(
-			periodTradeService.findPeriodTradesSuggestion(tradeId, memberId)
+			periodTradeService.findPeriodTradesSuggestion(tradeId)
 		);
 	}
 

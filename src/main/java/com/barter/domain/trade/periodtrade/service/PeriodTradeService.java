@@ -1,6 +1,8 @@
 package com.barter.domain.trade.periodtrade.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -96,14 +98,23 @@ public class PeriodTradeService {
 		return FindPeriodTradeResDto.from(periodTrade);
 	}
 
-	public FindPeriodTradeSuggestionResDto findPeriodTradesSuggestion(Long tradeId, Long memberId) {
+	public List<FindPeriodTradeSuggestionResDto> findPeriodTradesSuggestion(Long tradeId) {
 		List<SuggestedProduct> suggestedProducts = suggestedProductRepository.findSuggestedProductsByTradeTypeAndTradeId(
 			TradeType.PERIOD, tradeId);
-		List<FindSuggestedProductResDto> suggestionResDtos = suggestedProducts.stream()
-			.map(FindSuggestedProductResDto::from)
-			.toList();
 
-		return FindPeriodTradeSuggestionResDto.from(memberId, suggestionResDtos);
+		Map<Long, List<FindSuggestedProductResDto>> productsByMember = suggestedProducts.stream()
+			.collect(Collectors.groupingBy(
+				suggestedProduct -> suggestedProduct.getMember().getId(),  // memberId 기준으로 그룹화
+				Collectors.mapping(FindSuggestedProductResDto::from, Collectors.toList())
+				// FindSuggestedProductResDto로 변환
+			));
+
+		// 각 memberId에 대해 FindPeriodTradeSuggestionResDto 생성
+		List<FindPeriodTradeSuggestionResDto> result = productsByMember.entrySet().stream()
+			.map(entry -> FindPeriodTradeSuggestionResDto.from(entry.getKey(), entry.getValue()))
+			.collect(Collectors.toList());
+
+		return result;
 
 	}
 
