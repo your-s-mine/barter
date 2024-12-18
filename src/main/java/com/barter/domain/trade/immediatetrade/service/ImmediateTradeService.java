@@ -183,6 +183,7 @@ public class ImmediateTradeService {
 		for (TradeProduct tradeProduct : tradeProducts) {
 			SuggestedProduct suggestedProduct = tradeProduct.getSuggestedProduct();
 			suggestedProduct.changeStatusPending();
+			suggestedProductRepository.delete(suggestedProduct);
 		}
 
 		tradeProductRepository.deleteAll(tradeProducts);
