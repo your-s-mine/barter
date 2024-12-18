@@ -19,7 +19,6 @@ import com.barter.domain.product.enums.TradeType;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.repository.SuggestedProductRepository;
 import com.barter.domain.product.repository.TradeProductRepository;
-import com.barter.domain.product.service.ProductSwitchService;
 import com.barter.domain.trade.periodtrade.dto.request.AcceptPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.CreatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.DenyPeriodTradeReqDto;
@@ -50,9 +49,7 @@ public class PeriodTradeService {
 	private final SuggestedProductRepository suggestedProductRepository;
 	private final TradeProductRepository tradeProductRepository;
 	private final ApplicationEventPublisher eventPublisher;
-	private final ProductSwitchService productSwitchService;
 
-	// TODO : Member 는 나중에 VerifiedMember 로 변경될 예정
 	@Transactional
 	public CreatePeriodTradeResDto createPeriodTrades(VerifiedMember member, CreatePeriodTradeReqDto reqDto) {
 
@@ -129,19 +126,18 @@ public class PeriodTradeService {
 	public SuggestedPeriodTradeResDto suggestPeriodTrade(VerifiedMember member, Long id,
 		SuggestedPeriodTradeReqDto reqDto) {
 
-		// 알림 추가
-
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
 
 		periodTrade.validateSuggestAuthority(member.getId()); // 자신의 교환 (게시글) 에 제안 불가
 
-		// 기간 교환 시작 전(PENDING) 또는 이미 거래된(COMPLETED) 교환인 경우
-		periodTrade.validateIsPending();
-		periodTrade.validateIsCompleted();
+		// PENDING 인 경우와 IN_PROGRESS 의 경우만 제안 가능하다.
 
-		List<SuggestedProduct> suggestedProduct = findSuggestedProductByIds(reqDto.getProductIds());
+		periodTrade.validateIsCompleted();
+		periodTrade.validateIsClosed();
+
+		List<SuggestedProduct> suggestedProduct = findSuggestedProductByIds(reqDto.getProductIds(), member.getId());
 
 		List<TradeProduct> tradeProducts = suggestedProduct.stream()
 			.map(product -> {
@@ -234,7 +230,7 @@ public class PeriodTradeService {
 		return DenyPeriodTradeResDto.from(periodTrade);
 	}
 
-	private List<SuggestedProduct> findSuggestedProductByIds(List<Long> productIds) {
+	private List<SuggestedProduct> findSuggestedProductByIds(List<Long> productIds, Long memberId) {
 		return productIds.stream()
 			.map(id -> {
 					SuggestedProduct product = suggestedProductRepository.findById(id)
@@ -242,6 +238,7 @@ public class PeriodTradeService {
 					if (!product.getStatus().equals(SuggestedStatus.PENDING)) {
 						throw new IllegalArgumentException("다른 교환에 제안된 상품은 제안 할 수 없습니다.");
 					}
+					product.checkPermission(memberId); // 자신의 물건만 등록 가능
 
 					return product;
 				}
