@@ -88,11 +88,11 @@ public class ImmediateTradeController {
 			HttpStatus.OK);
 	}
 
-	// todo: 추후 제안 다건 조회되도록 변경
 	@PatchMapping("/cancelling-acceptance")
-	public String cancelAcceptanceOfSuggest(@RequestBody CancelAcceptanceReqDto reqDto, VerifiedMember verifiedMember) {
+	public ResponseEntity<String> cancelAcceptanceOfSuggest(@RequestBody CancelAcceptanceReqDto reqDto, VerifiedMember verifiedMember) {
 		Long tradeId = reqDto.getTradeId();
-		return immediateTradeService.cancelAcceptanceOfSuggest(tradeId, verifiedMember);
+		return new ResponseEntity<>(immediateTradeService.cancelAcceptanceOfSuggest(tradeId, verifiedMember),
+			HttpStatus.ACCEPTED);
 	}
 
 	@GetMapping("/suggest")
