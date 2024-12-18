@@ -215,7 +215,7 @@ public class PeriodTradeService {
 	@Transactional
 	public AcceptPeriodTradeResDto acceptPeriodTrade(VerifiedMember member, Long id, AcceptPeriodTradeReqDto reqDto) {
 
-		if (member.getId().equals(reqDto.getMemberId())) {
+		if (member.getId().equals(reqDto.getSuggestedMemberId())) {
 			throw new IllegalArgumentException("자기 자신을 수락할 수는 없습니다.");
 		}
 
@@ -231,15 +231,20 @@ public class PeriodTradeService {
 		// 해당하는 교환 id, 교환 타입 에 맞게 제안된 물품들을 조회 -> 추후 삭제 필요 (교환 완료, 만료 시)
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(id, TradeType.PERIOD);
 
+		Long canceledMemberId = 0L;
 		for (TradeProduct tradeProduct : tradeProducts) {
 			SuggestedProduct suggestedProduct = tradeProduct.getSuggestedProduct();
 
 			// 기존 수락된 제안이 있다면 이를 취소 (PENDING으로 상태 변경)
 			if (suggestedProduct.getStatus().equals(SuggestedStatus.ACCEPTED)) {
+				if (canceledMemberId == 0L) {
+					canceledMemberId = suggestedProduct.getMember().getId();
+				}
 				suggestedProduct.changStatusPending(); // 기존 수락 상태를 PENDING으로 변경
 			}
 
-			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId()) && suggestedProduct.getStatus()
+			if (suggestedProduct.getMember().getId().equals(reqDto.getSuggestedMemberId())
+				&& suggestedProduct.getStatus()
 				.equals(SuggestedStatus.SUGGESTING)) {
 				suggestedProduct.changStatusAccepted();
 				periodTrade.getRegisteredProduct()
@@ -247,9 +252,21 @@ public class PeriodTradeService {
 			}
 
 		}
-		// 알림 (제안자에게 알림)
 
 		periodTrade.updatePeriodTradeStatusInProgress();
+
+		// 알림 (제안 수락된 회원에게)
+		notificationService.saveTradeNotification(
+			EventKind.PERIOD_TRADE_SUGGEST_ACCEPT, reqDto.getSuggestedMemberId(),
+			TradeType.PERIOD, periodTrade.getId(), periodTrade.getTitle()
+		);
+		// 알림 (제안이 취소된 회원이 존재한다면, 제안 취소된 회원에게)
+		if (canceledMemberId != 0L) {
+			notificationService.saveTradeNotification(
+				EventKind.PERIOD_TRADE_SUGGEST_DENY, canceledMemberId,
+				TradeType.PERIOD, periodTrade.getId(), periodTrade.getTitle()
+			);
+		}
 
 		return AcceptPeriodTradeResDto.from(periodTrade);
 
@@ -260,7 +277,7 @@ public class PeriodTradeService {
 	@Transactional
 	public DenyPeriodTradeResDto denyPeriodTrade(VerifiedMember member, Long id, DenyPeriodTradeReqDto reqDto) {
 
-		if (member.getId().equals(reqDto.getMemberId())) {
+		if (member.getId().equals(reqDto.getSuggestedMemberId())) {
 			throw new IllegalArgumentException("자기 자신을 거절할 수는 없습니다.");
 		}
 
@@ -277,7 +294,8 @@ public class PeriodTradeService {
 		for (TradeProduct tradeProduct : tradeProducts) {
 			SuggestedProduct suggestedProduct = tradeProduct.getSuggestedProduct();
 
-			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId()) && !suggestedProduct.getStatus()
+			if (suggestedProduct.getMember().getId().equals(reqDto.getSuggestedMemberId())
+				&& !suggestedProduct.getStatus()
 				.equals(SuggestedStatus.PENDING)) {
 				suggestedProduct.changStatusPending();
 				periodTrade.getRegisteredProduct()
