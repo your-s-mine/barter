@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.barter.domain.product.entity.SuggestedProduct;
+import com.barter.domain.product.enums.SuggestedStatus;
 import com.barter.domain.product.enums.TradeType;
 
 public interface SuggestedProductRepository extends JpaRepository<SuggestedProduct, Long> {
@@ -22,4 +23,12 @@ public interface SuggestedProductRepository extends JpaRepository<SuggestedProdu
 	List<SuggestedProduct> findSuggestedProductsByTradeTypeAndTradeId(
 		@Param("tradeType") TradeType tradeType,
 		@Param("tradeId") Long tradeId);
+
+	@Query("SELECT sp FROM TradeProduct tp " +
+		"JOIN tp.suggestedProduct sp " +
+		"WHERE tp.tradeType = :tradeType AND tp.tradeId = :tradeId AND sp.status= :status")
+	List<SuggestedProduct> findSuggestedProductsByTradeTypeAndTradeIdAndStatus(
+		@Param("tradeType") TradeType tradeType,
+		@Param("tradeId") Long tradeId,
+		@Param("status") SuggestedStatus status);
 }
