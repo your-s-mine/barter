@@ -71,13 +71,6 @@ public class PeriodTradeController {
 		);
 	}
 
-	@GetMapping("/period-trades/{tradeId}/info")
-	public ResponseEntity<List<FindPeriodTradeSuggestionResDto>> findPeriodTradeInfo(@PathVariable Long tradeId) {
-		return ResponseEntity.status(HttpStatus.OK).body(
-			periodTradeService.findPeriodTradeInfo(tradeId)
-		);
-	}
-
 	@PatchMapping("/period-trades/{id}")
 	public ResponseEntity<UpdatePeriodTradeResDto> updatePeriodTrade(
 		VerifiedMember member,

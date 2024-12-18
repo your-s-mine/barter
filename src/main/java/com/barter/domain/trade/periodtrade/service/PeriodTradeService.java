@@ -98,15 +98,8 @@ public class PeriodTradeService {
 		return FindPeriodTradeResDto.from(periodTrade);
 	}
 
-	// 제 생각인데 아래 두 메서드는 모두 조회 하는 거 하나만 있어도 될 것 같습니다. (사용자 입장에서 accepted 된것 뿐만 아니라 제안온 모든 리스트를 확인한다고 하면)
 	public List<FindPeriodTradeSuggestionResDto> findPeriodTradesSuggestion(Long tradeId) {
-		return getPeriodTradeSuggestions(tradeId, null);
-
-	}
-
-	public List<FindPeriodTradeSuggestionResDto> findPeriodTradeInfo(Long tradeId) {
-
-		return getPeriodTradeSuggestions(tradeId, SuggestedStatus.ACCEPTED);
+		return getPeriodTradeSuggestions(tradeId);
 
 	}
 
@@ -303,16 +296,12 @@ public class PeriodTradeService {
 			.toList();
 	}
 
-	private List<FindPeriodTradeSuggestionResDto> getPeriodTradeSuggestions(Long tradeId, SuggestedStatus status) {
+	private List<FindPeriodTradeSuggestionResDto> getPeriodTradeSuggestions(Long tradeId) {
 		// 상태가 제공되지 않으면 ACCEPTED 상태로 처리
 		List<SuggestedProduct> suggestedProducts;
-		if (status == null) {
-			suggestedProducts = suggestedProductRepository.findSuggestedProductsByTradeTypeAndTradeId(
-				TradeType.PERIOD, tradeId);
-		} else {
-			suggestedProducts = suggestedProductRepository.findSuggestedProductsByTradeTypeAndTradeIdAndStatus(
-				TradeType.PERIOD, tradeId, status);
-		}
+
+		suggestedProducts = suggestedProductRepository.findSuggestedProductsByTradeTypeAndTradeId(
+			TradeType.PERIOD, tradeId);
 
 		// memberId 기준으로 그룹화
 		Map<Long, List<FindSuggestedProductResDto>> productsByMember = suggestedProducts.stream()
