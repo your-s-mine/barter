@@ -225,6 +225,27 @@ public class ImmediateTradeService {
 		return FindImmediateTradeResDto.from(updatedTrade);
 	}
 
+	public String cancelAcceptanceOfSuggest(Long tradeId, VerifiedMember member) {
+		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
+
+		immediateTrade.validateAuthority(member.getId());
+
+		if (!(immediateTrade.isInProgress())) {
+			throw new IllegalArgumentException("IN_PROGRESS 상태의 교환만을 수락 취소할 수 있습니다.");
+		}
+
+		immediateTrade.changeStatusPending();
+
+		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(tradeId,
+			TradeType.IMMEDIATE);
+		for (TradeProduct tradeProduct : tradeProducts) {
+			tradeProduct.getSuggestedProduct().changeStatusPending();
+			tradeProductRepository.delete(tradeProduct);
+		}
+
+		return "추후 제안 다건 조회되도록 변경";
+	}
 	public List<FindSuggestForImmediateTradeResDto> findSuggestForImmediateTrade(
 		Long tradeId, VerifiedMember member) {
 

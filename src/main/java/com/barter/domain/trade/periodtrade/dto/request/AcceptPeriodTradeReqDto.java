@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor // for test
 public class AcceptPeriodTradeReqDto {
-	private Long memberId;
+	private Long suggestedMemberId;
 	//Restful 하게 uri 하려면 pathVariable 보다는 이런식으로 넣는게 좋다고 생각했습니다.
 }

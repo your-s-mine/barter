@@ -1,7 +1,9 @@
 package com.barter.domain.trade.periodtrade.service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationEventPublisher;
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.barter.domain.auth.dto.VerifiedMember;
+import com.barter.domain.notification.enums.EventKind;
+import com.barter.domain.notification.service.NotificationService;
 import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
@@ -54,6 +58,7 @@ public class PeriodTradeService {
 	private final SuggestedProductRepository suggestedProductRepository;
 	private final TradeProductRepository tradeProductRepository;
 	private final ApplicationEventPublisher eventPublisher;
+	private final NotificationService notificationService;
 
 	@Transactional
 	public CreatePeriodTradeResDto createPeriodTrades(VerifiedMember member, CreatePeriodTradeReqDto reqDto) {
@@ -158,6 +163,12 @@ public class PeriodTradeService {
 
 		tradeProductRepository.saveAll(tradeProducts);
 
+		// 제안신청 알림 저장 및 전달
+		notificationService.saveTradeNotification(
+			EventKind.PERIOD_TRADE_SUGGEST, periodTrade.getRegisteredProduct().getMember().getId(),
+			TradeType.PERIOD, periodTrade.getId(), periodTrade.getTitle()
+		);
+
 		return SuggestedPeriodTradeResDto.from(id, suggestedProduct);
 
 	}
@@ -180,8 +191,22 @@ public class PeriodTradeService {
 
 		if (reqDto.getTradeStatus().equals(TradeStatus.CLOSED)) {
 
-			allTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusPending());
+			// allTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changStatusPending());
+			// 기존 제안자들의 ID 값이 필요해 위의 코드를 아래와 같이 수정하였습니다.
+			Set<Long> suggesterIds = new HashSet<>();
+			for (TradeProduct tradeProduct : allTradeProducts) {
+				tradeProduct.getSuggestedProduct().changeStatusPending();
+				suggesterIds.add(tradeProduct.getSuggestedProduct().getMember().getId());
+			}
 			tradeProductRepository.deleteAll(allTradeProducts);
+
+			// 알림 (제안신청 했던 제안자들에게)
+			for (Long suggesterId : suggesterIds) {
+				notificationService.saveTradeNotification(
+					EventKind.PERIOD_TRADE_CLOSE, suggesterId,
+					TradeType.PERIOD, periodTrade.getId(), periodTrade.getTitle()
+				);
+			}
 		}
 
 		if (reqDto.getTradeStatus().equals(TradeStatus.COMPLETED)) {
@@ -193,12 +218,35 @@ public class PeriodTradeService {
 			List<TradeProduct> acceptedTradeProducts = tradeProductRepository.findTradeProductsByTradeTypeAndTradeIdAndSuggestedStatus(
 				TradeType.PERIOD, periodTrade.getId(), SuggestedStatus.ACCEPTED);
 
-			tradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusPending());
+			// tradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusPending());
+			// 기존 제안자들의 ID 값이 필요해 위의 코드를 아래와 같이 수정하였습니다.
+			Set<Long> suggesterIds = new HashSet<>();
+			for (TradeProduct tradeProduct : tradeProducts) {
+				tradeProduct.getSuggestedProduct().changeStatusPending();
+				suggesterIds.add(tradeProduct.getSuggestedProduct().getMember().getId());
+			}
 			acceptedTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusCompleted());
 			tradeProductRepository.deleteAll(allTradeProducts);
-		}
 
-		// 알림 추가
+			// 알림 (교환 등록자에게)
+			notificationService.saveTradeNotification(
+				EventKind.PERIOD_TRADE_COMPLETE, periodTrade.getRegisteredProduct().getMember().getId(),
+				TradeType.PERIOD, periodTrade.getId(), periodTrade.getTitle()
+			);
+			// 알림 (교환에 성공한 제안자에게)
+			Long finalSuggesterId = acceptedTradeProducts.get(0).getSuggestedProduct().getMember().getId();
+			notificationService.saveTradeNotification(
+				EventKind.PERIOD_TRADE_COMPLETE, finalSuggesterId,
+				TradeType.PERIOD, periodTrade.getId(), periodTrade.getTitle()
+			);
+			// 알림 (기존 제안자들에게)
+			for (Long suggesterId : suggesterIds) {
+				notificationService.saveTradeNotification(
+					EventKind.PERIOD_TRADE_SUGGEST_DENY, suggesterId,
+					TradeType.PERIOD, periodTrade.getId(), periodTrade.getTitle()
+				);
+			}
+		}
 
 		return StatusUpdateResDto.from(periodTrade);
 	}
@@ -206,7 +254,7 @@ public class PeriodTradeService {
 	@Transactional
 	public AcceptPeriodTradeResDto acceptPeriodTrade(VerifiedMember member, Long id, AcceptPeriodTradeReqDto reqDto) {
 
-		if (member.getId().equals(reqDto.getMemberId())) {
+		if (member.getId().equals(reqDto.getSuggestedMemberId())) {
 			throw new IllegalArgumentException("자기 자신을 수락할 수는 없습니다.");
 		}
 
@@ -222,15 +270,20 @@ public class PeriodTradeService {
 		// 해당하는 교환 id, 교환 타입 에 맞게 제안된 물품들을 조회 -> 추후 삭제 필요 (교환 완료, 만료 시)
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(id, TradeType.PERIOD);
 
+		Long canceledMemberId = 0L;
 		for (TradeProduct tradeProduct : tradeProducts) {
 			SuggestedProduct suggestedProduct = tradeProduct.getSuggestedProduct();
 
 			// 기존 수락된 제안이 있다면 이를 취소 (PENDING으로 상태 변경)
 			if (suggestedProduct.getStatus().equals(SuggestedStatus.ACCEPTED)) {
+				if (canceledMemberId == 0L) {
+					canceledMemberId = suggestedProduct.getMember().getId();
+				}
 				suggestedProduct.changeStatusPending(); // 기존 수락 상태를 PENDING으로 변경
 			}
 
-			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId()) && suggestedProduct.getStatus()
+			if (suggestedProduct.getMember().getId().equals(reqDto.getSuggestedMemberId())
+				&& suggestedProduct.getStatus()
 				.equals(SuggestedStatus.SUGGESTING)) {
 				suggestedProduct.changStatusAccepted();
 				periodTrade.getRegisteredProduct()
@@ -238,9 +291,21 @@ public class PeriodTradeService {
 			}
 
 		}
-		// 알림 (제안자에게 알림)
 
 		periodTrade.updatePeriodTradeStatusInProgress();
+
+		// 알림 (제안 수락된 회원에게)
+		notificationService.saveTradeNotification(
+			EventKind.PERIOD_TRADE_SUGGEST_ACCEPT, reqDto.getSuggestedMemberId(),
+			TradeType.PERIOD, periodTrade.getId(), periodTrade.getTitle()
+		);
+		// 알림 (제안이 취소된 회원이 존재한다면, 제안 취소된 회원에게)
+		if (canceledMemberId != 0L) {
+			notificationService.saveTradeNotification(
+				EventKind.PERIOD_TRADE_SUGGEST_DENY, canceledMemberId,
+				TradeType.PERIOD, periodTrade.getId(), periodTrade.getTitle()
+			);
+		}
 
 		return AcceptPeriodTradeResDto.from(periodTrade);
 
@@ -251,7 +316,7 @@ public class PeriodTradeService {
 	@Transactional
 	public DenyPeriodTradeResDto denyPeriodTrade(VerifiedMember member, Long id, DenyPeriodTradeReqDto reqDto) {
 
-		if (member.getId().equals(reqDto.getMemberId())) {
+		if (member.getId().equals(reqDto.getSuggestedMemberId())) {
 			throw new IllegalArgumentException("자기 자신을 거절할 수는 없습니다.");
 		}
 
@@ -268,7 +333,8 @@ public class PeriodTradeService {
 		for (TradeProduct tradeProduct : tradeProducts) {
 			SuggestedProduct suggestedProduct = tradeProduct.getSuggestedProduct();
 
-			if (suggestedProduct.getMember().getId().equals(reqDto.getMemberId()) && !suggestedProduct.getStatus()
+			if (suggestedProduct.getMember().getId().equals(reqDto.getSuggestedMemberId())
+				&& !suggestedProduct.getStatus()
 				.equals(SuggestedStatus.PENDING)) {
 				suggestedProduct.changeStatusPending();
 				periodTrade.getRegisteredProduct()
@@ -276,7 +342,13 @@ public class PeriodTradeService {
 			}
 
 		}
+
 		// 알림 (제안자에게 알림)
+		notificationService.saveTradeNotification(
+			EventKind.PERIOD_TRADE_SUGGEST_DENY, reqDto.getSuggestedMemberId(),
+			TradeType.PERIOD, periodTrade.getId(), periodTrade.getTitle()
+		);
+
 		return DenyPeriodTradeResDto.from(periodTrade);
 	}
 
