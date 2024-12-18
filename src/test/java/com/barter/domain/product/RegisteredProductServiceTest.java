@@ -505,8 +505,8 @@ public class RegisteredProductServiceTest {
 	}
 
 	@Test
-	@DisplayName("등록 물품 삭제 - 성공 테스트")
-	void deleteRegisteredProductTest_Success() {
+	@DisplayName("등록 물품 삭제 - 성공 테스트1")
+	void deleteRegisteredProductTest_Success1() {
 		//given
 		Long registeredProductId = 1L;
 		Long verifiedMemberId = 1L;
@@ -514,6 +514,31 @@ public class RegisteredProductServiceTest {
 		RegisteredProduct testProduct = RegisteredProduct.builder()
 			.id(registeredProductId)
 			.status(RegisteredStatus.PENDING)
+			.images(List.of("image1", "image2"))
+			.member(Member.builder().id(verifiedMemberId).build())
+			.build();
+		registeredProductRepository.save(testProduct);
+
+		when(registeredProductRepository.findById(registeredProductId))
+			.thenReturn(Optional.of(testProduct));
+
+		//when
+		registeredProductService.deleteRegisteredProduct(registeredProductId, verifiedMemberId);
+
+		//then
+		assertThat(registeredProductRepository.count()).isEqualTo(0L);
+	}
+
+	@Test
+	@DisplayName("등록 물품 삭제 - 성공 테스트2")
+	void deleteRegisteredProductTest_Success2() {
+		//given
+		Long registeredProductId = 1L;
+		Long verifiedMemberId = 1L;
+
+		RegisteredProduct testProduct = RegisteredProduct.builder()
+			.id(registeredProductId)
+			.status(RegisteredStatus.COMPLETED)
 			.images(List.of("image1", "image2"))
 			.member(Member.builder().id(verifiedMemberId).build())
 			.build();
