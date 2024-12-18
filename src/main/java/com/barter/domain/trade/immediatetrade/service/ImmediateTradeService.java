@@ -182,7 +182,7 @@ public class ImmediateTradeService {
 
 		for (TradeProduct tradeProduct : tradeProducts) {
 			SuggestedProduct suggestedProduct = tradeProduct.getSuggestedProduct();
-			suggestedProduct.changStatusPending();
+			suggestedProduct.changeStatusPending();
 		}
 
 		tradeProductRepository.deleteAll(tradeProducts);
@@ -209,11 +209,11 @@ public class ImmediateTradeService {
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(tradeId, TradeType.IMMEDIATE);
 		for (TradeProduct tradeProduct : tradeProducts) {
 			if(tradeProduct.getSuggestedProduct().getStatus() == SuggestedStatus.ACCEPTED) {
-				tradeProduct.getSuggestedProduct().changStatusCompleted();
+				tradeProduct.getSuggestedProduct().changeStatusCompleted();
 			}
 
 			if(tradeProduct.getSuggestedProduct().getStatus() == SuggestedStatus.SUGGESTING) {
-				tradeProduct.getSuggestedProduct().changStatusPending();
+				tradeProduct.getSuggestedProduct().changeStatusPending();
 			}
 		}
 
