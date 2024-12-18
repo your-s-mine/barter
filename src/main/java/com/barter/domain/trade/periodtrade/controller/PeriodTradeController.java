@@ -1,5 +1,7 @@
 package com.barter.domain.trade.periodtrade.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
@@ -24,6 +26,7 @@ import com.barter.domain.trade.periodtrade.dto.response.AcceptPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.CreatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.DenyPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeSuggestionResDto;
 import com.barter.domain.trade.periodtrade.dto.response.StatusUpdateResDto;
 import com.barter.domain.trade.periodtrade.dto.response.SuggestedPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.UpdatePeriodTradeResDto;
@@ -57,6 +60,14 @@ public class PeriodTradeController {
 	public ResponseEntity<FindPeriodTradeResDto> findPeriodTrade(@PathVariable Long id) {
 		return ResponseEntity.status(HttpStatus.OK).body(
 			periodTradeService.findPeriodTradeById(id)
+		);
+	}
+
+	@GetMapping("/period-trades/{tradeId}/suggestion") // 제안 온 물품 조회
+	public ResponseEntity<List<FindPeriodTradeSuggestionResDto>> findPeriodTradeSuggestion(
+		@PathVariable Long tradeId) {
+		return ResponseEntity.status(HttpStatus.OK).body(
+			periodTradeService.findPeriodTradesSuggestion(tradeId)
 		);
 	}
 

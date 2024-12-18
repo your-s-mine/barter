@@ -3,11 +3,14 @@ package com.barter.domain.notification;
 import static com.barter.domain.notification.enums.EventKind.*;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import com.barter.domain.notification.dto.response.SendTradeEventResDto;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,7 +27,7 @@ public class SseEmitters {
 
 		setCallbacks(memberId, emitter);
 
-		sendEvent(memberId, DEFAULT.getName(), DEFAULT.getMessage());
+		sendEvent(memberId, DEFAULT.getEventName(), DEFAULT.getEventMessage());
 
 		return emitter;
 	}
@@ -45,6 +48,25 @@ public class SseEmitters {
 			);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	public void sendAllSameEvent(String eventName, List<SendTradeEventResDto> data) {
+		for (SendTradeEventResDto d : data) {
+			SseEmitter emitter = emitterMap.get(d.getMemberId());
+			if (emitter == null) {
+				continue;
+			}
+
+			try {
+				emitter.send(SseEmitter.event()
+					.id(String.valueOf(d.getMemberId()))
+					.name(eventName)
+					.data(d)
+				);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 

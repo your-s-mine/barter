@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.member.repository.MemberRepository;
+import com.barter.domain.notification.enums.EventKind;
+import com.barter.domain.notification.service.NotificationService;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.enums.TradeType;
 import com.barter.domain.product.repository.RegisteredProductRepository;
@@ -36,6 +38,7 @@ public class DonationTradeService {
 	private final DonationProductMemberRepository donationProductMemberRepository;
 	private final MemberRepository memberRepository;
 	private final ApplicationEventPublisher publisher;
+	private final NotificationService notificationService;
 
 	@Transactional
 	public CreateDonationTradeResDto createDonationTrade(VerifiedMember verifiedMember, CreateDonationTradeReqDto req) {
@@ -113,6 +116,12 @@ public class DonationTradeService {
 			.build();
 		donationTradeRepository.save(donationTrade);
 		donationProductMemberRepository.save(donationProductMember);
+
+		// 이벤트 정보 저장 및 전달
+		notificationService.saveTradeNotification(
+			EventKind.DONATION_TRADE_SUGGEST, donationTrade.getProduct().getMember().getId(),
+			TradeType.DONATION, donationTrade.getId(), donationTrade.getTitle()
+		);
 		return new SuggestDonationTradeResDto("나눔 신청 성공", DonationResult.SUCCESS);
 	}
 }

@@ -108,7 +108,7 @@ public class SuggestedProduct extends BaseTimeStampEntity {
 		this.status = SuggestedStatus.findSuggestedStatus(status);
 	}
 
-	public void changStatusPending() {
+	public void changeStatusPending() {
 		this.status = SuggestedStatus.PENDING;
 	}
 
@@ -118,7 +118,10 @@ public class SuggestedProduct extends BaseTimeStampEntity {
 		}
 	}
 
-	public void changStatusCompleted() {
+	public void changeStatusCompleted() {
 		this.status = SuggestedStatus.COMPLETED;
+	}
+
+	public void changStatusCompleted() {
 	}
 }
