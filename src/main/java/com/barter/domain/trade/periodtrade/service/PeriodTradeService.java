@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.barter.domain.auth.dto.VerifiedMember;
+import com.barter.domain.notification.enums.EventKind;
+import com.barter.domain.notification.service.NotificationService;
 import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
@@ -54,6 +56,7 @@ public class PeriodTradeService {
 	private final SuggestedProductRepository suggestedProductRepository;
 	private final TradeProductRepository tradeProductRepository;
 	private final ApplicationEventPublisher eventPublisher;
+	private final NotificationService notificationService;
 
 	@Transactional
 	public CreatePeriodTradeResDto createPeriodTrades(VerifiedMember member, CreatePeriodTradeReqDto reqDto) {
@@ -157,6 +160,12 @@ public class PeriodTradeService {
 			}).toList();
 
 		tradeProductRepository.saveAll(tradeProducts);
+
+		// 제안신청 알림 저장 및 전달
+		notificationService.saveTradeNotification(
+			EventKind.PERIOD_TRADE_SUGGEST, periodTrade.getRegisteredProduct().getMember().getId(),
+			TradeType.PERIOD, periodTrade.getId(), periodTrade.getTitle()
+		);
 
 		return SuggestedPeriodTradeResDto.from(id, suggestedProduct);
 
