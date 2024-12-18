@@ -178,8 +178,12 @@ public class PeriodTradeService {
 			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
 		);
 		periodTrade.validateAuthority(member.getId());
-		periodTrade.validateInProgress();
 
+		// 아래 두 줄은 없어도 될 것 같긴 하다.
+		periodTrade.validateIsCompleted();
+		periodTrade.validateIsClosed();
+
+		// 해당하는 교환 id, 교환 타입 에 맞게 제안된 물품들을 조회 -> 추후 삭제 필요 (교환 완료, 만료 시)
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(id, TradeType.PERIOD);
 
 		for (TradeProduct tradeProduct : tradeProducts) {
@@ -189,10 +193,8 @@ public class PeriodTradeService {
 				.equals(SuggestedStatus.SUGGESTING)) {
 				suggestedProduct.changStatusAccepted();
 				periodTrade.getRegisteredProduct()
-					.updateStatus(RegisteredStatus.ACCEPTED.toString());// enum 타입이 아니어도 검증 로직이 구현되어 있기 때문에 일단 이렇게 구현함
+					.updateStatus(RegisteredStatus.ACCEPTED.toString());
 			}
-
-			// 한 교환에 대해서 여러번의 교환은 불가능 (회의 때 말한 같은 물건으로 여러번 다른 교환 시도 방지 위함)
 
 		}
 		// 알림 (제안자에게 알림)
