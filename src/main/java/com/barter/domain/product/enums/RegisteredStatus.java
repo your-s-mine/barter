@@ -1,7 +1,7 @@
 package com.barter.domain.product.enums;
 
 public enum RegisteredStatus {
-	PENDING, REGISTERING, ACCEPTED;
+	PENDING, REGISTERING, ACCEPTED, COMPLETED;
 
 	public static RegisteredStatus findRegisteredStatus(String status) {
 		for (RegisteredStatus registeredStatus : RegisteredStatus.values()) {
