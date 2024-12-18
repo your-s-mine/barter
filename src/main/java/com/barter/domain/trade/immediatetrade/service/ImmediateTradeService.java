@@ -101,7 +101,7 @@ public class ImmediateTradeService {
 			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
 
 		immediateTrade.validateAuthority(member.getId());
-		if(!(immediateTrade.getStatus() == TradeStatus.PENDING)) {
+		if (!(immediateTrade.getStatus() == TradeStatus.PENDING)) {
 			throw new IllegalStateException("PENDING 상태의 교환만 삭제할 수 있습니다.");
 		}
 
@@ -190,18 +190,25 @@ public class ImmediateTradeService {
 	}
 
 	@Transactional
-	public FindImmediateTradeResDto updateStatus(Long tradeId, UpdateStatusReqDto reqDto, VerifiedMember member) {
+	public FindImmediateTradeResDto updateStatusCompleted(Long tradeId, UpdateStatusReqDto reqDto,
+		VerifiedMember member) {
 
 		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
 
 		immediateTrade.validateAuthority(member.getId());
 
-		if ((immediateTrade.isCompleted())) {
-			throw new IllegalStateException("교환이 완료된 건에 대해서는 상태 변경을 할 수 없습니다.");
+		if (!(immediateTrade.isInProgress()) || !(reqDto.getTradeStatus() == TradeStatus.COMPLETED)) {
+			throw new IllegalArgumentException("IN_PROGRESS 상태의 교환만을 COMPLETED 상태로 변경하실 수 있습니다.");
 		}
 
-		immediateTrade.changeStatus(reqDto.getTradeStatus());
+		immediateTrade.changeStatusCompleted();
+		immediateTrade.getProduct().changeStatusCompleted();
+
+		List<TradeProduct> tradeProducts = tradeProductRepository.findByTradeId(tradeId);
+		for (TradeProduct tradeProduct : tradeProducts) {
+			tradeProduct.getSuggestedProduct().changStatusCompleted();
+		}
 
 		ImmediateTrade updatedTrade = immediateTradeRepository.save(immediateTrade);
 		return FindImmediateTradeResDto.from(updatedTrade);

@@ -243,7 +243,8 @@ public class TradeSuggestTest {
 
 		updateStatusReqDto = new UpdateStatusReqDto(TradeStatus.IN_PROGRESS);
 
-		FindImmediateTradeResDto resDto = immediateTradeService.updateStatus(immediateTrade.getId(), updateStatusReqDto,
+		FindImmediateTradeResDto resDto = immediateTradeService.updateStatusCompleted(immediateTrade.getId(),
+			updateStatusReqDto,
 			verifiedMember);
 
 		assertThat(resDto.getTradeStatus()).isEqualTo(TradeStatus.IN_PROGRESS);
@@ -268,7 +269,8 @@ public class TradeSuggestTest {
 		updateStatusReqDto = new UpdateStatusReqDto(TradeStatus.IN_PROGRESS);
 
 		assertThatThrownBy(
-			() -> immediateTradeService.updateStatus(immediateTrade.getId(), updateStatusReqDto, verifiedMember))
+			() -> immediateTradeService.updateStatusCompleted(immediateTrade.getId(), updateStatusReqDto,
+				verifiedMember))
 			.isInstanceOf(IllegalStateException.class).hasMessage("교환이 완료된 건에 대해서는 상태 변경을 할 수 없습니다.");
 
 	}

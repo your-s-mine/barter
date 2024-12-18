@@ -11,4 +11,6 @@ public interface TradeProductRepository extends JpaRepository<TradeProduct, Long
 	List<TradeProduct> findAllByTradeId(Long tradeId);
 
 	List<TradeProduct> findAllByTradeIdAndTradeType(Long tradeId, TradeType type);
+
+	List<TradeProduct> findByTradeId(Long tradeId);
 }
