@@ -192,7 +192,7 @@ public class PeriodTradeService {
 		if (reqDto.getTradeStatus().equals(TradeStatus.CLOSED)) {
 
 			// allTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changStatusPending());
-			// 위의 코드가 아래와 같이 변경, 기존 제안자들의 ID 값이 필요해서 변경하게 되었습니다.
+			// 기존 제안자들의 ID 값이 필요해 위의 코드를 아래와 같이 수정하였습니다.
 			Set<Long> suggesterIds = new HashSet<>();
 			for (TradeProduct tradeProduct : allTradeProducts) {
 				tradeProduct.getSuggestedProduct().changStatusSuggesting();
@@ -221,6 +221,18 @@ public class PeriodTradeService {
 			tradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changStatusPending());
 			acceptedTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusCompleted());
 			tradeProductRepository.deleteAll(allTradeProducts);
+
+			// 알림 (교환 등록자에게)
+			notificationService.saveTradeNotification(
+				EventKind.PERIOD_TRADE_COMPLETE, periodTrade.getRegisteredProduct().getMember().getId(),
+				TradeType.PERIOD, periodTrade.getId(), periodTrade.getTitle()
+			);
+			// 알림 (교환 제안자에게)
+			Long finalSuggesterId = acceptedTradeProducts.get(0).getSuggestedProduct().getMember().getId();
+			notificationService.saveTradeNotification(
+				EventKind.PERIOD_TRADE_COMPLETE, finalSuggesterId,
+				TradeType.PERIOD, periodTrade.getId(), periodTrade.getTitle()
+			);
 		}
 
 		return StatusUpdateResDto.from(periodTrade);
