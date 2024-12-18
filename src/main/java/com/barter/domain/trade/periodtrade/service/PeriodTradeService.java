@@ -19,6 +19,7 @@ import com.barter.domain.product.enums.TradeType;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.repository.SuggestedProductRepository;
 import com.barter.domain.product.repository.TradeProductRepository;
+import com.barter.domain.trade.enums.TradeStatus;
 import com.barter.domain.trade.periodtrade.dto.request.AcceptPeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.CreatePeriodTradeReqDto;
 import com.barter.domain.trade.periodtrade.dto.request.DenyPeriodTradeReqDto;
@@ -199,7 +200,7 @@ public class PeriodTradeService {
 		}
 		// 알림 (제안자에게 알림)
 
-		periodTrade.updatePeriodTradeStatusCompleted();
+		periodTrade.updatePeriodTradeStatus(TradeStatus.IN_PROGRESS);
 
 		return AcceptPeriodTradeResDto.from(periodTrade);
 
