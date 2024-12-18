@@ -17,6 +17,9 @@ public interface SuggestedProductRepository extends JpaRepository<SuggestedProdu
 	@Query(value = "SELECT sp FROM SuggestedProduct AS sp WHERE sp.member.id = :memberId")
 	Page<SuggestedProduct> findAllByMemberId(Pageable pageable, @Param("memberId") Long memberId);
 
+	@Query(value = "SELECT sp FROM SuggestedProduct AS sp WHERE sp.member.id = :memberId AND sp.status = 'PENDING'")
+	List<SuggestedProduct> findAllAvailableSuggestedProduct(@Param("memberId") Long memberId);
+
 	@Query("SELECT sp FROM TradeProduct tp " +
 		"JOIN tp.suggestedProduct sp " +
 		"WHERE tp.tradeType = :tradeType AND tp.tradeId = :tradeId")

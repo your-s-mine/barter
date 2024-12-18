@@ -27,10 +27,11 @@ import com.barter.domain.product.dto.request.SwitchRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductInfoReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductStatusReqDto;
 import com.barter.domain.product.dto.response.CreateRegisteredProductResDto;
+import com.barter.domain.product.dto.response.FindAvailableRegisteredProductResDto;
 import com.barter.domain.product.dto.response.FindRegisteredProductResDto;
+import com.barter.domain.product.dto.response.SwitchRegisteredProductResDto;
 import com.barter.domain.product.dto.response.UpdateRegisteredProductInfoResDto;
 import com.barter.domain.product.dto.response.UpdateRegisteredProductStatusResDto;
-import com.barter.domain.product.dto.response.SwitchRegisteredProductResDto;
 import com.barter.domain.product.service.ProductSwitchService;
 import com.barter.domain.product.service.RegisteredProductService;
 
@@ -111,5 +112,11 @@ public class RegisteredProductController {
 		return productSwitchService.createRegisteredProductFromSuggestedProduct(
 			request.getSuggestedProductId(), verifiedMember.getId()
 		);
+	}
+
+	@GetMapping("/available")
+	@ResponseStatus(HttpStatus.OK)
+	public List<FindAvailableRegisteredProductResDto> findAvailableRegisteredProducts(VerifiedMember verifiedMember) {
+		return registeredProductService.findAvailableRegisteredProducts(verifiedMember.getId());
 	}
 }
