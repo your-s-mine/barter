@@ -352,6 +352,20 @@ public class PeriodTradeService {
 		return DenyPeriodTradeResDto.from(periodTrade);
 	}
 
+	@Transactional
+	public void closePeriodTrade(Long periodTradeId) {
+		PeriodTrade periodTrade = periodTradeRepository.findById(periodTradeId).orElseThrow(
+			() -> new IllegalArgumentException("해당 기간 거래를 찾을 수 없습니다.")
+		);
+		periodTrade.updatePeriodTradeStatus(TradeStatus.CLOSED);
+		List<TradeProduct> allTradeProducts = tradeProductRepository.findTradeProductsWithSuggestedProductByPeriodTradeId(
+			TradeType.PERIOD, periodTrade.getId());
+		tradeProductRepository.saveAll(allTradeProducts);
+
+		allTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusPending());
+
+	}
+
 	private List<SuggestedProduct> findSuggestedProductByIds(List<Long> productIds, Long memberId) {
 		return productIds.stream()
 			.map(id -> {
