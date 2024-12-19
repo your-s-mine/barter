@@ -1,7 +1,9 @@
 package com.barter.domain.trade.immediatetrade.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -230,18 +232,44 @@ public class ImmediateTradeService {
 
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(tradeId,
 			TradeType.IMMEDIATE);
+		// 최종 교환 제안자와 선택받지 못한 제안자(들)의 ID 값이 필요해 아래와 같이 수정했습니다.
+		Long finalSuggesterId = 0L;
+		Set<Long> suggesterIds = new HashSet<>();
 		for (TradeProduct tradeProduct : tradeProducts) {
 			if (tradeProduct.getSuggestedProduct().getStatus() == SuggestedStatus.ACCEPTED) {
 				tradeProduct.getSuggestedProduct().changeStatusCompleted();
+				if (finalSuggesterId == 0L) {
+					finalSuggesterId = tradeProduct.getSuggestedProduct().getMember().getId();
+				}
 			}
 
 			if (tradeProduct.getSuggestedProduct().getStatus() == SuggestedStatus.SUGGESTING) {
+				suggesterIds.add(tradeProduct.getSuggestedProduct().getMember().getId());
 				tradeProduct.getSuggestedProduct().changeStatusPending();
 				tradeProductRepository.delete(tradeProduct);
 			}
 		}
 
 		ImmediateTrade updatedTrade = immediateTradeRepository.save(immediateTrade);
+
+		// 알림 (교환 등록자에게)
+		notificationService.saveTradeNotification(
+			EventKind.IMMEDIATE_TRADE_COMPLETE, immediateTrade.getProduct().getMember().getId(),
+			TradeType.IMMEDIATE, updatedTrade.getId(), updatedTrade.getTitle()
+		);
+		// 알림 (교환에 성공한 제안자에게)
+		notificationService.saveTradeNotification(
+			EventKind.IMMEDIATE_TRADE_COMPLETE, finalSuggesterId,
+			TradeType.IMMEDIATE, updatedTrade.getId(), updatedTrade.getTitle()
+		);
+		// 알림 (교환에 실패한 나머지 제안자(들)에게)
+		for (Long suggesterId : suggesterIds) {
+			notificationService.saveTradeNotification(
+				EventKind.IMMEDIATE_TRADE_SUGGEST_DENY, suggesterId,
+				TradeType.IMMEDIATE, updatedTrade.getId(), updatedTrade.getTitle()
+			);
+		}
+
 		return FindImmediateTradeResDto.from(updatedTrade);
 	}
 
