@@ -18,13 +18,19 @@ class PeriodTradeSearchControllerTest {
 	private MockMvc mockMvc;
 
 	private String generateJwtToken() {
-		return "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJ3b290YWVwYXJrQG5hdmVyLmNvbSIsImV4cCI6MTczNDU3NzMwNiwiaWF0IjoxNzM0NTczNzA2fQ.0Ya1aQR8QEDBKavbmjGKZcfHCXzrMV2xaWgW-qAmKnQ";  // 실제로 사용하는 JWT 토큰을 반환하도록 수정
+		return "token-value";  // 실제로 사용하는 JWT 토큰을 반환하도록 수정
 	}
 
 	@Test
 	public void testMessageResponseTime() throws Exception {
 
 		String jwtToken = generateJwtToken();
+
+		mockMvc.perform(get("/period-trades/2/suggestion")
+			.contentType(MediaType.APPLICATION_JSON)
+			.header("Authorization", "Bearer " + jwtToken) // JWT 토큰을 Authorization 헤더에 추가
+		).andExpect(status().isOk());
+		// 처음 초기화 시간 고려해서 먼저 실행
 
 		// 메시지 전송 및 응답 시간 측정
 		int iterations = 100; // 반복 횟수
@@ -35,7 +41,7 @@ class PeriodTradeSearchControllerTest {
 		for (int i = 0; i < iterations; i++) {
 			long startTime = System.currentTimeMillis();
 
-			mockMvc.perform(get("/period-trades/10/suggestion")
+			mockMvc.perform(get("/period-trades/2/suggestion")
 				.contentType(MediaType.APPLICATION_JSON)
 				.header("Authorization", "Bearer " + jwtToken) // JWT 토큰을 Authorization 헤더에 추가
 			).andExpect(status().isOk());
