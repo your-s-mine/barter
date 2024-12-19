@@ -49,7 +49,7 @@ public class ImmediateTradeService {
 	@Transactional
 	public FindImmediateTradeResDto create(CreateImmediateTradeReqDto reqDto) {
 		RegisteredProduct registeredProduct = registeredProductRepository
-			.findById(reqDto.getRegisteredProduct().getId()).orElseThrow(
+			.findById(reqDto.getRegisteredProductId()).orElseThrow(
 				() -> new IllegalArgumentException("등록 물품을 찾을 수 없습니다.")
 			);
 
