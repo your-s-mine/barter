@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -246,6 +245,7 @@ public class ImmediateTradeService {
 
 		return "제안 수락 취소 완료";
 	}
+
 	public List<FindSuggestForImmediateTradeResDto> findSuggestForImmediateTrade(
 		Long tradeId, VerifiedMember member) {
 
