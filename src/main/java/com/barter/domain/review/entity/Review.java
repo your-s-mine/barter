@@ -3,21 +3,27 @@ package com.barter.domain.review.entity;
 import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED) // 기본 생성자
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class) // @CreatedDate 활성화
 @Table(name = "REVIEWS")
+@Builder
 public class Review {
 
 	@Id
@@ -34,13 +40,5 @@ public class Review {
 	@CreatedDate
 	private LocalDateTime createdAt;
 
-	@Builder
-	public Review(Long reviewerId, Long revieweeId, Long tradeProductId, String content, Double score, LocalDateTime createdAt) {
-		this.reviewerId = reviewerId;
-		this.revieweeId = revieweeId;
-		this.tradeProductId = tradeProductId;
-		this.content = content;
-		this.score = score;
-		this.createdAt = createdAt;
-	}
+	// 추가적으로 @Builder와 @AllArgsConstructor를 함께 사용하면 생성자를 빌더에 활용할 수 있습니다.
 }
