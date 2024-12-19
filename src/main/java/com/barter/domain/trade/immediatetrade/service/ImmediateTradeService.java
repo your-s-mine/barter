@@ -264,9 +264,9 @@ public class ImmediateTradeService {
 			tradeProductRepository.delete(tradeProduct);
 		}
 
-		// 알림 (교환 등록자에게)
+		// 알림 (제안자에게)
 		notificationService.saveTradeNotification(
-			EventKind.IMMEDIATE_TRADE_SUGGEST_CANCEL, immediateTrade.getProduct().getMember().getId(),
+			EventKind.IMMEDIATE_TRADE_SUGGEST_CANCEL, tradeProducts.get(0).getSuggestedProduct().getMember().getId(),
 			TradeType.IMMEDIATE, immediateTrade.getId(), immediateTrade.getTitle()
 		);
 
