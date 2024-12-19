@@ -17,6 +17,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.member.repository.MemberRepository;
+import com.barter.domain.notification.service.NotificationService;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.enums.RegisteredStatus;
 import com.barter.domain.product.repository.RegisteredProductRepository;
@@ -29,6 +30,7 @@ import com.barter.domain.trade.donationtrade.entity.DonationTrade;
 import com.barter.domain.trade.donationtrade.repository.DonationProductMemberRepository;
 import com.barter.domain.trade.donationtrade.repository.DonationTradeRepository;
 import com.barter.domain.trade.enums.DonationResult;
+import com.barter.domain.trade.enums.TradeStatus;
 
 @ExtendWith(MockitoExtension.class)
 class DonationTradeServiceTest {
@@ -41,6 +43,9 @@ class DonationTradeServiceTest {
 	private DonationProductMemberRepository donationProductMemberRepository;
 	@Mock
 	private MemberRepository memberRepository;
+
+	@Mock
+	private NotificationService notificationService;
 	@Mock
 	private ApplicationEventPublisher publisher;
 
@@ -392,15 +397,23 @@ class DonationTradeServiceTest {
 		// given
 		VerifiedMember verifiedMember = new VerifiedMember(1L, "tester");
 		Long tradeId = 100L;
-		Member member = mock(Member.class);
-		DonationTrade donationTrade = mock(DonationTrade.class);
+		Member member = Member.builder()
+			.id(2L)
+			.build();
+		RegisteredProduct registeredProduct = RegisteredProduct.builder()
+			.member(member)
+			.build();
+		DonationTrade donationTrade = DonationTrade.builder()
+			.product(registeredProduct)
+			.maxAmount(1)
+			.status(TradeStatus.PENDING)
+			.build();
 
 		when(donationProductMemberRepository.existsByMemberIdAndDonationTradeId(1L, 100L)).thenReturn(false);
 		when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
 		when(donationTradeRepository.findByIdForUpdate(tradeId)).thenReturn(Optional.of(donationTrade));
-		when(donationTrade.isDonationCompleted()).thenReturn(false);
-		doNothing().when(donationTrade).suggestDonation();
 		when(donationTradeRepository.save(donationTrade)).thenReturn(donationTrade);
+		doNothing().when(notificationService).saveTradeNotification(any(), any(), any(), any(), any());
 
 		// when
 		SuggestDonationTradeResDto result = donationTradeService.suggestDonationTrade(verifiedMember, tradeId);

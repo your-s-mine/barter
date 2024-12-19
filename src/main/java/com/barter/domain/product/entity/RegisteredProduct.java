@@ -114,10 +114,6 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 		this.status = RegisteredStatus.REGISTERING;
 	}
 
-	public void changeStatusAccepted() {
-		this.status = RegisteredStatus.ACCEPTED;
-	}
-
 	public void changeStatusPending() {
 		this.status = RegisteredStatus.PENDING;
 	}
