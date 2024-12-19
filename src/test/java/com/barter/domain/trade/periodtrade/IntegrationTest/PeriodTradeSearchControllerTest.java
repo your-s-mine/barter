@@ -29,6 +29,8 @@ class PeriodTradeSearchControllerTest {
 		// 메시지 전송 및 응답 시간 측정
 		int iterations = 100; // 반복 횟수
 		long totalTime = 0;
+		long maxTime = Long.MIN_VALUE;  // 최대 시간 초기화
+		long minTime = Long.MAX_VALUE;  // 최소 시간 초기화
 
 		for (int i = 0; i < iterations; i++) {
 			long startTime = System.currentTimeMillis();
@@ -39,10 +41,24 @@ class PeriodTradeSearchControllerTest {
 			).andExpect(status().isOk());
 
 			long endTime = System.currentTimeMillis();
-			totalTime += (endTime - startTime);
+			long responseTime = endTime - startTime;
+			totalTime += responseTime;
+
+			// 최대 시간 갱신
+			if (responseTime > maxTime) {
+				maxTime = responseTime;
+			}
+
+			// 최소 시간 갱신
+			if (responseTime < minTime) {
+				minTime = responseTime;
+			}
 		}
 
 		long averageTime = totalTime / iterations;
+		System.out.println("TOTAL TIME: " + totalTime + "ms");
 		System.out.println("Average Response Time: " + averageTime + " ms");
+		System.out.println("Maximum Response Time: " + maxTime + " ms");
+		System.out.println("Minimum Response Time: " + minTime + " ms");
 	}
 }
