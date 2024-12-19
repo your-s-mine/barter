@@ -284,6 +284,7 @@ public class ImmediateTradeService {
 		return FindImmediateTradeResDto.from(updatedTrade);
 	}
 
+	@Transactional
 	public String cancelAcceptanceOfSuggest(Long tradeId, VerifiedMember member) {
 		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
@@ -300,8 +301,8 @@ public class ImmediateTradeService {
 			TradeType.IMMEDIATE);
 		for (TradeProduct tradeProduct : tradeProducts) {
 			tradeProduct.getSuggestedProduct().changeStatusPending();
-			tradeProductRepository.delete(tradeProduct);
 		}
+		tradeProductRepository.deleteAllInBatch(tradeProducts);
 
 		// 알림 (제안자에게)
 		notificationService.saveTradeNotification(

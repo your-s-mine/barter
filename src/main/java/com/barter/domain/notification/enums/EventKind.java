@@ -17,8 +17,9 @@ public enum EventKind {
 	PERIOD_TRADE_SUGGEST("기간 교환, 제안 신청", " 교환에 제안이 들어왔어요!"),
 	PERIOD_TRADE_SUGGEST_ACCEPT("기간 교환, 제안 수락", " 교환에 신청한 제안이 수락되었어요!"),
 	PERIOD_TRADE_SUGGEST_DENY("기간 교환, 제안 거절", " 교환에 신청한 제안이 거절되었어요."),
-	PERIOD_TRADE_CLOSE("기간 교환, 제안 수락", " 교환이 종료되었습니다."),
-	PERIOD_TRADE_COMPLETE("기간 교환, 제안 수락", " 교환을 마쳤습니다!"),
+	PERIOD_TRADE_CLOSE("기간 교환, 교환 종료", " 교환이 종료되었습니다."),
+	PERIOD_TRADE_COMPLETE("기간 교환, 교환 완료", " 교환을 마쳤습니다!"),
+	PERIOD_TRADE_PERIOD_EXPIRES("기간 교환, 교환 마감", " 교환이 마감되었습니다."),
 
 	DONATION_TRADE_SUGGEST("나눔 교환, 나눔 신청", " 을(를) 누군가 나눔받았어요!"),
 
