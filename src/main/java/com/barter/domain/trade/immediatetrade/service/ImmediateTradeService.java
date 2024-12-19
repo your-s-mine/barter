@@ -3,10 +3,10 @@ package com.barter.domain.trade.immediatetrade.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +28,7 @@ import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeRes
 import com.barter.domain.trade.immediatetrade.dto.response.FindSuggestForImmediateTradeResDto;
 import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
+import com.barter.event.trade.TradeNotificationEvent;
 
 import lombok.RequiredArgsConstructor;
 
@@ -38,6 +39,7 @@ public class ImmediateTradeService {
 	private final RegisteredProductRepository registeredProductRepository;
 	private final TradeProductRepository tradeProductRepository;
 	private final SuggestedProductRepository suggestedProductRepository;
+	private final ApplicationEventPublisher publisher;
 
 	@Transactional
 	public FindImmediateTradeResDto create(CreateImmediateTradeReqDto reqDto) {
@@ -56,6 +58,11 @@ public class ImmediateTradeService {
 
 		registeredProduct.changStatusRegistering();
 		ImmediateTrade savedTrade = immediateTradeRepository.save(immediateTrade);
+		publisher.publishEvent(TradeNotificationEvent.builder()
+			.tradeId(savedTrade.getId())
+			.type(TradeType.IMMEDIATE)
+			.productName(savedTrade.getProduct().getName())
+			.build());
 		return FindImmediateTradeResDto.from(savedTrade);
 	}
 
@@ -246,6 +253,7 @@ public class ImmediateTradeService {
 
 		return "추후 제안 다건 조회되도록 변경";
 	}
+
 	public List<FindSuggestForImmediateTradeResDto> findSuggestForImmediateTrade(
 		Long tradeId, VerifiedMember member) {
 
