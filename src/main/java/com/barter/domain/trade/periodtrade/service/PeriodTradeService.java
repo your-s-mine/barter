@@ -44,6 +44,7 @@ import com.barter.domain.trade.periodtrade.dto.response.UpdatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 import com.barter.domain.trade.periodtrade.repository.PeriodTradeRepository;
 import com.barter.event.trade.PeriodTradeEvent.PeriodTradeCloseEvent;
+import com.barter.event.trade.TradeNotificationEvent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -78,10 +79,14 @@ public class PeriodTradeService {
 		registeredProduct.updateStatus(RegisteredStatus.REGISTERING.toString());
 		periodTrade.validateIsExceededMaxEndDate();
 
-		periodTradeRepository.save(periodTrade);
+		PeriodTrade savedPeriodTrade = periodTradeRepository.save(periodTrade);
 		// 이벤트 발행
 		eventPublisher.publishEvent(new PeriodTradeCloseEvent(periodTrade));
-
+		eventPublisher.publishEvent(TradeNotificationEvent.builder()
+			.tradeId(savedPeriodTrade.getId())
+			.type(TradeType.PERIOD)
+			.productName(savedPeriodTrade.getRegisteredProduct().getName())
+			.build());
 		return CreatePeriodTradeResDto.from(periodTrade);
 	}
 
