@@ -244,7 +244,7 @@ public class ImmediateTradeService {
 			tradeProductRepository.delete(tradeProduct);
 		}
 
-		return "추후 제안 다건 조회되도록 변경";
+		return "제안 수락 취소 완료";
 	}
 	public List<FindSuggestForImmediateTradeResDto> findSuggestForImmediateTrade(
 		Long tradeId, VerifiedMember member) {
