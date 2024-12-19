@@ -367,7 +367,7 @@ public class PeriodTradeService {
 		periodTrade.updatePeriodTradeStatus(TradeStatus.CLOSED);
 		List<TradeProduct> allTradeProducts = tradeProductRepository.findTradeProductsWithSuggestedProductByPeriodTradeId(
 			TradeType.PERIOD, periodTrade.getId());
-		tradeProductRepository.saveAll(allTradeProducts);
+		tradeProductRepository.deleteAll(allTradeProducts);
 
 		// allTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusPending());
 		// 해당 기간 교환에 제안한 제안자들의 ID 정보를 얻기 위해 위의 코드를 아래와 같이 수정했습니다.
