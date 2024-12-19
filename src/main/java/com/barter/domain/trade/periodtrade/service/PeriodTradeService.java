@@ -233,7 +233,7 @@ public class PeriodTradeService {
 				suggesterIds.add(tradeProduct.getSuggestedProduct().getMember().getId());
 			}
 			acceptedTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusCompleted());
-			tradeProductRepository.deleteAll(allTradeProducts);
+			tradeProductRepository.deleteAll(tradeProducts);
 
 			// 알림 (교환 등록자에게)
 			notificationService.saveTradeNotification(
@@ -287,6 +287,7 @@ public class PeriodTradeService {
 					canceledMemberId = suggestedProduct.getMember().getId();
 				}
 				suggestedProduct.changeStatusPending(); // 기존 수락 상태를 PENDING으로 변경
+				tradeProductRepository.delete(tradeProduct);
 			}
 
 			if (suggestedProduct.getMember().getId().equals(reqDto.getSuggestedMemberId())
@@ -345,7 +346,8 @@ public class PeriodTradeService {
 				.equals(SuggestedStatus.PENDING)) {
 				suggestedProduct.changeStatusPending();
 				periodTrade.getRegisteredProduct()
-					.updateStatus(RegisteredStatus.PENDING.toString());
+					.updateStatus(RegisteredStatus.REGISTERING.toString());
+				tradeProductRepository.delete(tradeProduct);
 			}
 
 		}
@@ -367,7 +369,7 @@ public class PeriodTradeService {
 		periodTrade.updatePeriodTradeStatus(TradeStatus.CLOSED);
 		List<TradeProduct> allTradeProducts = tradeProductRepository.findTradeProductsWithSuggestedProductByPeriodTradeId(
 			TradeType.PERIOD, periodTrade.getId());
-		tradeProductRepository.saveAll(allTradeProducts);
+		tradeProductRepository.deleteAll(allTradeProducts);
 
 		// allTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusPending());
 		// 해당 기간 교환에 제안한 제안자들의 ID 정보를 얻기 위해 위의 코드를 아래와 같이 수정했습니다.
