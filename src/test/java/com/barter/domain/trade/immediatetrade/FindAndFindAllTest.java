@@ -54,7 +54,7 @@ public class FindAndFindAllTest {
 
 		registeredProduct = RegisteredProduct.create(createRegisteredProductReqDto, member, images);
 
-		createImmediateTradeReqDto = new CreateImmediateTradeReqDto(registeredProduct, "즉시 교환 제목", "즉시 교환 설명");
+		createImmediateTradeReqDto = new CreateImmediateTradeReqDto(registeredProduct.getId(), "즉시 교환 제목", "즉시 교환 설명");
 
 		immediateTrade = ImmediateTrade.builder()
 			.title(createImmediateTradeReqDto.getTitle())

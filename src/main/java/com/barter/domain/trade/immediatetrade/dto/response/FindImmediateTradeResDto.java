@@ -24,8 +24,7 @@ public class FindImmediateTradeResDto {
 
 	@Builder
 	public FindImmediateTradeResDto(String title, String description, RegisteredProduct product,
-		LocalDateTime createdAt, LocalDateTime updatedAt, TradeStatus tradeStatus, int viewCount)
-	{
+		LocalDateTime createdAt, LocalDateTime updatedAt, TradeStatus tradeStatus, int viewCount) {
 		this.title = title;
 		this.description = description;
 		this.productId = product.getId();

@@ -49,7 +49,7 @@ public class ImmediateTradeService {
 	@Transactional
 	public FindImmediateTradeResDto create(CreateImmediateTradeReqDto reqDto) {
 		RegisteredProduct registeredProduct = registeredProductRepository
-			.findById(reqDto.getRegisteredProduct().getId()).orElseThrow(
+			.findById(reqDto.getRegisteredProductId()).orElseThrow(
 				() -> new IllegalArgumentException("등록 물품을 찾을 수 없습니다.")
 			);
 
@@ -61,7 +61,7 @@ public class ImmediateTradeService {
 			.viewCount(0)
 			.build();
 
-		registeredProduct.changStatusRegistering();
+		registeredProduct.changeStatusRegistering();
 		ImmediateTrade savedTrade = immediateTradeRepository.save(immediateTrade);
 		publisher.publishEvent(TradeNotificationEvent.builder()
 			.tradeId(savedTrade.getId())
@@ -179,6 +179,7 @@ public class ImmediateTradeService {
 		immediateTrade.validateAuthority(member.getId());
 
 		immediateTrade.changeStatusInProgress();
+		immediateTrade.getProduct().changeStatusAccepted();
 
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeId(tradeId);
 
