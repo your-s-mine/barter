@@ -287,6 +287,7 @@ public class PeriodTradeService {
 					canceledMemberId = suggestedProduct.getMember().getId();
 				}
 				suggestedProduct.changeStatusPending(); // 기존 수락 상태를 PENDING으로 변경
+				tradeProductRepository.delete(tradeProduct);
 			}
 
 			if (suggestedProduct.getMember().getId().equals(reqDto.getSuggestedMemberId())
@@ -345,7 +346,8 @@ public class PeriodTradeService {
 				.equals(SuggestedStatus.PENDING)) {
 				suggestedProduct.changeStatusPending();
 				periodTrade.getRegisteredProduct()
-					.updateStatus(RegisteredStatus.PENDING.toString());
+					.updateStatus(RegisteredStatus.REGISTERING.toString());
+				tradeProductRepository.delete(tradeProduct);
 			}
 
 		}
