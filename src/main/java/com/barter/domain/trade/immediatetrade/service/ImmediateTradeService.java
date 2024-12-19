@@ -1,8 +1,11 @@
 package com.barter.domain.trade.immediatetrade.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
@@ -10,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.barter.domain.auth.dto.VerifiedMember;
+import com.barter.domain.notification.enums.EventKind;
+import com.barter.domain.notification.service.NotificationService;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.entity.TradeProduct;
@@ -27,6 +32,7 @@ import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeRes
 import com.barter.domain.trade.immediatetrade.dto.response.FindSuggestForImmediateTradeResDto;
 import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
+import com.barter.event.trade.TradeNotificationEvent;
 
 import lombok.RequiredArgsConstructor;
 
@@ -37,6 +43,8 @@ public class ImmediateTradeService {
 	private final RegisteredProductRepository registeredProductRepository;
 	private final TradeProductRepository tradeProductRepository;
 	private final SuggestedProductRepository suggestedProductRepository;
+	private final ApplicationEventPublisher publisher;
+	private final NotificationService notificationService;
 
 	@Transactional
 	public FindImmediateTradeResDto create(CreateImmediateTradeReqDto reqDto) {
@@ -55,6 +63,11 @@ public class ImmediateTradeService {
 
 		registeredProduct.changStatusRegistering();
 		ImmediateTrade savedTrade = immediateTradeRepository.save(immediateTrade);
+		publisher.publishEvent(TradeNotificationEvent.builder()
+			.tradeId(savedTrade.getId())
+			.type(TradeType.IMMEDIATE)
+			.productName(savedTrade.getProduct().getName())
+			.build());
 		return FindImmediateTradeResDto.from(savedTrade);
 	}
 
@@ -147,6 +160,13 @@ public class ImmediateTradeService {
 		}
 
 		tradeProductRepository.saveAll(tradeProducts);
+
+		// 알림 (교환 등록자에게)
+		notificationService.saveTradeNotification(
+			EventKind.IMMEDIATE_TRADE_SUGGEST, immediateTrade.getProduct().getMember().getId(),
+			TradeType.IMMEDIATE, immediateTrade.getId(), immediateTrade.getTitle()
+		);
+
 		return "제안 완료";
 	}
 
@@ -166,6 +186,13 @@ public class ImmediateTradeService {
 			SuggestedProduct suggestedProduct = tradeProduct.getSuggestedProduct();
 			suggestedProduct.changStatusAccepted();
 		}
+
+		// 알림 (제안자에게)
+		Long suggesterId = tradeProducts.get(0).getSuggestedProduct().getMember().getId();
+		notificationService.saveTradeNotification(
+			EventKind.IMMEDIATE_TRADE_SUGGEST_ACCEPT, suggesterId,
+			TradeType.IMMEDIATE, immediateTrade.getId(), immediateTrade.getTitle()
+		);
 
 		return "제안 수락 완료";
 	}
@@ -188,6 +215,13 @@ public class ImmediateTradeService {
 
 		tradeProductRepository.deleteAll(tradeProducts);
 
+		// 알림 (제안자에게)
+		Long suggesterId = tradeProducts.get(0).getSuggestedProduct().getMember().getId();
+		notificationService.saveTradeNotification(
+			EventKind.IMMEDIATE_TRADE_SUGGEST_DENY, suggesterId,
+			TradeType.IMMEDIATE, immediateTrade.getId(), immediateTrade.getTitle()
+		);
+
 		return "제안 거절";
 	}
 
@@ -209,18 +243,44 @@ public class ImmediateTradeService {
 
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(tradeId,
 			TradeType.IMMEDIATE);
+		// 최종 교환 제안자와 선택받지 못한 제안자(들)의 ID 값이 필요해 아래와 같이 수정했습니다.
+		Long finalSuggesterId = 0L;
+		Set<Long> suggesterIds = new HashSet<>();
 		for (TradeProduct tradeProduct : tradeProducts) {
 			if (tradeProduct.getSuggestedProduct().getStatus() == SuggestedStatus.ACCEPTED) {
 				tradeProduct.getSuggestedProduct().changeStatusCompleted();
+				if (finalSuggesterId == 0L) {
+					finalSuggesterId = tradeProduct.getSuggestedProduct().getMember().getId();
+				}
 			}
 
 			if (tradeProduct.getSuggestedProduct().getStatus() == SuggestedStatus.SUGGESTING) {
+				suggesterIds.add(tradeProduct.getSuggestedProduct().getMember().getId());
 				tradeProduct.getSuggestedProduct().changeStatusPending();
 				tradeProductRepository.delete(tradeProduct);
 			}
 		}
 
 		ImmediateTrade updatedTrade = immediateTradeRepository.save(immediateTrade);
+
+		// 알림 (교환 등록자에게)
+		notificationService.saveTradeNotification(
+			EventKind.IMMEDIATE_TRADE_COMPLETE, immediateTrade.getProduct().getMember().getId(),
+			TradeType.IMMEDIATE, updatedTrade.getId(), updatedTrade.getTitle()
+		);
+		// 알림 (교환에 성공한 제안자에게)
+		notificationService.saveTradeNotification(
+			EventKind.IMMEDIATE_TRADE_COMPLETE, finalSuggesterId,
+			TradeType.IMMEDIATE, updatedTrade.getId(), updatedTrade.getTitle()
+		);
+		// 알림 (교환에 실패한 나머지 제안자(들)에게)
+		for (Long suggesterId : suggesterIds) {
+			notificationService.saveTradeNotification(
+				EventKind.IMMEDIATE_TRADE_SUGGEST_DENY, suggesterId,
+				TradeType.IMMEDIATE, updatedTrade.getId(), updatedTrade.getTitle()
+			);
+		}
+
 		return FindImmediateTradeResDto.from(updatedTrade);
 	}
 
@@ -243,6 +303,12 @@ public class ImmediateTradeService {
 			tradeProduct.getSuggestedProduct().changeStatusPending();
 		}
 		tradeProductRepository.deleteAllInBatch(tradeProducts);
+
+		// 알림 (제안자에게)
+		notificationService.saveTradeNotification(
+			EventKind.IMMEDIATE_TRADE_SUGGEST_CANCEL, tradeProducts.get(0).getSuggestedProduct().getMember().getId(),
+			TradeType.IMMEDIATE, immediateTrade.getId(), immediateTrade.getTitle()
+		);
 
 		return "제안 수락 취소 완료";
 	}

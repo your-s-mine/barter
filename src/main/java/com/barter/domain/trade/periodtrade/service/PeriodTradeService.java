@@ -44,6 +44,7 @@ import com.barter.domain.trade.periodtrade.dto.response.UpdatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 import com.barter.domain.trade.periodtrade.repository.PeriodTradeRepository;
 import com.barter.event.trade.PeriodTradeEvent.PeriodTradeCloseEvent;
+import com.barter.event.trade.TradeNotificationEvent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -78,10 +79,14 @@ public class PeriodTradeService {
 		registeredProduct.updateStatus(RegisteredStatus.REGISTERING.toString());
 		periodTrade.validateIsExceededMaxEndDate();
 
-		periodTradeRepository.save(periodTrade);
+		PeriodTrade savedPeriodTrade = periodTradeRepository.save(periodTrade);
 		// 이벤트 발행
 		eventPublisher.publishEvent(new PeriodTradeCloseEvent(periodTrade));
-
+		eventPublisher.publishEvent(TradeNotificationEvent.builder()
+			.tradeId(savedPeriodTrade.getId())
+			.type(TradeType.PERIOD)
+			.productName(savedPeriodTrade.getRegisteredProduct().getName())
+			.build());
 		return CreatePeriodTradeResDto.from(periodTrade);
 	}
 
@@ -350,6 +355,20 @@ public class PeriodTradeService {
 		);
 
 		return DenyPeriodTradeResDto.from(periodTrade);
+	}
+
+	@Transactional
+	public void closePeriodTrade(Long periodTradeId) {
+		PeriodTrade periodTrade = periodTradeRepository.findById(periodTradeId).orElseThrow(
+			() -> new IllegalArgumentException("해당 기간 거래를 찾을 수 없습니다.")
+		);
+		periodTrade.updatePeriodTradeStatus(TradeStatus.CLOSED);
+		List<TradeProduct> allTradeProducts = tradeProductRepository.findTradeProductsWithSuggestedProductByPeriodTradeId(
+			TradeType.PERIOD, periodTrade.getId());
+		tradeProductRepository.saveAll(allTradeProducts);
+
+		allTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusPending());
+
 	}
 
 	private List<SuggestedProduct> findSuggestedProductByIds(List<Long> productIds, Long memberId) {
