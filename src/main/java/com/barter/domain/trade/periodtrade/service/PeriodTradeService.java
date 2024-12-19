@@ -367,8 +367,26 @@ public class PeriodTradeService {
 			TradeType.PERIOD, periodTrade.getId());
 		tradeProductRepository.saveAll(allTradeProducts);
 
-		allTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusPending());
+		// allTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusPending());
+		// 해당 기간 교환에 제안한 제안자들의 ID 정보를 얻기 위해 위의 코드를 아래와 같이 수정했습니다.
+		Set<Long> suggesterIds = new HashSet<>();
+		for (TradeProduct tradeProduct : allTradeProducts) {
+			tradeProduct.getSuggestedProduct().changeStatusPending();
+			suggesterIds.add(tradeProduct.getSuggestedProduct().getMember().getId());
+		}
 
+		// 알림 (교환 등록자에게)
+		notificationService.saveTradeNotification(
+			EventKind.PERIOD_TRADE_PERIOD_EXPIRES, periodTrade.getRegisteredProduct().getMember().getId(),
+			TradeType.PERIOD, periodTrade.getId(), periodTrade.getTitle()
+		);
+		// 알림 (제안자(들)에게)
+		for (Long suggesterId : suggesterIds) {
+			notificationService.saveTradeNotification(
+				EventKind.PERIOD_TRADE_SUGGEST_DENY, suggesterId,
+				TradeType.PERIOD, periodTrade.getId(), periodTrade.getTitle()
+			);
+		}
 	}
 
 	private List<SuggestedProduct> findSuggestedProductByIds(List<Long> productIds, Long memberId) {
