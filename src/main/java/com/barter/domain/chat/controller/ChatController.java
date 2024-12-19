@@ -1,5 +1,7 @@
 package com.barter.domain.chat.controller;
 
+import java.time.LocalDateTime;
+
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -38,6 +40,7 @@ public class ChatController {
 		chattingRepository.save(chattingContent);
 
 		// 일단 이거는 한명이 나가도 유지되어야 함 (나중에 채팅 로그 저장하면 해당 로그를 보여줄 수 있음)
+		chatMessageReqDto.setReceivedTime(LocalDateTime.now().toString());
 		log.info("CHAT : {}", chatMessageReqDto.getMessage());
 		template.convertAndSend("/topic/chat/room/" + roomId, chatMessageReqDto);
 
