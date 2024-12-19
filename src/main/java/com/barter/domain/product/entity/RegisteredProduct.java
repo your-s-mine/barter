@@ -110,7 +110,7 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 		}
 	}
 
-	public void changStatusRegistering() {
+	public void changeStatusRegistering() {
 		this.status = RegisteredStatus.REGISTERING;
 	}
 
@@ -126,6 +126,10 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 
 	public void changeStatusCompleted() {
 		this.status = RegisteredStatus.COMPLETED;
+	}
+
+	public void changeStatusAccepted() {
+		this.status = RegisteredStatus.ACCEPTED;
 	}
 }
 

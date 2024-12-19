@@ -61,7 +61,7 @@ public class ImmediateTradeService {
 			.viewCount(0)
 			.build();
 
-		registeredProduct.changStatusRegistering();
+		registeredProduct.changeStatusRegistering();
 		ImmediateTrade savedTrade = immediateTradeRepository.save(immediateTrade);
 		publisher.publishEvent(TradeNotificationEvent.builder()
 			.tradeId(savedTrade.getId())
@@ -179,6 +179,7 @@ public class ImmediateTradeService {
 		immediateTrade.validateAuthority(member.getId());
 
 		immediateTrade.changeStatusInProgress();
+		immediateTrade.getProduct().changeStatusAccepted();
 
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeId(tradeId);
 
