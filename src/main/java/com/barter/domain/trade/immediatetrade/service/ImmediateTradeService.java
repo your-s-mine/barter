@@ -5,10 +5,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +32,7 @@ import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeRes
 import com.barter.domain.trade.immediatetrade.dto.response.FindSuggestForImmediateTradeResDto;
 import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
+import com.barter.event.trade.TradeNotificationEvent;
 
 import lombok.RequiredArgsConstructor;
 
@@ -42,6 +43,7 @@ public class ImmediateTradeService {
 	private final RegisteredProductRepository registeredProductRepository;
 	private final TradeProductRepository tradeProductRepository;
 	private final SuggestedProductRepository suggestedProductRepository;
+	private final ApplicationEventPublisher publisher;
 	private final NotificationService notificationService;
 
 	@Transactional
@@ -61,6 +63,11 @@ public class ImmediateTradeService {
 
 		registeredProduct.changStatusRegistering();
 		ImmediateTrade savedTrade = immediateTradeRepository.save(immediateTrade);
+		publisher.publishEvent(TradeNotificationEvent.builder()
+			.tradeId(savedTrade.getId())
+			.type(TradeType.IMMEDIATE)
+			.productName(savedTrade.getProduct().getName())
+			.build());
 		return FindImmediateTradeResDto.from(savedTrade);
 	}
 
@@ -159,6 +166,7 @@ public class ImmediateTradeService {
 			EventKind.IMMEDIATE_TRADE_SUGGEST, immediateTrade.getProduct().getMember().getId(),
 			TradeType.IMMEDIATE, immediateTrade.getId(), immediateTrade.getTitle()
 		);
+
 		return "제안 완료";
 	}
 
@@ -185,6 +193,7 @@ public class ImmediateTradeService {
 			EventKind.IMMEDIATE_TRADE_SUGGEST_ACCEPT, suggesterId,
 			TradeType.IMMEDIATE, immediateTrade.getId(), immediateTrade.getTitle()
 		);
+
 		return "제안 수락 완료";
 	}
 
@@ -212,6 +221,7 @@ public class ImmediateTradeService {
 			EventKind.IMMEDIATE_TRADE_SUGGEST_DENY, suggesterId,
 			TradeType.IMMEDIATE, immediateTrade.getId(), immediateTrade.getTitle()
 		);
+
 		return "제안 거절";
 	}
 
