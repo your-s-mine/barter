@@ -153,7 +153,7 @@ public class ImmediateTradeService {
 
 		tradeProductRepository.saveAll(tradeProducts);
 
-		// 이벤트 저장 및 전달
+		// 알림 (교환 등록자에게)
 		notificationService.saveTradeNotification(
 			EventKind.IMMEDIATE_TRADE_SUGGEST, immediateTrade.getProduct().getMember().getId(),
 			TradeType.IMMEDIATE, immediateTrade.getId(), immediateTrade.getTitle()
@@ -178,7 +178,7 @@ public class ImmediateTradeService {
 			suggestedProduct.changStatusAccepted();
 		}
 
-		// 이벤트 저장 및 전달
+		// 알림 (제안자에게)
 		Long suggesterId = tradeProducts.get(0).getSuggestedProduct().getMember().getId();
 		notificationService.saveTradeNotification(
 			EventKind.IMMEDIATE_TRADE_SUGGEST_ACCEPT, suggesterId,
@@ -205,7 +205,7 @@ public class ImmediateTradeService {
 
 		tradeProductRepository.deleteAll(tradeProducts);
 
-		// 이벤트 저장 및 전달
+		// 알림 (제안자에게)
 		Long suggesterId = tradeProducts.get(0).getSuggestedProduct().getMember().getId();
 		notificationService.saveTradeNotification(
 			EventKind.IMMEDIATE_TRADE_SUGGEST_DENY, suggesterId,
