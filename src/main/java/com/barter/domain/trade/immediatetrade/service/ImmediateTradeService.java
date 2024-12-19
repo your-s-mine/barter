@@ -8,6 +8,7 @@ import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -298,7 +299,7 @@ public class ImmediateTradeService {
 			TradeType.IMMEDIATE, immediateTrade.getId(), immediateTrade.getTitle()
 		);
 
-		return "추후 제안 다건 조회되도록 변경";
+		return "제안 수락 취소 완료";
 	}
 
 	public List<FindSuggestForImmediateTradeResDto> findSuggestForImmediateTrade(
