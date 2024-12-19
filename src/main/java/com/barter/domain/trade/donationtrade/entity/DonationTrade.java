@@ -104,7 +104,7 @@ public class DonationTrade extends BaseTimeStampEntity {
 	public void suggestDonation() {
 		currentAmount++;
 		if (currentAmount == maxAmount) {
-			product.changeStatusAccepted();
+			product.changeStatusCompleted();
 			status = TradeStatus.COMPLETED;
 		}
 	}
