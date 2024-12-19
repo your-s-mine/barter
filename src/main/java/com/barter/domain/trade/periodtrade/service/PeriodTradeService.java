@@ -233,7 +233,7 @@ public class PeriodTradeService {
 				suggesterIds.add(tradeProduct.getSuggestedProduct().getMember().getId());
 			}
 			acceptedTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusCompleted());
-			tradeProductRepository.deleteAll(allTradeProducts);
+			tradeProductRepository.deleteAll(tradeProducts);
 
 			// 알림 (교환 등록자에게)
 			notificationService.saveTradeNotification(
