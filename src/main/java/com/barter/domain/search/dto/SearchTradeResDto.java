@@ -10,12 +10,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SearchTradeResDto {
 	private String title;
-	private ConvertProductDto product;
+	private ConvertRegisteredProductDto product;
 	private TradeStatus tradeStatus;
 	private int viewCount;
 
 	@Builder
-	public SearchTradeResDto(String title, ConvertProductDto product, TradeStatus tradeStatus,
+	public SearchTradeResDto(String title, ConvertRegisteredProductDto product, TradeStatus tradeStatus,
 		int viewCount) {
 		this.title = title;
 		this.product = product;

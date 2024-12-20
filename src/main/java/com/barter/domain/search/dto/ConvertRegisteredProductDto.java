@@ -9,7 +9,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class ConvertProductDto {
+public class ConvertRegisteredProductDto {
 	private Long id;
 	private String name;
 	private String description;
