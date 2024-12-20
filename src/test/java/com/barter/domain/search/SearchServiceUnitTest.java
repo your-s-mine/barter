@@ -95,7 +95,7 @@ public class SearchServiceUnitTest {
 
 		when(searchKeywordRepository.findByWord(word)).thenReturn(Optional.of(existingKeyword));
 
-		when(donationTradeRepository.findByTitleOrDescriptionContaining(word, word)).thenReturn(donationTrades);
+		// when(donationTradeRepository.findByTitleOrDescriptionContaining(word, word)).thenReturn(donationTrades)
 		when(periodTradeRepository.findByTitleOrDescriptionContaining(word, word)).thenReturn(periodTrades);
 
 		List<SearchTradeResDto> result = searchService.searchKeywordAndFindTrades(word);

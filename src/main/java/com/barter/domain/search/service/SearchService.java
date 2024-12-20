@@ -8,7 +8,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.search.dto.SearchTradeResDto;
+import com.barter.domain.search.dto.ConvertProductDto;
 import com.barter.domain.search.entity.SearchHistory;
 import com.barter.domain.search.entity.SearchKeyword;
 import com.barter.domain.search.repository.SearchHistoryRepository;
@@ -35,14 +37,6 @@ public class SearchService {
 	@Transactional
 	public List<SearchTradeResDto> searchKeywordAndFindTrades(String word) {
 
-		if (word.isBlank()) {
-			List<SearchTradeResDto> blank = new ArrayList<>();
-			blank.add(SearchTradeResDto.builder()
-				.title("검색어를 입력해주세요.")
-				.build());
-			return blank;
-		}
-
 		SearchKeyword searchKeyword = searchKeywordRepository.findByWord(word)
 			.orElseGet(() ->
 				searchKeywordRepository.save(SearchKeyword.builder()
@@ -62,9 +56,9 @@ public class SearchService {
 		searchKeyword.updateCount(recentCount);
 		searchKeywordRepository.save(searchKeyword);
 
-		List<DonationTrade> donationTrades = donationTradeRepository.findByTitleOrDescriptionContaining(word, word);
-		List<ImmediateTrade> immediateTrades = immediateTradeRepository.findByTitleOrDescriptionContaining(word, word);
-		List<PeriodTrade> periodTrades = periodTradeRepository.findByTitleOrDescriptionContaining(word, word);
+		List<DonationTrade> donationTrades = donationTradeRepository.findDonationTradesWithProduct(word);
+		List<ImmediateTrade> immediateTrades = immediateTradeRepository.findImmediateTradesWithProduct(word);
+		List<PeriodTrade> periodTrades = periodTradeRepository.findPeriodTradesWithProduct(word);
 
 		List<SearchTradeResDto> tradeDtos = new ArrayList<>();
 		tradeDtos.addAll(mapDonationTradesToSearchTradeRes(donationTrades));
@@ -107,7 +101,7 @@ public class SearchService {
 		return trades.stream()
 			.map(trade -> SearchTradeResDto.builder()
 				.title(trade.getTitle())
-				.product(trade.getProduct())
+				.product(createSimpleProductDto(trade.getProduct()))
 				.tradeStatus(trade.getStatus())
 				.viewCount(trade.getViewCount())
 				.build())
@@ -118,7 +112,7 @@ public class SearchService {
 		return trades.stream()
 			.map(trade -> SearchTradeResDto.builder()
 				.title(trade.getTitle())
-				.product(trade.getProduct())
+				.product(createSimpleProductDto(trade.getProduct()))
 				.tradeStatus(trade.getStatus())
 				.viewCount(trade.getViewCount())
 				.build())
@@ -129,10 +123,20 @@ public class SearchService {
 		return trades.stream()
 			.map(trade -> SearchTradeResDto.builder()
 				.title(trade.getTitle())
-				.product(trade.getRegisteredProduct())
+				.product(createSimpleProductDto(trade.getRegisteredProduct()))
 				.tradeStatus(trade.getStatus())
 				.viewCount(trade.getViewCount())
 				.build())
 			.toList();
+	}
+
+	private ConvertProductDto createSimpleProductDto(RegisteredProduct product) {
+		return ConvertProductDto.builder()
+			.id(product.getId())
+			.name(product.getName())
+			.description(product.getDescription())
+			.images(product.getImages())
+			.status(product.getStatus())
+			.build();
 	}
 }
