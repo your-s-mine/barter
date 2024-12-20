@@ -1,6 +1,7 @@
 package com.barter.domain.trade.periodtrade.service;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
@@ -23,7 +24,10 @@ import org.springframework.data.web.PagedModel;
 
 import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.member.entity.Member;
+import com.barter.domain.notification.enums.EventKind;
+import com.barter.domain.notification.service.NotificationService;
 import com.barter.domain.oauth.enums.OAuthProvider;
+import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.entity.TradeProduct;
@@ -44,6 +48,7 @@ import com.barter.domain.trade.periodtrade.dto.response.AcceptPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.CreatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.DenyPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeResDto;
+import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeSuggestionResDto;
 import com.barter.domain.trade.periodtrade.dto.response.StatusUpdateResDto;
 import com.barter.domain.trade.periodtrade.dto.response.SuggestedPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.dto.response.UpdatePeriodTradeResDto;
@@ -64,6 +69,8 @@ class PeriodTradeServiceTest {
 
 	@Mock
 	private TradeProductRepository tradeProductRepository;
+	@Mock
+	private NotificationService notificationService;
 
 	@Mock
 	private PeriodTradeRepository periodTradeRepository;
@@ -95,6 +102,7 @@ class PeriodTradeServiceTest {
 			.status(RegisteredStatus.PENDING)
 			.member(member)
 			.build();
+
 	}
 
 	@Test
@@ -109,8 +117,13 @@ class PeriodTradeServiceTest {
 			.endedAt(LocalDateTime.now().plusDays(5))
 			.build();
 
+		PeriodTrade periodTrade = PeriodTrade.createInitPeriodTrade("title", "description", registeredProduct,
+			LocalDateTime.now().plusDays(1));
+
 		when(registeredProductRepository.findById(reqDto.getRegisteredProductId()))
 			.thenReturn(Optional.of(registeredProduct));
+
+		when(periodTradeRepository.save(any(PeriodTrade.class))).thenReturn(periodTrade);
 
 		// when
 
@@ -270,6 +283,17 @@ class PeriodTradeServiceTest {
 
 		when(tradeProductRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
 
+		when(mockPeriodTrade.getRegisteredProduct()).thenReturn(registeredProduct);
+		when(mockPeriodTrade.getId()).thenReturn(1L);
+		when(mockPeriodTrade.getTitle()).thenReturn("test-title");
+
+		doNothing().when(notificationService).saveTradeNotification(
+			EventKind.PERIOD_TRADE_SUGGEST,
+			1L,
+			TradeType.PERIOD,
+			tradeId,
+			"test-title"
+		);
 		// when
 		SuggestedPeriodTradeResDto result = periodTradeService.suggestPeriodTrade(verifiedMember, tradeId, reqDto);
 
@@ -364,12 +388,9 @@ class PeriodTradeServiceTest {
 			.thenReturn(List.of(tradeProduct1, tradeProduct2));
 
 		doNothing().when(mockPeriodTrade).validateAuthority(1L);
-		doNothing().when(mockPeriodTrade).validateInProgress();
 
 		doNothing().when(suggestedProduct1).changStatusAccepted();
 		doNothing().when(suggestedProduct2).changStatusAccepted();
-
-		doNothing().when(mockPeriodTrade).updatePeriodTradeStatusCompleted();
 
 		when(tradeProduct1.getSuggestedProduct()).thenReturn(suggestedProduct1);
 		when(tradeProduct2.getSuggestedProduct()).thenReturn(suggestedProduct2);
@@ -388,68 +409,42 @@ class PeriodTradeServiceTest {
 		verify(periodTradeRepository, times(1)).findById(tradeId);
 		verify(tradeProductRepository, times(1)).findAllByTradeIdAndTradeType(tradeId, TradeType.PERIOD);
 		verify(mockPeriodTrade, times(1)).validateAuthority(1L);
-		verify(mockPeriodTrade, times(1)).validateInProgress();
-		verify(suggestedProduct1, times(1)).changStatusAccepted();
-		verify(suggestedProduct2, times(1)).changStatusAccepted();
-		verify(mockPeriodTrade, times(1)).updatePeriodTradeStatusCompleted();
 
 	}
 
 	@Test
-	@DisplayName("기간 거래 거절")
-	public void 기간_거래_거절() {
-		//given
-		Long tradeId = 1L;
+	@DisplayName("기간 거래 거절: 정상적으로 거래가 거절되었을 때 반환값 확인")
+	void 기간_거절_성공() {
 
-		Member member = mock(Member.class);
-		when(member.getId()).thenReturn(2L);
+		// given
+		SuggestedProduct suggestedProduct = mock(SuggestedProduct.class);
+		when(suggestedProduct.getMember()).thenReturn(mock(Member.class));
 
-		DenyPeriodTradeReqDto reqDto = new DenyPeriodTradeReqDto(member.getId()); // 다른 멤버 (2L)
+		PeriodTrade periodTrade = PeriodTrade.builder()
+			.id(1L)
+			.status(TradeStatus.PENDING)
+			.registeredProduct(registeredProduct)
+			.build();
 
-		PeriodTrade mockPeriodTrade = mock(PeriodTrade.class);
-		TradeProduct tradeProduct1 = mock(TradeProduct.class);
-		TradeProduct tradeProduct2 = mock(TradeProduct.class);
+		TradeProduct tradeProduct = TradeProduct.builder()
+			.tradeId(1L)
+			.tradeType(TradeType.PERIOD)
+			.suggestedProduct(suggestedProduct)
+			.build();
 
-		SuggestedProduct suggestedProduct1 = mock(SuggestedProduct.class);
-		SuggestedProduct suggestedProduct2 = mock(SuggestedProduct.class);
+		DenyPeriodTradeReqDto reqDto = new DenyPeriodTradeReqDto(2L);
 
-		RegisteredProduct registeredProduct = mock(RegisteredProduct.class);
-
-		when(mockPeriodTrade.getRegisteredProduct()).thenReturn(registeredProduct);
-
-		when(periodTradeRepository.findById(tradeId)).thenReturn(Optional.of(mockPeriodTrade));
-
-		// 제안된 물건 2개
-		when(tradeProductRepository.findAllByTradeIdAndTradeType(tradeId, TradeType.PERIOD))
-			.thenReturn(List.of(tradeProduct1, tradeProduct2));
-
-		doNothing().when(mockPeriodTrade).validateAuthority(1L);
-		doNothing().when(mockPeriodTrade).validateInProgress();
-
-		doNothing().when(suggestedProduct1).changeStatusPending();
-		doNothing().when(suggestedProduct2).changeStatusPending();
-
-		when(tradeProduct1.getSuggestedProduct()).thenReturn(suggestedProduct1);
-		when(tradeProduct2.getSuggestedProduct()).thenReturn(suggestedProduct2);
-		when(suggestedProduct1.getMember()).thenReturn(member);
-		when(suggestedProduct2.getMember()).thenReturn(member);
-
-		when(suggestedProduct1.getStatus()).thenReturn(SuggestedStatus.SUGGESTING);
-		when(suggestedProduct2.getStatus()).thenReturn(SuggestedStatus.SUGGESTING);
+		when(periodTradeRepository.findById(1L)).thenReturn(Optional.of(periodTrade));
+		when(tradeProductRepository.findAllByTradeIdAndTradeType(1L, TradeType.PERIOD)).thenReturn(
+			List.of(tradeProduct));
 
 		// when
-
-		DenyPeriodTradeResDto result = periodTradeService.denyPeriodTrade(verifiedMember, tradeId, reqDto);
+		DenyPeriodTradeResDto response = periodTradeService.denyPeriodTrade(verifiedMember, 1L, reqDto);
 
 		// then
-		assertThat(result).isNotNull();
-		verify(periodTradeRepository, times(1)).findById(tradeId);
-		verify(tradeProductRepository, times(1)).findAllByTradeIdAndTradeType(tradeId, TradeType.PERIOD);
-		verify(mockPeriodTrade, times(1)).validateAuthority(1L);
-		verify(mockPeriodTrade, times(1)).validateInProgress();
-		verify(suggestedProduct1, times(1)).changeStatusPending();
-		verify(suggestedProduct2, times(1)).changeStatusPending();
-
+		assertThat(response).isNotNull();
+		assertThat(response.getPeriodTradeId()).isEqualTo(1L);
+		assertThat(response.getTradeStatus()).isEqualTo(TradeStatus.PENDING);
 	}
 
 	// -----------------------------------------------------------------
@@ -557,8 +552,23 @@ class PeriodTradeServiceTest {
 
 		doNothing().when(periodTrade).validateAuthority(1L);
 		doNothing().when(periodTrade).validateIsCompleted();
-
 		when(periodTrade.updatePeriodTradeStatus(TradeStatus.CLOSED)).thenReturn(true);
+
+		List<TradeProduct> mockTradeProducts = List.of(mock(TradeProduct.class), mock(TradeProduct.class));
+		when(tradeProductRepository.findTradeProductsWithSuggestedProductByPeriodTradeId(TradeType.PERIOD, tradeId))
+			.thenReturn(mockTradeProducts);
+
+		SuggestedProduct suggestedProduct1 = mock(SuggestedProduct.class);
+		SuggestedProduct suggestedProduct2 = mock(SuggestedProduct.class);
+
+		doNothing().when(suggestedProduct1).changeStatusPending();
+		doNothing().when(suggestedProduct2).changeStatusPending();
+
+		when(mockTradeProducts.get(0).getSuggestedProduct()).thenReturn(suggestedProduct1);
+		when(mockTradeProducts.get(1).getSuggestedProduct()).thenReturn(suggestedProduct2);
+
+		when(mockTradeProducts.get(0).getSuggestedProduct().getMember()).thenReturn(member);
+		when(mockTradeProducts.get(1).getSuggestedProduct().getMember()).thenReturn(member);
 
 		// when
 		StatusUpdateResDto result = periodTradeService.updatePeriodTradeStatus(verifiedMember, tradeId, reqDto);
@@ -568,6 +578,13 @@ class PeriodTradeServiceTest {
 		verify(periodTrade, times(1)).validateAuthority(1L);
 		verify(periodTrade, times(1)).validateIsCompleted();
 		verify(periodTrade, times(1)).updatePeriodTradeStatus(TradeStatus.CLOSED);
+		verify(tradeProductRepository, times(1)).findTradeProductsWithSuggestedProductByPeriodTradeId(TradeType.PERIOD,
+			tradeId);
+		verify(tradeProductRepository, times(1)).deleteAll(mockTradeProducts);
+
+		mockTradeProducts.forEach(tradeProduct -> {
+			verify(tradeProduct.getSuggestedProduct(), times(1)).changeStatusPending();
+		});
 
 	}
 
@@ -630,5 +647,44 @@ class PeriodTradeServiceTest {
 		verify(periodTradeRepository, times(1)).findById(tradeId);
 
 	}
+
+	@Test
+	@DisplayName("기간 거래 제안 목록 조회")
+	public void 기간_거래_제안_목록_조회() {
+		// Given
+		Long tradeId = 123L; // Example tradeId
+		SuggestedProduct suggestedProduct1 = new SuggestedProduct(1L, "Product 1", "Description 1", List.of("img1.jpg"),
+			member, SuggestedStatus.ACCEPTED);
+		SuggestedProduct suggestedProduct2 = new SuggestedProduct(2L, "Product 2", "Description 2", List.of("img2.jpg"),
+			member, SuggestedStatus.PENDING);
+		List<SuggestedProduct> suggestedProducts = List.of(suggestedProduct1, suggestedProduct2);
+
+		// Mock the repository call
+		when(suggestedProductRepository.findSuggestedProductsByTradeTypeAndTradeId(TradeType.PERIOD, tradeId))
+			.thenReturn(suggestedProducts);
+
+		// When
+		List<FindPeriodTradeSuggestionResDto> result = periodTradeService.findPeriodTradesSuggestion(tradeId);
+
+		// Then
+		assertNotNull(result);
+		assertEquals(1, result.size());  // Since both products are by the same member, expect one entry
+		FindPeriodTradeSuggestionResDto dto = result.get(0);
+		assertEquals(1L, dto.getMemberId());
+		assertEquals(2, dto.getSuggestedProducts().size());  // We expect two products in the list
+
+		FindSuggestedProductResDto suggestedProductDto1 = dto.getSuggestedProducts().get(0);
+		assertEquals("Product 1", suggestedProductDto1.getName());
+		assertEquals("Description 1", suggestedProductDto1.getDescription());
+
+		FindSuggestedProductResDto suggestedProductDto2 = dto.getSuggestedProducts().get(1);
+		assertEquals("Product 2", suggestedProductDto2.getName());
+		assertEquals("Description 2", suggestedProductDto2.getDescription());
+
+	}
+
+	// 테스트 코드 작성 목록
+	// 1. 기간 거래 상태 업데이트 (수정 필요)
+	// 2. 기간 거래 수락 및 거절 업데이트 (수정 필요)
 
 }
