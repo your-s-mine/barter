@@ -24,6 +24,8 @@ import org.springframework.data.web.PagedModel;
 
 import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.member.entity.Member;
+import com.barter.domain.notification.enums.EventKind;
+import com.barter.domain.notification.service.NotificationService;
 import com.barter.domain.oauth.enums.OAuthProvider;
 import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
 import com.barter.domain.product.entity.RegisteredProduct;
@@ -67,6 +69,8 @@ class PeriodTradeServiceTest {
 
 	@Mock
 	private TradeProductRepository tradeProductRepository;
+	@Mock
+	private NotificationService notificationService;
 
 	@Mock
 	private PeriodTradeRepository periodTradeRepository;
@@ -279,6 +283,17 @@ class PeriodTradeServiceTest {
 
 		when(tradeProductRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
 
+		when(mockPeriodTrade.getRegisteredProduct()).thenReturn(registeredProduct);
+		when(mockPeriodTrade.getId()).thenReturn(1L);
+		when(mockPeriodTrade.getTitle()).thenReturn("test-title");
+
+		doNothing().when(notificationService).saveTradeNotification(
+			EventKind.PERIOD_TRADE_SUGGEST,
+			1L,
+			TradeType.PERIOD,
+			tradeId,
+			"test-title"
+		);
 		// when
 		SuggestedPeriodTradeResDto result = periodTradeService.suggestPeriodTrade(verifiedMember, tradeId, reqDto);
 
