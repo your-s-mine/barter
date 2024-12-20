@@ -113,8 +113,13 @@ class PeriodTradeServiceTest {
 			.endedAt(LocalDateTime.now().plusDays(5))
 			.build();
 
+		PeriodTrade periodTrade = PeriodTrade.createInitPeriodTrade("title", "description", registeredProduct,
+			LocalDateTime.now().plusDays(1));
+
 		when(registeredProductRepository.findById(reqDto.getRegisteredProductId()))
 			.thenReturn(Optional.of(registeredProduct));
+
+		when(periodTradeRepository.save(any(PeriodTrade.class))).thenReturn(periodTrade);
 
 		// when
 
