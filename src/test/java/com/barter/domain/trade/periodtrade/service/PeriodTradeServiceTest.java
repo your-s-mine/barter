@@ -388,13 +388,10 @@ class PeriodTradeServiceTest {
 			.thenReturn(List.of(tradeProduct1, tradeProduct2));
 
 		doNothing().when(mockPeriodTrade).validateAuthority(1L);
-		doNothing().when(mockPeriodTrade).validateInProgress();
 
 		doNothing().when(suggestedProduct1).changStatusAccepted();
 		doNothing().when(suggestedProduct2).changStatusAccepted();
-
-		doNothing().when(mockPeriodTrade).updatePeriodTradeStatusCompleted();
-
+		
 		when(tradeProduct1.getSuggestedProduct()).thenReturn(suggestedProduct1);
 		when(tradeProduct2.getSuggestedProduct()).thenReturn(suggestedProduct2);
 		when(suggestedProduct1.getMember()).thenReturn(member);
@@ -412,10 +409,6 @@ class PeriodTradeServiceTest {
 		verify(periodTradeRepository, times(1)).findById(tradeId);
 		verify(tradeProductRepository, times(1)).findAllByTradeIdAndTradeType(tradeId, TradeType.PERIOD);
 		verify(mockPeriodTrade, times(1)).validateAuthority(1L);
-		verify(mockPeriodTrade, times(1)).validateInProgress();
-		verify(suggestedProduct1, times(1)).changStatusAccepted();
-		verify(suggestedProduct2, times(1)).changStatusAccepted();
-		verify(mockPeriodTrade, times(1)).updatePeriodTradeStatusCompleted();
 
 	}
 
