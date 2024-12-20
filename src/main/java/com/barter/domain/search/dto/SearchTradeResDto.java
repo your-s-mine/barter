@@ -1,6 +1,5 @@
 package com.barter.domain.search.dto;
 
-import com.barter.domain.search.service.SearchService;
 import com.barter.domain.trade.enums.TradeStatus;
 
 import lombok.Builder;
@@ -11,12 +10,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SearchTradeResDto {
 	private String title;
-	private SearchService.SimpleProductDto product; // RegisteredProduct에서 SimpleProductDto로 변경
+	private ConvertProductDto product;
 	private TradeStatus tradeStatus;
 	private int viewCount;
 
 	@Builder
-	public SearchTradeResDto(String title, SearchService.SimpleProductDto product, TradeStatus tradeStatus,
+	public SearchTradeResDto(String title, ConvertProductDto product, TradeStatus tradeStatus,
 		int viewCount) {
 		this.title = title;
 		this.product = product;

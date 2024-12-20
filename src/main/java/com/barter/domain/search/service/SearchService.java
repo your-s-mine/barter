@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.barter.domain.product.entity.RegisteredProduct;
-import com.barter.domain.product.enums.RegisteredStatus;
 import com.barter.domain.search.dto.SearchTradeResDto;
+import com.barter.domain.search.dto.ConvertProductDto;
 import com.barter.domain.search.entity.SearchHistory;
 import com.barter.domain.search.entity.SearchKeyword;
 import com.barter.domain.search.repository.SearchHistoryRepository;
@@ -22,8 +22,6 @@ import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepositor
 import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 import com.barter.domain.trade.periodtrade.repository.PeriodTradeRepository;
 
-import lombok.Builder;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -131,17 +129,9 @@ public class SearchService {
 				.build())
 			.toList();
 	}
-	@Getter
-	@Builder
-	public static class SimpleProductDto {
-		private Long id;
-		private String name;
-		private String description;
-		private List<String> images;
-		private RegisteredStatus status;
-	}
-	private SimpleProductDto createSimpleProductDto(RegisteredProduct product) {
-		return SimpleProductDto.builder()
+
+	private ConvertProductDto createSimpleProductDto(RegisteredProduct product) {
+		return ConvertProductDto.builder()
 			.id(product.getId())
 			.name(product.getName())
 			.description(product.getDescription())
