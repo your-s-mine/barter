@@ -391,7 +391,7 @@ class PeriodTradeServiceTest {
 
 		doNothing().when(suggestedProduct1).changStatusAccepted();
 		doNothing().when(suggestedProduct2).changStatusAccepted();
-		
+
 		when(tradeProduct1.getSuggestedProduct()).thenReturn(suggestedProduct1);
 		when(tradeProduct2.getSuggestedProduct()).thenReturn(suggestedProduct2);
 		when(suggestedProduct1.getMember()).thenReturn(member);
@@ -566,6 +566,9 @@ class PeriodTradeServiceTest {
 
 		when(mockTradeProducts.get(0).getSuggestedProduct()).thenReturn(suggestedProduct1);
 		when(mockTradeProducts.get(1).getSuggestedProduct()).thenReturn(suggestedProduct2);
+
+		when(mockTradeProducts.get(0).getSuggestedProduct().getMember()).thenReturn(member);
+		when(mockTradeProducts.get(1).getSuggestedProduct().getMember()).thenReturn(member);
 
 		// when
 		StatusUpdateResDto result = periodTradeService.updatePeriodTradeStatus(verifiedMember, tradeId, reqDto);
