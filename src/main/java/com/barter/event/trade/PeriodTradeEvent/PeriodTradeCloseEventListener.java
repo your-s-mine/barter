@@ -10,9 +10,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import com.barter.domain.trade.enums.TradeStatus;
 import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
-import com.barter.domain.trade.periodtrade.repository.PeriodTradeRepository;
+import com.barter.domain.trade.periodtrade.service.PeriodTradeService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PeriodTradeCloseEventListener {
 
 	private final TaskScheduler taskScheduler;
-	private final PeriodTradeRepository periodTradeRepository; // 추가된 부분
+	private final PeriodTradeService periodTradeService;
 
 	@Async
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -41,8 +40,7 @@ public class PeriodTradeCloseEventListener {
 		log.info("기간 교환 마감 시간 스케줄링, PeriodTradeId : {} , closeTime : {}", periodTradeId, closeTimeKST);
 		taskScheduler.schedule(() ->
 			{
-				periodTrade.updatePeriodTradeStatus(TradeStatus.CLOSED);
-				periodTradeRepository.save(periodTrade);
+				periodTradeService.closePeriodTrade(periodTradeId);
 				log.info("기간 교환 상태가 CLOSED 로 변경되었습니다. PeriodTradeId: {}", periodTradeId);
 			},
 			closeTime);

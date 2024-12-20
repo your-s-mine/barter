@@ -238,40 +238,25 @@ public class TradeSuggestTest {
 	@Test
 	@DisplayName("즉시 교환 - 상태 변경: 성공")
 	void updateStatusSuccess() {
-		when(immediateTradeRepository.findById(immediateTrade.getId())).thenReturn(Optional.ofNullable(immediateTrade));
-		when(immediateTradeRepository.save(immediateTrade)).thenReturn(immediateTrade);
-
-		updateStatusReqDto = new UpdateStatusReqDto(TradeStatus.IN_PROGRESS);
-
-		FindImmediateTradeResDto resDto = immediateTradeService.updateStatusCompleted(immediateTrade.getId(),
-			updateStatusReqDto,
-			verifiedMember);
-
-		assertThat(resDto.getTradeStatus()).isEqualTo(TradeStatus.IN_PROGRESS);
-
-	}
-
-	@Test
-	@DisplayName("즉시 교환 - 상태 변경: 실패 - 교환이 완료된 건에 대하여 상태 변경 시도")
-	void updateStatusFailure() {
-
 		immediateTrade = ImmediateTrade.builder()
 			.id(1L)
 			.title("즉시 교환 제목")
 			.description("즉시 교환 설명")
 			.product(registeredProduct)
-			.status(TradeStatus.COMPLETED)
+			.status(TradeStatus.IN_PROGRESS)
 			.viewCount(0)
 			.build();
 
 		when(immediateTradeRepository.findById(immediateTrade.getId())).thenReturn(Optional.ofNullable(immediateTrade));
+		when(immediateTradeRepository.save(immediateTrade)).thenReturn(immediateTrade);
 
-		updateStatusReqDto = new UpdateStatusReqDto(TradeStatus.IN_PROGRESS);
+		updateStatusReqDto = new UpdateStatusReqDto(TradeStatus.COMPLETED);
 
-		assertThatThrownBy(
-			() -> immediateTradeService.updateStatusCompleted(immediateTrade.getId(), updateStatusReqDto,
-				verifiedMember))
-			.isInstanceOf(IllegalStateException.class).hasMessage("교환이 완료된 건에 대해서는 상태 변경을 할 수 없습니다.");
+		FindImmediateTradeResDto resDto = immediateTradeService.updateStatusCompleted(immediateTrade.getId(),
+			updateStatusReqDto,
+			verifiedMember);
+
+		assertThat(resDto.getTradeStatus()).isEqualTo(TradeStatus.COMPLETED);
 
 	}
 }

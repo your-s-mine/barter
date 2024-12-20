@@ -11,13 +11,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
 import com.barter.domain.product.entity.RegisteredProduct;
+import com.barter.domain.product.enums.TradeType;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.trade.enums.TradeStatus;
 import com.barter.domain.trade.immediatetrade.dto.request.CreateImmediateTradeReqDto;
@@ -25,6 +28,7 @@ import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeRes
 import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
 import com.barter.domain.trade.immediatetrade.service.ImmediateTradeService;
+import com.barter.event.trade.TradeNotificationEvent;
 
 @ExtendWith(MockitoExtension.class)
 public class CreateTest {
@@ -33,6 +37,8 @@ public class CreateTest {
 	ImmediateTradeRepository immediateTradeRepository;
 	@Mock
 	RegisteredProductRepository registeredProductRepository;
+	@Mock
+	ApplicationEventPublisher publisher;
 	@InjectMocks
 	ImmediateTradeService immediateTradeService;
 
@@ -51,9 +57,12 @@ public class CreateTest {
 		List<String> images = new ArrayList<>();
 		images.add("testImage");
 
-		registeredProduct = RegisteredProduct.create(createRegisteredProductReqDto, member, images);
+		registeredProduct = RegisteredProduct.builder()
+			.id(1L)
+			.member(member)
+			.build();
 
-		createImmediateTradeReqDto = new CreateImmediateTradeReqDto(registeredProduct, "즉시 교환 제목", "즉시 교환 설명");
+		createImmediateTradeReqDto = new CreateImmediateTradeReqDto(registeredProduct.getId(), "즉시 교환 제목", "즉시 교환 설명");
 
 		immediateTrade = ImmediateTrade.builder()
 			.title(createImmediateTradeReqDto.getTitle())
@@ -68,10 +77,13 @@ public class CreateTest {
 	@DisplayName("즉시 교환 생성: 성공")
 	void success() {
 		// given
-		when(registeredProductRepository.findById(createImmediateTradeReqDto.getRegisteredProduct().getId()))
+		when(registeredProductRepository.findById(createImmediateTradeReqDto.getRegisteredProductId()))
 			.thenReturn(Optional.ofNullable(registeredProduct));
 
 		when(immediateTradeRepository.save(any())).thenReturn(immediateTrade);
+
+		ArgumentCaptor<TradeNotificationEvent> eventCaptor = ArgumentCaptor.forClass(TradeNotificationEvent.class);
+		doNothing().when(publisher).publishEvent(eventCaptor.capture());
 
 		// when
 		FindImmediateTradeResDto resDto = immediateTradeService.create(createImmediateTradeReqDto);
@@ -80,13 +92,18 @@ public class CreateTest {
 		assertThat(resDto.getTitle()).isEqualTo("즉시 교환 제목");
 		assertThat(resDto.getDescription()).isEqualTo("즉시 교환 설명");
 		assertThat(resDto.getProductId()).isEqualTo(registeredProduct.getId());
+
+		TradeNotificationEvent capturedEvent = eventCaptor.getValue();
+		assertThat(capturedEvent.getType()).isEqualTo(TradeType.IMMEDIATE);
+		assertThat(capturedEvent.getProductName()).isEqualTo(registeredProduct.getName());
+		verify(publisher, times(1)).publishEvent(any(TradeNotificationEvent.class));
 	}
 
 	@Test
 	@DisplayName("즉시 교환 생성: 실패 - 등록 물품을 찾을 수 없는 경우")
 	void failure() {
 		// given
-		when(registeredProductRepository.findById(createImmediateTradeReqDto.getRegisteredProduct().getId()))
+		when(registeredProductRepository.findById(createImmediateTradeReqDto.getRegisteredProductId()))
 			.thenReturn(Optional.empty());
 
 		// when, then

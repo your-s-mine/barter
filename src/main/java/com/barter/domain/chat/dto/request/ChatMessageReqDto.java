@@ -10,13 +10,18 @@ public class ChatMessageReqDto {
 
 	private String roomId;
 	private String message;
-	private String time;
+	private String sentTime;
+	private String receivedTime;
 
 	@Builder
 	public ChatMessageReqDto(String roomId, String message) {
 		this.roomId = roomId;
 		this.message = message;
-		this.time = LocalDateTime.now().toString();
+		this.sentTime = LocalDateTime.now().toString();
+	}
+
+	public void setReceivedTime(String receivedTimetime) {
+		this.receivedTime = receivedTimetime;
 	}
 
 }

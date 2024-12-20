@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,6 +45,7 @@ import com.barter.domain.trade.periodtrade.dto.response.UpdatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 import com.barter.domain.trade.periodtrade.repository.PeriodTradeRepository;
 import com.barter.event.trade.PeriodTradeEvent.PeriodTradeCloseEvent;
+import com.barter.event.trade.TradeNotificationEvent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -78,10 +80,14 @@ public class PeriodTradeService {
 		registeredProduct.updateStatus(RegisteredStatus.REGISTERING.toString());
 		periodTrade.validateIsExceededMaxEndDate();
 
-		periodTradeRepository.save(periodTrade);
+		PeriodTrade savedPeriodTrade = periodTradeRepository.save(periodTrade);
 		// 이벤트 발행
 		eventPublisher.publishEvent(new PeriodTradeCloseEvent(periodTrade));
-
+		eventPublisher.publishEvent(TradeNotificationEvent.builder()
+			.tradeId(savedPeriodTrade.getId())
+			.type(TradeType.PERIOD)
+			.productName(savedPeriodTrade.getRegisteredProduct().getName())
+			.build());
 		return CreatePeriodTradeResDto.from(periodTrade);
 	}
 
@@ -103,6 +109,7 @@ public class PeriodTradeService {
 		return FindPeriodTradeResDto.from(periodTrade);
 	}
 
+	@Cacheable("suggestionList")
 	public List<FindPeriodTradeSuggestionResDto> findPeriodTradesSuggestion(Long tradeId) {
 		return getPeriodTradeSuggestions(tradeId);
 
@@ -226,7 +233,7 @@ public class PeriodTradeService {
 				suggesterIds.add(tradeProduct.getSuggestedProduct().getMember().getId());
 			}
 			acceptedTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusCompleted());
-			tradeProductRepository.deleteAll(allTradeProducts);
+			tradeProductRepository.deleteAll(tradeProducts);
 
 			// 알림 (교환 등록자에게)
 			notificationService.saveTradeNotification(
@@ -280,6 +287,7 @@ public class PeriodTradeService {
 					canceledMemberId = suggestedProduct.getMember().getId();
 				}
 				suggestedProduct.changeStatusPending(); // 기존 수락 상태를 PENDING으로 변경
+				tradeProductRepository.delete(tradeProduct);
 			}
 
 			if (suggestedProduct.getMember().getId().equals(reqDto.getSuggestedMemberId())
@@ -338,7 +346,8 @@ public class PeriodTradeService {
 				.equals(SuggestedStatus.PENDING)) {
 				suggestedProduct.changeStatusPending();
 				periodTrade.getRegisteredProduct()
-					.updateStatus(RegisteredStatus.PENDING.toString());
+					.updateStatus(RegisteredStatus.REGISTERING.toString());
+				tradeProductRepository.delete(tradeProduct);
 			}
 
 		}
@@ -350,6 +359,38 @@ public class PeriodTradeService {
 		);
 
 		return DenyPeriodTradeResDto.from(periodTrade);
+	}
+
+	@Transactional
+	public void closePeriodTrade(Long periodTradeId) {
+		PeriodTrade periodTrade = periodTradeRepository.findById(periodTradeId).orElseThrow(
+			() -> new IllegalArgumentException("해당 기간 거래를 찾을 수 없습니다.")
+		);
+		periodTrade.updatePeriodTradeStatus(TradeStatus.CLOSED);
+		List<TradeProduct> allTradeProducts = tradeProductRepository.findTradeProductsWithSuggestedProductByPeriodTradeId(
+			TradeType.PERIOD, periodTrade.getId());
+		tradeProductRepository.deleteAll(allTradeProducts);
+
+		// allTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changeStatusPending());
+		// 해당 기간 교환에 제안한 제안자들의 ID 정보를 얻기 위해 위의 코드를 아래와 같이 수정했습니다.
+		Set<Long> suggesterIds = new HashSet<>();
+		for (TradeProduct tradeProduct : allTradeProducts) {
+			tradeProduct.getSuggestedProduct().changeStatusPending();
+			suggesterIds.add(tradeProduct.getSuggestedProduct().getMember().getId());
+		}
+
+		// 알림 (교환 등록자에게)
+		notificationService.saveTradeNotification(
+			EventKind.PERIOD_TRADE_PERIOD_EXPIRES, periodTrade.getRegisteredProduct().getMember().getId(),
+			TradeType.PERIOD, periodTrade.getId(), periodTrade.getTitle()
+		);
+		// 알림 (제안자(들)에게)
+		for (Long suggesterId : suggesterIds) {
+			notificationService.saveTradeNotification(
+				EventKind.PERIOD_TRADE_SUGGEST_DENY, suggesterId,
+				TradeType.PERIOD, periodTrade.getId(), periodTrade.getTitle()
+			);
+		}
 	}
 
 	private List<SuggestedProduct> findSuggestedProductByIds(List<Long> productIds, Long memberId) {
