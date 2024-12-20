@@ -101,6 +101,16 @@ public class SearchService {
 		searchKeywordRepository.save(searchKeyword);
 	}
 
+	@Async
+	public void asyncUpdateSearchKeywordCount(Long searchKeywordId) {
+		LocalDateTime since = LocalDateTime.now().minusHours(24);
+		Long recentCount = searchHistoryRepository.countRecentSearches(searchKeywordId, since);
+
+		SearchKeyword searchKeyword = searchKeywordRepository.findById(searchKeywordId).orElseThrow();
+		searchKeyword.updateCount(recentCount);
+		searchKeywordRepository.save(searchKeyword);
+	}
+
 	private List<SearchTradeResDto> mapDonationTradesToSearchTradeRes(List<DonationTrade> trades) {
 		return trades.stream()
 			.map(trade -> SearchTradeResDto.builder()
