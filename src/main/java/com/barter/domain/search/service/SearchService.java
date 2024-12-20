@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.search.dto.SearchTradeResDto;
-import com.barter.domain.search.dto.ConvertProductDto;
+import com.barter.domain.search.dto.ConvertRegisteredProductDto;
 import com.barter.domain.search.entity.SearchHistory;
 import com.barter.domain.search.entity.SearchKeyword;
 import com.barter.domain.search.repository.SearchHistoryRepository;
@@ -101,7 +101,7 @@ public class SearchService {
 		return trades.stream()
 			.map(trade -> SearchTradeResDto.builder()
 				.title(trade.getTitle())
-				.product(createSimpleProductDto(trade.getProduct()))
+				.product(createConvertedProductDto(trade.getProduct()))
 				.tradeStatus(trade.getStatus())
 				.viewCount(trade.getViewCount())
 				.build())
@@ -112,7 +112,7 @@ public class SearchService {
 		return trades.stream()
 			.map(trade -> SearchTradeResDto.builder()
 				.title(trade.getTitle())
-				.product(createSimpleProductDto(trade.getProduct()))
+				.product(createConvertedProductDto(trade.getProduct()))
 				.tradeStatus(trade.getStatus())
 				.viewCount(trade.getViewCount())
 				.build())
@@ -123,15 +123,15 @@ public class SearchService {
 		return trades.stream()
 			.map(trade -> SearchTradeResDto.builder()
 				.title(trade.getTitle())
-				.product(createSimpleProductDto(trade.getRegisteredProduct()))
+				.product(createConvertedProductDto(trade.getRegisteredProduct()))
 				.tradeStatus(trade.getStatus())
 				.viewCount(trade.getViewCount())
 				.build())
 			.toList();
 	}
 
-	private ConvertProductDto createSimpleProductDto(RegisteredProduct product) {
-		return ConvertProductDto.builder()
+	private ConvertRegisteredProductDto createConvertedProductDto(RegisteredProduct product) {
+		return ConvertRegisteredProductDto.builder()
 			.id(product.getId())
 			.name(product.getName())
 			.description(product.getDescription())
