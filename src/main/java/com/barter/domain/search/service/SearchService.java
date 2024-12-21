@@ -87,14 +87,12 @@ public class SearchService {
 		return searchKeywords.stream().map(topKeyword -> topKeyword.getWord()).toList();
 	}
 
-	@Scheduled(cron = "0 */5 * * * *")
+	@Scheduled(cron = "0 */3 * * * *")
 	@Transactional
 	public void deleteHistoryOver24hours() {
 		LocalDateTime time = LocalDateTime.now().minusHours(24);
 
-		List<SearchHistory> searchHistories = searchHistoryRepository.findAllBySearchedAt(time);
-
-		searchHistoryRepository.deleteAll(searchHistories);
+		searchHistoryRepository.deleteBySearchedAtBefore(time);
 	}
 
 	@Async
