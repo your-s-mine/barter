@@ -9,6 +9,7 @@ import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 
@@ -17,6 +18,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 public class CacheConfig {
 
 	@Bean
+	@Primary
 	public CacheManager suggestionListCacheManager() {
 		return new ConcurrentMapCacheManager("suggestionList");
 	}
