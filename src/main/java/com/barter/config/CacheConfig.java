@@ -7,7 +7,6 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.cache.interceptor.CacheResolver;
-import org.springframework.cache.interceptor.SimpleCacheResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,8 +22,8 @@ public class CacheConfig {
 	}
 
 	@Bean
-	public CacheManager searchResultCacheManager() {
-		CaffeineCacheManager cacheManager = new CaffeineCacheManager("searchResult");
+	public CacheManager immediateTradeListCacheManager() {
+		CaffeineCacheManager cacheManager = new CaffeineCacheManager("immediateTradeList");
 		cacheManager.setCaffeine(Caffeine.newBuilder()
 			.expireAfterWrite(24, TimeUnit.HOURS)
 			.maximumSize(10000));
@@ -32,7 +31,8 @@ public class CacheConfig {
 	}
 
 	@Bean
-	public CacheResolver cacheResolver(CacheManager suggestionListCacheManager, CacheManager searchResultCacheManager) {
-		return new CustomCacheResolver(suggestionListCacheManager, searchResultCacheManager);
+	public CacheResolver cacheResolver(CacheManager suggestionListCacheManager,
+		CacheManager immediateTradeListCacheManager) {
+		return new CustomCacheResolver(suggestionListCacheManager, immediateTradeListCacheManager);
 	}
 }

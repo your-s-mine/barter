@@ -1,5 +1,7 @@
 package com.barter.domain.trade.immediatetrade.entity;
 
+import org.springframework.scheduling.annotation.Async;
+
 import com.amazonaws.services.cloudformation.model.ListStackSetsRequest;
 import com.barter.domain.BaseTimeStampEntity;
 import com.barter.domain.product.entity.RegisteredProduct;
@@ -47,6 +49,7 @@ public class ImmediateTrade extends BaseTimeStampEntity {
 		this.viewCount = viewCount;
 	}
 
+	@Async
 	public void addViewCount() {
 		this.viewCount += 1;
 	}

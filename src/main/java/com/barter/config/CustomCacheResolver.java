@@ -14,10 +14,10 @@ public class CustomCacheResolver implements CacheResolver {
 
 	private final Map<String, CacheManager> cacheManagerMap;
 
-	public CustomCacheResolver(CacheManager suggestionListCacheManager, CacheManager searchResultCacheManager) {
+	public CustomCacheResolver(CacheManager suggestionListCacheManager, CacheManager immediateTradeListCacheManager) {
 		this.cacheManagerMap = Map.of(
 			"suggestionList", suggestionListCacheManager,
-			"searchResult", searchResultCacheManager
+			"immediateTradeList", immediateTradeListCacheManager
 		);
 	}
 
@@ -29,6 +29,11 @@ public class CustomCacheResolver implements CacheResolver {
 		CacheManager cacheManager = cacheManagerMap.get(cacheName);
 		if (cacheManager == null) {
 			throw new IllegalArgumentException("캐시 오류: " + cacheName);
+		}
+
+		Cache cache = cacheManager.getCache(cacheName);
+		if (cache == null) {
+			throw new IllegalArgumentException("캐시를 찾을 수 없습니다: " + cacheName);
 		}
 
 		return cacheManager.getCacheNames()

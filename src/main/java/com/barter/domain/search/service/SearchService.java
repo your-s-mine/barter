@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -37,7 +36,6 @@ public class SearchService {
 	private final PeriodTradeRepository periodTradeRepository;
 
 	@Transactional
-	@Cacheable(cacheResolver = "cacheResolver", value = "searchResult", key = "#word")
 	public List<SearchTradeResDto> searchKeywordAndFindTrades(String word) {
 
 		SearchKeyword searchKeyword = searchKeywordRepository.findByWord(word)
@@ -73,9 +71,7 @@ public class SearchService {
 		return tradeDtos;
 	}
 
-	@Cacheable(cacheResolver = "cacheResolver", value = "searchResult", key = "'popularKeywords'")
 	public List<String> findPopularKeywords() {
-
 		List<SearchKeyword> searchKeywords = searchKeywordRepository.findTop10ByOrderByCountDesc();
 
 		if (searchKeywords.isEmpty()) {
