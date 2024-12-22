@@ -42,9 +42,13 @@ public class ImmediateTradeController {
 		return new ResponseEntity<>(immediateTradeService.create(reqDto), HttpStatus.CREATED);
 	}
 
-	@GetMapping("{tradeId}")
+	@GetMapping("/{tradeId}")
 	public ResponseEntity<FindImmediateTradeResDto> find(@PathVariable Long tradeId) {
 		return new ResponseEntity<>(immediateTradeService.find(tradeId), HttpStatus.OK);
+	}
+	@PatchMapping("/viewCount/{tradeId}")
+	public void addViewCount(@PathVariable Long tradeId) {
+		immediateTradeService.addViewCount(tradeId);
 	}
 
 	@GetMapping("")
