@@ -51,7 +51,7 @@ public class SearchService {
 			.build()
 		);
 
-		asyncUpdateSearchKeywordCount(searchKeyword.getId());
+		asyncUpdateSearchKeywordCount(searchKeyword.getId(), searchKeyword);
 
 		List<DonationTrade> donationTrades = donationTradeRepository.findDonationTradesWithProduct(word);
 		List<ImmediateTrade> immediateTrades = immediateTradeRepository.findImmediateTradesWithProduct(word);
@@ -92,11 +92,10 @@ public class SearchService {
 	}
 
 	@Async
-	public void asyncUpdateSearchKeywordCount(Long searchKeywordId) {
+	public void asyncUpdateSearchKeywordCount(Long searchKeywordId, SearchKeyword searchKeyword) {
 		LocalDateTime since = LocalDateTime.now().minusHours(24);
 		Long recentCount = searchHistoryRepository.countRecentSearches(searchKeywordId, since);
 
-		SearchKeyword searchKeyword = searchKeywordRepository.findById(searchKeywordId).orElseThrow();
 		searchKeyword.updateCount(recentCount);
 		searchKeywordRepository.save(searchKeyword);
 	}
