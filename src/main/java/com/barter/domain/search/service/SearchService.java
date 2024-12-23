@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -24,7 +27,9 @@ import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 import com.barter.domain.trade.periodtrade.repository.PeriodTradeRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SearchService {
@@ -83,12 +88,21 @@ public class SearchService {
 		return searchKeywords.stream().map(topKeyword -> topKeyword.getWord()).toList();
 	}
 
+	@Retryable(
+		maxAttempts = 3,
+		backoff = @Backoff(delay = 5000)
+	)
 	@Scheduled(cron = "0 */3 * * * *")
 	@Transactional
 	public void deleteHistoryOver24hours() {
 		LocalDateTime time = LocalDateTime.now().minusHours(24);
 
 		searchHistoryRepository.deleteBySearchedAtBefore(time);
+	}
+
+	@Recover
+	public void recover(Exception e) {
+		log.error("검색 기록 데이터 삭제 오류");
 	}
 
 	@Async
