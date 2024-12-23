@@ -116,7 +116,7 @@ public class SuggestedProduct extends BaseTimeStampEntity {
 
 	public void checkPossibleDelete() {
 		if (this.status != SuggestedStatus.PENDING && this.status != SuggestedStatus.COMPLETED) {
-			throw new IllegalArgumentException("PENDING 또는 COMPLETED 상태인 경우에만 제안 물품을 삭제할 수 있습니다.");
+			throw new ProductException(ExceptionCode.NOT_VALID_STATUS_SUGGESTED_PRODUCT_DELETE);
 		}
 	}
 
