@@ -17,7 +17,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -114,5 +117,48 @@ class ReviewServiceTest {
         ))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("점수는 1에서 5 사이여야 합니다.");
+    }
+
+    @Test
+    @DisplayName("리뷰 조회 성공")
+    void getMyReputationReviews_WhenValidMember_ShouldReturnReviewList() {
+        // given
+        VerifiedMember verifiedMember = VerifiedMember.builder()
+                .id(1L)
+                .email("reviewee@email.com")
+                .build();
+
+        List<Review> mockReviews = Stream.of(
+                Review.builder()
+                        .id(1L)
+                        .reviewerId(2L)
+                        .revieweeId(verifiedMember.getId())
+                        .tradeProductId(3L)
+                        .content("Great transaction!")
+                        .score(5.0)
+                        .createdAt(LocalDateTime.now())
+                        .build(),
+                Review.builder()
+                        .id(2L)
+                        .reviewerId(3L)
+                        .revieweeId(verifiedMember.getId())
+                        .tradeProductId(4L)
+                        .content("Good product quality.")
+                        .score(4.5)
+                        .createdAt(LocalDateTime.now())
+                        .build()
+        ).collect(Collectors.toList());
+
+        when(reviewRepository.findByRevieweeId(verifiedMember.getId())).thenReturn(mockReviews);
+
+        // when
+        List<ReviewResponseDto> responseDtos = reviewService.getMyReputationReviews(verifiedMember);
+
+        // then
+        assertThat(responseDtos).hasSize(2);
+        assertThat(responseDtos.get(0).getContent()).isEqualTo("Great transaction!");
+        assertThat(responseDtos.get(1).getContent()).isEqualTo("Good product quality.");
+
+        verify(reviewRepository).findByRevieweeId(verifiedMember.getId());
     }
 }
