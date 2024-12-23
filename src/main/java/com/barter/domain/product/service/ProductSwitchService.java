@@ -28,7 +28,7 @@ public class ProductSwitchService {
 		Long suggestedProductId, Long verifiedMemberId
 	) {
 		SuggestedProduct suggestedProduct = suggestedProductRepository.findById(suggestedProductId)
-			.orElseThrow(() -> new IllegalArgumentException("Suggested product not found"));
+			.orElseThrow(() -> new ProductException(ExceptionCode.NOT_FOUND_SUGGESTED_PRODUCT));
 
 		suggestedProduct.checkPermission(verifiedMemberId);
 		suggestedProduct.checkPossibleDelete();

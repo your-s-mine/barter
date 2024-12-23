@@ -15,6 +15,7 @@ public enum ExceptionCode {
 
 	// 물품
 	NOT_FOUND_REGISTERED_PRODUCT(HttpStatus.NOT_FOUND, "존재하지 않는 등록물품입니다."),
+	NOT_FOUND_SUGGESTED_PRODUCT(HttpStatus.NOT_FOUND, "존재하지 않는 제안물품입니다."),
 	NOT_OWNER_REGISTERED_PRODUCT(HttpStatus.FORBIDDEN, "등록물품을 생성한 회원이 아닙니다."),
 	REGISTERED_PRODUCT_INFO_UPDATE_IMPOSSIBLE(HttpStatus.BAD_REQUEST, "PENDING 상태일 때, 등록물품 정보를 수정할 수 있습니다."),
 	NOT_VALID_STATUS_REGISTERED_PRODUCT_DELETE(

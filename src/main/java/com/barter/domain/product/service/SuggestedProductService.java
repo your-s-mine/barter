@@ -22,6 +22,8 @@ import com.barter.domain.product.dto.response.UpdateSuggestedProductStatusResDto
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.repository.SuggestedProductRepository;
 import com.barter.domain.product.validator.ImageCountValidator;
+import com.barter.exception.customexceptions.ProductException;
+import com.barter.exception.enums.ExceptionCode;
 
 import lombok.RequiredArgsConstructor;
 
@@ -47,7 +49,7 @@ public class SuggestedProductService {
 
 	public FindSuggestedProductResDto findSuggestedProduct(Long suggestedProductId, Long verifiedMemberId) {
 		SuggestedProduct foundProduct = suggestedProductRepository.findById(suggestedProductId)
-			.orElseThrow(() -> new IllegalArgumentException("Suggested product not found"));
+			.orElseThrow(() -> new ProductException(ExceptionCode.NOT_FOUND_SUGGESTED_PRODUCT));
 
 		foundProduct.checkPermission(verifiedMemberId);
 
@@ -67,7 +69,7 @@ public class SuggestedProductService {
 		UpdateSuggestedProductInfoReqDto request, List<MultipartFile> multipartFiles, Long verifiedMemberId
 	) {
 		SuggestedProduct foundProduct = suggestedProductRepository.findById(request.getId())
-			.orElseThrow(() -> new IllegalArgumentException("Suggested product not found"));
+			.orElseThrow(() -> new ProductException(ExceptionCode.NOT_FOUND_SUGGESTED_PRODUCT));
 
 		foundProduct.checkPermission(verifiedMemberId);
 		foundProduct.checkPossibleUpdate();
@@ -92,7 +94,7 @@ public class SuggestedProductService {
 		UpdateSuggestedProductStatusReqDto request, Long verifiedMemberId
 	) {
 		SuggestedProduct foundProduct = suggestedProductRepository.findById(request.getId())
-			.orElseThrow(() -> new IllegalArgumentException("Suggested product not found"));
+			.orElseThrow(() -> new ProductException(ExceptionCode.NOT_FOUND_SUGGESTED_PRODUCT));
 
 		foundProduct.checkPermission(verifiedMemberId);
 
@@ -104,7 +106,7 @@ public class SuggestedProductService {
 	@Transactional
 	public void deleteSuggestedProduct(Long suggestedProductId, Long verifiedMemberId) {
 		SuggestedProduct foundProduct = suggestedProductRepository.findById(suggestedProductId)
-			.orElseThrow(() -> new IllegalArgumentException("Suggested product not found"));
+			.orElseThrow(() -> new ProductException(ExceptionCode.NOT_FOUND_SUGGESTED_PRODUCT));
 
 		foundProduct.checkPermission(verifiedMemberId);
 		foundProduct.checkPossibleDelete();
