@@ -85,7 +85,7 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 
 	public void checkPossibleUpdate() {
 		if (this.status != RegisteredStatus.PENDING) {
-			throw new IllegalArgumentException("PENDING 상태인 경우에만 등록 물품을 수정할 수 있습니다.");
+			throw new ProductException(ExceptionCode.REGISTERED_PRODUCT_INFO_UPDATE_IMPOSSIBLE);
 		}
 	}
 
