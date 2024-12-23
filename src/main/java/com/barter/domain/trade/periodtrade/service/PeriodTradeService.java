@@ -109,7 +109,7 @@ public class PeriodTradeService {
 		return FindPeriodTradeResDto.from(periodTrade);
 	}
 
-	@Cacheable("suggestionList")
+	@Cacheable(cacheResolver = "cacheResolver", value = "suggestionList")
 	public List<FindPeriodTradeSuggestionResDto> findPeriodTradesSuggestion(Long tradeId) {
 		return getPeriodTradeSuggestions(tradeId);
 

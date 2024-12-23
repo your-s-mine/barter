@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -71,14 +72,21 @@ public class ImmediateTradeService {
 		return FindImmediateTradeResDto.from(savedTrade);
 	}
 
-	@Transactional
+	@Transactional(readOnly = true)
+	@CachePut(cacheResolver = "cacheResolver", value = "immediateTradeList", key = "#tradeId")
 	public FindImmediateTradeResDto find(Long tradeId) {
 		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
 
-		immediateTrade.addViewCount();
-
 		return FindImmediateTradeResDto.from(immediateTrade);
+	}
+
+	@Transactional
+	public void addViewCount(Long tradeId) {
+		ImmediateTrade immediateTrade = immediateTradeRepository.findById(tradeId)
+			.orElseThrow(() -> new IllegalArgumentException("해당 교환을 찾을 수 없습니다."));
+
+		immediateTrade.addViewCount();
 	}
 
 	@Transactional(readOnly = true)

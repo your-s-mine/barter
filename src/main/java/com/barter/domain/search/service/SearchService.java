@@ -4,13 +4,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.barter.domain.product.entity.RegisteredProduct;
-import com.barter.domain.search.dto.SearchTradeResDto;
 import com.barter.domain.search.dto.ConvertRegisteredProductDto;
+import com.barter.domain.search.dto.SearchTradeResDto;
 import com.barter.domain.search.entity.SearchHistory;
 import com.barter.domain.search.entity.SearchKeyword;
 import com.barter.domain.search.repository.SearchHistoryRepository;
@@ -38,23 +39,19 @@ public class SearchService {
 	public List<SearchTradeResDto> searchKeywordAndFindTrades(String word) {
 
 		SearchKeyword searchKeyword = searchKeywordRepository.findByWord(word)
-			.orElseGet(() ->
-				searchKeywordRepository.save(SearchKeyword.builder()
+			.orElseGet(() -> searchKeywordRepository.save(
+				SearchKeyword.builder()
 					.word(word)
 					.count(0L)
 					.build()
-				));
+			));
 
 		searchHistoryRepository.save(SearchHistory.builder()
 			.searchKeyword(searchKeyword)
 			.build()
 		);
 
-		LocalDateTime since = LocalDateTime.now().minusHours(24);
-		Long recentCount = searchHistoryRepository.countRecentSearches(searchKeyword.getId(), since);
-
-		searchKeyword.updateCount(recentCount);
-		searchKeywordRepository.save(searchKeyword);
+		asyncUpdateSearchKeywordCount(searchKeyword.getId());
 
 		List<DonationTrade> donationTrades = donationTradeRepository.findDonationTradesWithProduct(word);
 		List<ImmediateTrade> immediateTrades = immediateTradeRepository.findImmediateTradesWithProduct(word);
@@ -75,7 +72,6 @@ public class SearchService {
 	}
 
 	public List<String> findPopularKeywords() {
-
 		List<SearchKeyword> searchKeywords = searchKeywordRepository.findTop10ByOrderByCountDesc();
 
 		if (searchKeywords.isEmpty()) {
@@ -87,14 +83,22 @@ public class SearchService {
 		return searchKeywords.stream().map(topKeyword -> topKeyword.getWord()).toList();
 	}
 
-	@Scheduled(cron = "0 */5 * * * *")
+	@Scheduled(cron = "0 */3 * * * *")
 	@Transactional
 	public void deleteHistoryOver24hours() {
 		LocalDateTime time = LocalDateTime.now().minusHours(24);
 
-		List<SearchHistory> searchHistories = searchHistoryRepository.findAllBySearchedAt(time);
+		searchHistoryRepository.deleteBySearchedAtBefore(time);
+	}
 
-		searchHistoryRepository.deleteAll(searchHistories);
+	@Async
+	public void asyncUpdateSearchKeywordCount(Long searchKeywordId) {
+		LocalDateTime since = LocalDateTime.now().minusHours(24);
+		Long recentCount = searchHistoryRepository.countRecentSearches(searchKeywordId, since);
+
+		SearchKeyword searchKeyword = searchKeywordRepository.findById(searchKeywordId).orElseThrow();
+		searchKeyword.updateCount(recentCount);
+		searchKeywordRepository.save(searchKeyword);
 	}
 
 	private List<SearchTradeResDto> mapDonationTradesToSearchTradeRes(List<DonationTrade> trades) {
