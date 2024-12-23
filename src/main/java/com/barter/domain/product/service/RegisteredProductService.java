@@ -22,6 +22,8 @@ import com.barter.domain.product.dto.response.UpdateRegisteredProductStatusResDt
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.validator.ImageCountValidator;
+import com.barter.exception.customexceptions.ProductException;
+import com.barter.exception.enums.ExceptionCode;
 
 import lombok.RequiredArgsConstructor;
 
@@ -48,7 +50,7 @@ public class RegisteredProductService {
 
 	public FindRegisteredProductResDto findRegisteredProduct(Long RegisteredProductId, Long verifiedMemberId) {
 		RegisteredProduct foundProduct = registeredProductRepository.findById(RegisteredProductId)
-			.orElseThrow(() -> new IllegalArgumentException("Registered product not found"));
+			.orElseThrow(() -> new ProductException(ExceptionCode.NOT_FOUND_REGISTERED_PRODUCT));
 
 		foundProduct.checkPermission(verifiedMemberId);
 
@@ -68,7 +70,7 @@ public class RegisteredProductService {
 		UpdateRegisteredProductInfoReqDto request, List<MultipartFile> multipartFiles, Long verifiedMemberId
 	) {
 		RegisteredProduct foundProduct = registeredProductRepository.findById(request.getId())
-			.orElseThrow(() -> new IllegalArgumentException("Registered product not found"));
+			.orElseThrow(() -> new ProductException(ExceptionCode.NOT_FOUND_REGISTERED_PRODUCT));
 
 		foundProduct.checkPermission(verifiedMemberId);
 		foundProduct.checkPossibleUpdate();
@@ -94,7 +96,7 @@ public class RegisteredProductService {
 		UpdateRegisteredProductStatusReqDto request, Long verifiedMemberId
 	) {
 		RegisteredProduct foundProduct = registeredProductRepository.findById(request.getId())
-			.orElseThrow(() -> new IllegalArgumentException("Registered product not found"));
+			.orElseThrow(() -> new ProductException(ExceptionCode.NOT_FOUND_REGISTERED_PRODUCT));
 
 		foundProduct.checkPermission(verifiedMemberId);
 
@@ -106,7 +108,7 @@ public class RegisteredProductService {
 	@Transactional
 	public void deleteRegisteredProduct(Long registeredProductId, Long verifiedMemberId) {
 		RegisteredProduct foundProduct = registeredProductRepository.findById(registeredProductId)
-			.orElseThrow(() -> new IllegalArgumentException("Registered product not found"));
+			.orElseThrow(() -> new ProductException(ExceptionCode.NOT_FOUND_REGISTERED_PRODUCT));
 
 		foundProduct.checkPermission(verifiedMemberId);
 		foundProduct.checkPossibleDelete();
