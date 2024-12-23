@@ -1,5 +1,8 @@
 package com.barter.domain.product.enums;
 
+import com.barter.exception.customexceptions.ProductException;
+import com.barter.exception.enums.ExceptionCode;
+
 public enum RegisteredStatus {
 	PENDING, REGISTERING, ACCEPTED, COMPLETED;
 
@@ -10,6 +13,6 @@ public enum RegisteredStatus {
 			}
 		}
 
-		throw new IllegalArgumentException("Registered status has not value " + status);
+		throw new ProductException(ExceptionCode.NOT_SUPPORT_REGISTERED_STATUS);
 	}
 }
