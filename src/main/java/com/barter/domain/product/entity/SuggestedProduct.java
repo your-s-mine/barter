@@ -10,6 +10,8 @@ import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateSuggestedProductReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductInfoReqDto;
 import com.barter.domain.product.enums.SuggestedStatus;
+import com.barter.exception.customexceptions.ProductException;
+import com.barter.exception.enums.ExceptionCode;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -69,7 +71,7 @@ public class SuggestedProduct extends BaseTimeStampEntity {
 
 	public void checkPermission(Long memberId) {
 		if (!this.member.getId().equals(memberId)) {
-			throw new IllegalArgumentException("권한이 없습니다.");
+			throw new ProductException(ExceptionCode.NOT_OWNER_SUGGESTED_PRODUCT);
 		}
 	}
 
