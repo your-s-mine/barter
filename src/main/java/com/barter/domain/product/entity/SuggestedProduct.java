@@ -89,7 +89,7 @@ public class SuggestedProduct extends BaseTimeStampEntity {
 
 	public void checkPossibleUpdate() {
 		if (this.status != SuggestedStatus.PENDING) {
-			throw new IllegalArgumentException("PENDING 상태인 경우에만 제안 물품을 수정할 수 있습니다.");
+			throw new ProductException(ExceptionCode.SUGGESTED_PRODUCT_INFO_UPDATE_IMPOSSIBLE);
 		}
 	}
 
