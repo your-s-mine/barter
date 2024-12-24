@@ -20,6 +20,8 @@ import com.barter.domain.member.entity.MemberFavoriteKeyword;
 import com.barter.domain.member.repository.FavoriteKeywordRepository;
 import com.barter.domain.member.repository.MemberFavoriteKeywordRepository;
 import com.barter.domain.member.repository.MemberRepository;
+import com.barter.exception.customexceptions.AuthException;
+import com.barter.exception.customexceptions.FavoriteKeywordException;
 
 @ExtendWith(MockitoExtension.class)
 class FavoriteKeywordServiceTest {
@@ -88,7 +90,7 @@ class FavoriteKeywordServiceTest {
 
 		// when & then
 		assertThatThrownBy(() -> favoriteKeywordService.createFavoriteKeyword(verifiedMember, req))
-			.isInstanceOf(IllegalArgumentException.class)
+			.isInstanceOf(AuthException.class)
 			.hasMessageContaining("존재하지 않는");
 	}
 
@@ -115,7 +117,7 @@ class FavoriteKeywordServiceTest {
 
 		// when & then
 		assertThatThrownBy(() -> favoriteKeywordService.createFavoriteKeyword(verifiedMember, req))
-			.isInstanceOf(IllegalArgumentException.class)
+			.isInstanceOf(FavoriteKeywordException.class)
 			.hasMessageContaining("이미 관심키워드로");
 	}
 
@@ -140,7 +142,7 @@ class FavoriteKeywordServiceTest {
 
 		// when & then
 		assertThatThrownBy(() -> favoriteKeywordService.createFavoriteKeyword(verifiedMember, req))
-			.isInstanceOf(IllegalArgumentException.class)
+			.isInstanceOf(FavoriteKeywordException.class)
 			.hasMessageContaining("관심 키워드는 3개까지만");
 	}
 
@@ -190,7 +192,7 @@ class FavoriteKeywordServiceTest {
 
 		// when & then
 		assertThatThrownBy(() -> favoriteKeywordService.deleteFavoriteKeyword(verifiedMember, memberFavoriteKeywordId))
-			.isInstanceOf(IllegalArgumentException.class);
+			.isInstanceOf(FavoriteKeywordException.class);
 
 	}
 
