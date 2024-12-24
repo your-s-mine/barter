@@ -18,6 +18,8 @@ import com.barter.domain.notification.entity.Notification;
 import com.barter.domain.notification.enums.EventKind;
 import com.barter.domain.notification.respository.NotificationRepository;
 import com.barter.domain.product.enums.TradeType;
+import com.barter.exception.customexceptions.NotificationException;
+import com.barter.exception.enums.ExceptionCode;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +57,7 @@ public class NotificationService {
 		Long notificationId, Long verifiedMemberId
 	) {
 		Notification foundNotification = notificationRepository.findById(notificationId)
-			.orElseThrow(() -> new IllegalArgumentException("Notification not found"));
+			.orElseThrow(() -> new NotificationException(ExceptionCode.NOT_FOUND_NOTIFICATION));
 
 		foundNotification.checkPermission(verifiedMemberId);
 
@@ -67,7 +69,7 @@ public class NotificationService {
 	@Transactional
 	public void deleteNotification(Long notificationId, Long verifiedMemberId) {
 		Notification foundNotification = notificationRepository.findById(notificationId)
-			.orElseThrow(() -> new IllegalArgumentException("Notification not found"));
+			.orElseThrow(() -> new NotificationException(ExceptionCode.NOT_FOUND_NOTIFICATION));
 
 		foundNotification.checkPermission(verifiedMemberId);
 
