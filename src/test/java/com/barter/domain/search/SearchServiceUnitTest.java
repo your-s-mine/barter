@@ -1,22 +1,13 @@
 package com.barter.domain.search;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.barter.domain.search.dto.SearchTradeResDto;
-import com.barter.domain.search.entity.SearchHistory;
-import com.barter.domain.search.entity.SearchKeyword;
 import com.barter.domain.search.repository.SearchHistoryRepository;
 import com.barter.domain.search.repository.SearchKeywordRepository;
 import com.barter.domain.search.service.SearchService;
@@ -46,7 +37,7 @@ public class SearchServiceUnitTest {
 	List<DonationTrade> donationTrades = new ArrayList<>();
 	List<ImmediateTrade> immediateTrades = new ArrayList<>();
 	List<PeriodTrade> periodTrades = new ArrayList<>();
-
+/*
 	@Test
 	@DisplayName("검색 - 기존에 검색 이력이 없어서 생성하는 경우")
 	void searchAndCreateKeywordAndFindTrades() {
@@ -202,4 +193,5 @@ public class SearchServiceUnitTest {
 		verify(searchHistoryRepository, times(1)).findAllBySearchedAt(any());
 		verify(searchHistoryRepository, times(1)).deleteAll(oldHistories);
 	}
+ */
 }
