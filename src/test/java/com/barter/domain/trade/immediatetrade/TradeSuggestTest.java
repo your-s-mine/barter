@@ -35,6 +35,8 @@ import com.barter.domain.trade.immediatetrade.dto.response.FindImmediateTradeRes
 import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
 import com.barter.domain.trade.immediatetrade.service.ImmediateTradeService;
+import com.barter.exception.customexceptions.ImmediateTradeException;
+import com.barter.exception.customexceptions.ProductException;
 
 @ExtendWith(MockitoExtension.class)
 public class TradeSuggestTest {
@@ -147,7 +149,7 @@ public class TradeSuggestTest {
 
 		assertThatThrownBy(() ->
 			immediateTradeService.createTradeSuggest(immediateTrade.getId(), reqDto, suggester))
-			.isInstanceOf(IllegalStateException.class).hasMessage("PENDING 상태의 교환에만 제안할 수 있습니다.");
+			.isInstanceOf(ImmediateTradeException.class).hasMessage("PENDING 상태의 교환에만 제안할 수 있습니다.");
 
 	}
 
@@ -165,7 +167,7 @@ public class TradeSuggestTest {
 
 		assertThatThrownBy(() ->
 			immediateTradeService.createTradeSuggest(immediateTrade.getId(), reqDto, suggester))
-			.isInstanceOf(IllegalArgumentException.class).hasMessage("PENDING 상태의 상품으로만 제안하실 수 있습니다.");
+			.isInstanceOf(ProductException.class).hasMessage("PENDING 상태의 상품으로만 제안하실 수 있습니다.");
 	}
 
 	@Test
@@ -212,7 +214,7 @@ public class TradeSuggestTest {
 
 		assertThatThrownBy(() ->
 			immediateTradeService.denyTradeSuggest(123L, verifiedMember))
-			.isInstanceOf(IllegalArgumentException.class).hasMessage("해당 교환을 찾을 수 없습니다.");
+			.isInstanceOf(ImmediateTradeException.class).hasMessage("존재하지 않는 즉시 교환입니다.");
 
 	}
 
@@ -260,7 +262,7 @@ public class TradeSuggestTest {
 
 		assertThatThrownBy(() ->
 			immediateTradeService.denyTradeSuggest(123L, verifiedMember))
-			.isInstanceOf(IllegalArgumentException.class).hasMessage("해당 교환을 찾을 수 없습니다.");
+			.isInstanceOf(ImmediateTradeException.class).hasMessage("존재하지 않는 즉시 교환입니다.");
 
 	}
 

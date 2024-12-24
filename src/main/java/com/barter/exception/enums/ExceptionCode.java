@@ -32,6 +32,7 @@ public enum ExceptionCode {
 	NOT_SUPPORT_REGISTERED_STATUS(HttpStatus.BAD_REQUEST, "지원하지 않는 등록물품 상태입니다."),
 	NOT_SUPPORT_SUGGESTED_STATUS(HttpStatus.BAD_REQUEST, "지원하지 않는 제안물품 상태입니다."),
 	NOT_VALID_IMAGE_COUNT(HttpStatus.BAD_REQUEST, "1~3개 사이의 이미지를 가질 수 있습니다."),
+	NOT_PENDING_FOR_SUGGEST(HttpStatus.FORBIDDEN, "PENDING 상태의 상품으로만 제안하실 수 있습니다."),
 
 	// 알림
 	NOT_FOUND_NOTIFICATION(HttpStatus.NOT_FOUND, "존재하지 않는 알림입니다."),
@@ -48,6 +49,14 @@ public enum ExceptionCode {
 	DUPLICATE_FAVORITE_KEYWORD(HttpStatus.CONFLICT, "이미 관심키워드로 등록돼 있습니다."),
 	MAX_FAVORITE_KEYWORDS_EXCEEDED(HttpStatus.BAD_REQUEST, "관심 키워드는 3개까지만 등록 가능합니다."),
 	NOT_FOUND_FAVORITE_KEYWORD(HttpStatus.NOT_FOUND, "존재하지 않는 관심 키워드 입니다."),
+
+	// 즉시 교환
+	IT_NOT_FOUND_IMMEDIATE_TRADE(HttpStatus.NOT_FOUND, "존재하지 않는 즉시 교환입니다."),
+	IT_NOT_IN_PROGRESS_FOR_UPDATING_COMPLETED(HttpStatus.FORBIDDEN, "IN_PROGRESS 상태의 교환만을 COMPLETED 상태로 변경하실 수 있습니다."),
+	IT_NOT_PENDING_FOR_DELETION(HttpStatus.FORBIDDEN, "PENDING 상태의 교환만 삭제할 수 있습니다."),
+	IT_NOT_PENDING_FOR_SUGGEST(HttpStatus.FORBIDDEN, "PENDING 상태의 교환에만 제안할 수 있습니다."),
+	IT_NOT_IN_PROGRESS_FOR_CANCELING(HttpStatus.FORBIDDEN, "IN_PROGRESS 상태의 교환만을 수락 취소할 수 있습니다."),
+
 	;
 
 	private final HttpStatus code;

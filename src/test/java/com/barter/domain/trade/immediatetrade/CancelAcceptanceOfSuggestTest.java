@@ -30,6 +30,7 @@ import com.barter.domain.trade.enums.TradeStatus;
 import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
 import com.barter.domain.trade.immediatetrade.service.ImmediateTradeService;
+import com.barter.exception.customexceptions.ImmediateTradeException;
 
 @ExtendWith(MockitoExtension.class)
 public class CancelAcceptanceOfSuggestTest {
@@ -124,7 +125,7 @@ public class CancelAcceptanceOfSuggestTest {
 
 		assertThatThrownBy(
 			() -> immediateTradeService.cancelAcceptanceOfSuggest(immediateTrade.getId(), verifiedMember))
-			.isInstanceOf(IllegalArgumentException.class).hasMessage("IN_PROGRESS 상태의 교환만을 수락 취소할 수 있습니다.");
+			.isInstanceOf(ImmediateTradeException.class).hasMessage("IN_PROGRESS 상태의 교환만을 수락 취소할 수 있습니다.");
 
 	}
 }
