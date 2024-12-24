@@ -32,6 +32,8 @@ public class KafkaProducerConfiguration {
 			ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092",
 			ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class,
 			ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class
+			// 파티셔닝 전략 추가 (주석을 해야 일정한 파티션 분배 가능)
+			//ProducerConfig.PARTITIONER_CLASS_CONFIG, RoundRobinPartitioner.class
 		);
 
 		return producerConfigurations;

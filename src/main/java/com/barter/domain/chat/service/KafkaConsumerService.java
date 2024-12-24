@@ -17,8 +17,13 @@ public class KafkaConsumerService {
 	@KafkaListener(topics = "${kafka.topic.chat}", groupId = "chatGroup")
 	public void listenChatMessage(ChatMessageReqDto chatMessageReqDto) {
 		// kafka 에서 메시지를 받으면 해당 메시지를 STOMP 로 전달
-		String roomId = chatMessageReqDto.getRoomId();
-		messagingTemplate.convertAndSend("/topic/chat/room/" + roomId, chatMessageReqDto);
+
+		try {
+			String roomId = chatMessageReqDto.getRoomId();
+			messagingTemplate.convertAndSend("/topic/chat/room/" + roomId, chatMessageReqDto);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 
 	}
 }

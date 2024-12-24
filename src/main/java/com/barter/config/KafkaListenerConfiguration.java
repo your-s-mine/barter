@@ -38,7 +38,7 @@ public class KafkaListenerConfiguration {
 
 		consumerConfigurations = Map.of(
 			ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092",
-			ConsumerConfig.GROUP_ID_CONFIG, "adopt",
+			ConsumerConfig.GROUP_ID_CONFIG, "server-a-group",
 			ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class,
 			ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializer,
 			ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
