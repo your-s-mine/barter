@@ -88,7 +88,7 @@ public class Notification extends BaseTimeStampEntity {
 
 	public void checkPermission(Long memberId) {
 		if (!this.memberId.equals(memberId)) {
-			throw new IllegalArgumentException("권한이 없습니다.");
+			throw new NotificationException(ExceptionCode.NOT_OWNER_NOTIFICATION);
 		}
 	}
 }

@@ -33,6 +33,7 @@ public enum ExceptionCode {
 	// 알림
 	NOT_FOUND_NOTIFICATION(HttpStatus.NOT_FOUND, "존재하지 않는 알림입니다."),
 	NOT_READ_NOTIFICATION(HttpStatus.BAD_REQUEST, "읽지 않은 알림입니다."),
+	NOT_OWNER_NOTIFICATION(HttpStatus.FORBIDDEN, "알림을 받은 회원이 아닙니다."),
 	;
 
 	private final HttpStatus code;
