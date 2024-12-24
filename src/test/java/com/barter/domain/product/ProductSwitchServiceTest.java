@@ -23,6 +23,8 @@ import com.barter.domain.product.enums.SuggestedStatus;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.repository.SuggestedProductRepository;
 import com.barter.domain.product.service.ProductSwitchService;
+import com.barter.exception.customexceptions.ProductException;
+import com.barter.exception.enums.ExceptionCode;
 
 @ExtendWith(MockitoExtension.class)
 public class ProductSwitchServiceTest {
@@ -90,14 +92,14 @@ public class ProductSwitchServiceTest {
 		Long verifiedMemberId = 1L;
 
 		when(suggestedProductRepository.findById(suggestedProductId)).thenThrow(
-			new IllegalArgumentException("Suggested product not found")
+			new ProductException(ExceptionCode.NOT_FOUND_SUGGESTED_PRODUCT)
 		);
 
 		//when & then
 		assertThatThrownBy(() ->
 			productSwitchService.createRegisteredProductFromSuggestedProduct(suggestedProductId, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("Suggested product not found");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_FOUND_SUGGESTED_PRODUCT.getMessage());
 	}
 
 	@Test
@@ -124,8 +126,8 @@ public class ProductSwitchServiceTest {
 		//when & then
 		assertThatThrownBy(() ->
 			productSwitchService.createRegisteredProductFromSuggestedProduct(suggestedProductId, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("권한이 없습니다.");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_OWNER_SUGGESTED_PRODUCT.getMessage());
 	}
 
 	@Test
@@ -152,8 +154,8 @@ public class ProductSwitchServiceTest {
 		//when & then
 		assertThatThrownBy(() ->
 			productSwitchService.createRegisteredProductFromSuggestedProduct(suggestedProductId, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("PENDING 상태인 경우에만 제안 물품을 삭제할 수 있습니다.");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.SUGGESTED_PRODUCT_INFO_UPDATE_IMPOSSIBLE.getMessage());
 	}
 
 	@Test
@@ -211,14 +213,14 @@ public class ProductSwitchServiceTest {
 		Long verifiedMemberId = 1L;
 
 		when(registeredProductRepository.findById(registeredProductId)).thenThrow(
-			new IllegalArgumentException("Registered product not found")
+			new ProductException(ExceptionCode.NOT_FOUND_REGISTERED_PRODUCT)
 		);
 
 		//when & then
 		assertThatThrownBy(() ->
 			productSwitchService.createSuggestedProductFromRegisteredProduct(registeredProductId, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("Registered product not found");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_FOUND_REGISTERED_PRODUCT.getMessage());
 	}
 
 	@Test
@@ -245,8 +247,8 @@ public class ProductSwitchServiceTest {
 		//when & then
 		assertThatThrownBy(() ->
 			productSwitchService.createSuggestedProductFromRegisteredProduct(registeredProductId, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("권한이 없습니다.");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_OWNER_REGISTERED_PRODUCT.getMessage());
 	}
 
 	@Test
@@ -273,7 +275,7 @@ public class ProductSwitchServiceTest {
 		//when & then
 		assertThatThrownBy(() ->
 			productSwitchService.createSuggestedProductFromRegisteredProduct(registeredProductId, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("PENDING 상태인 경우에만 등록 물품을 삭제할 수 있습니다.");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.REGISTERED_PRODUCT_INFO_UPDATE_IMPOSSIBLE.getMessage());
 	}
 }

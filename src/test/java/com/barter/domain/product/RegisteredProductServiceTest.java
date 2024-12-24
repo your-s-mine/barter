@@ -39,6 +39,8 @@ import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.enums.RegisteredStatus;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.service.RegisteredProductService;
+import com.barter.exception.customexceptions.ProductException;
+import com.barter.exception.enums.ExceptionCode;
 
 @ExtendWith(MockitoExtension.class)
 public class RegisteredProductServiceTest {
@@ -113,8 +115,8 @@ public class RegisteredProductServiceTest {
 		//when && then
 		assertThatThrownBy(
 			() -> registeredProductService.createRegisteredProduct(request, multipartFiles, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessageContaining("1 ~ 3개 사이의 이미지를 가져야 합니다.");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_VALID_IMAGE_COUNT.getMessage());
 	}
 
 	@Test
@@ -157,12 +159,12 @@ public class RegisteredProductServiceTest {
 		Long verifiedMemberId = 1L;
 
 		when(registeredProductRepository.findById(registeredProductId))
-			.thenThrow(new IllegalArgumentException("Registered product not found"));
+			.thenThrow(new ProductException(ExceptionCode.NOT_FOUND_REGISTERED_PRODUCT));
 
 		//when & then
 		assertThatThrownBy(() -> registeredProductService.findRegisteredProduct(registeredProductId, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("Registered product not found");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_FOUND_REGISTERED_PRODUCT.getMessage());
 	}
 
 	@Test
@@ -186,8 +188,8 @@ public class RegisteredProductServiceTest {
 
 		//when & then
 		assertThatThrownBy(() -> registeredProductService.findRegisteredProduct(registeredProductId, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("권한이 없습니다.");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_OWNER_REGISTERED_PRODUCT.getMessage());
 	}
 
 	@Test
@@ -314,14 +316,14 @@ public class RegisteredProductServiceTest {
 		Long verifiedMemberId = 1L;
 
 		when(registeredProductRepository.findById(request.getId())).thenThrow(
-			new IllegalArgumentException("Registered product not found")
+			new ProductException(ExceptionCode.NOT_FOUND_REGISTERED_PRODUCT)
 		);
 
 		//when & then
 		assertThatThrownBy(() ->
 			registeredProductService.updateRegisteredProductInfo(request, multipartFiles, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("Registered product not found");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_FOUND_REGISTERED_PRODUCT.getMessage());
 	}
 
 	@Test
@@ -351,8 +353,8 @@ public class RegisteredProductServiceTest {
 		//when & then
 		assertThatThrownBy(() ->
 			registeredProductService.updateRegisteredProductInfo(request, multipartFiles, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("권한이 없습니다.");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_OWNER_REGISTERED_PRODUCT.getMessage());
 	}
 
 	@Test
@@ -382,8 +384,8 @@ public class RegisteredProductServiceTest {
 		//when & then
 		assertThatThrownBy(() ->
 			registeredProductService.updateRegisteredProductInfo(request, multipartFiles, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("PENDING 상태인 경우에만 등록 물품을 수정할 수 있습니다.");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.REGISTERED_PRODUCT_INFO_UPDATE_IMPOSSIBLE.getMessage());
 	}
 
 	@Test
@@ -415,8 +417,8 @@ public class RegisteredProductServiceTest {
 		//when & then
 		assertThatThrownBy(() ->
 			registeredProductService.updateRegisteredProductInfo(request, multipartFiles, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("1 ~ 3개 사이의 이미지를 가져야 합니다.");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_VALID_IMAGE_COUNT.getMessage());
 	}
 
 	@Test
@@ -469,17 +471,17 @@ public class RegisteredProductServiceTest {
 		Long verifiedMemberId = 1L;
 
 		when(registeredProductRepository.findById(request.getId()))
-			.thenThrow(new IllegalArgumentException("Registered product not found"));
+			.thenThrow(new ProductException(ExceptionCode.NOT_FOUND_REGISTERED_PRODUCT));
 
 		//when & then
 		assertThatThrownBy(() ->
 			registeredProductService.updateRegisteredProductStatus(request, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("Registered product not found");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_FOUND_REGISTERED_PRODUCT.getMessage());
 	}
 
 	@Test
-	@DisplayName("등록 물품 상태 수정 - 수정 권환 예외 테스트")
+	@DisplayName("등록 물품 상태 수정 - 수정 권한 예외 테스트")
 	void updateRegisteredProductStatusTest_Exception2() {
 		//given
 		UpdateRegisteredProductStatusReqDto request = UpdateRegisteredProductStatusReqDto.builder()
@@ -501,8 +503,8 @@ public class RegisteredProductServiceTest {
 		//when & then
 		assertThatThrownBy(() ->
 			registeredProductService.updateRegisteredProductStatus(request, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("권한이 없습니다.");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_OWNER_REGISTERED_PRODUCT.getMessage());
 	}
 
 	@Test
@@ -563,13 +565,13 @@ public class RegisteredProductServiceTest {
 		Long verifiedMemberId = 1L;
 
 		when(registeredProductRepository.findById(registeredProductId))
-			.thenThrow(new IllegalArgumentException("Registered product not found"));
+			.thenThrow(new ProductException(ExceptionCode.NOT_FOUND_REGISTERED_PRODUCT));
 
 		//when & then
 		assertThatThrownBy(() ->
 			registeredProductService.deleteRegisteredProduct(registeredProductId, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("Registered product not found");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_FOUND_REGISTERED_PRODUCT.getMessage());
 	}
 
 	@Test
@@ -591,8 +593,8 @@ public class RegisteredProductServiceTest {
 		//when & then
 		assertThatThrownBy(() ->
 			registeredProductService.deleteRegisteredProduct(registeredProductId, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("권한이 없습니다.");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_OWNER_REGISTERED_PRODUCT.getMessage());
 	}
 
 	@Test
@@ -614,8 +616,8 @@ public class RegisteredProductServiceTest {
 		//when & then
 		assertThatThrownBy(() ->
 			registeredProductService.deleteRegisteredProduct(registeredProductId, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("PENDING 상태인 경우에만 등록 물품을 삭제할 수 있습니다.");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_VALID_STATUS_REGISTERED_PRODUCT_DELETE.getMessage());
 	}
 
 	@Test
