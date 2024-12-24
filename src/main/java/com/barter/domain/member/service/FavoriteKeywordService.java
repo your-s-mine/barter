@@ -1,5 +1,7 @@
 package com.barter.domain.member.service;
 
+import static com.barter.exception.enums.ExceptionCode.*;
+
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -15,6 +17,8 @@ import com.barter.domain.member.entity.MemberFavoriteKeyword;
 import com.barter.domain.member.repository.FavoriteKeywordRepository;
 import com.barter.domain.member.repository.MemberFavoriteKeywordRepository;
 import com.barter.domain.member.repository.MemberRepository;
+import com.barter.exception.customexceptions.AuthException;
+import com.barter.exception.customexceptions.FavoriteKeywordException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,18 +34,17 @@ public class FavoriteKeywordService {
 	@Transactional
 	public void createFavoriteKeyword(VerifiedMember verifiedMember, CreateFavoriteKeywordReqDto req) {
 		Member member = memberRepository.findById(verifiedMember.getId())
-			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 멤버입니다."));
+			.orElseThrow(() -> new AuthException(NOT_FOUND_MEMBER));
 		String keyword = KeywordHelper.removeSpace(req.getKeyword());
 		FavoriteKeyword favoriteKeyword = favoriteKeywordRepository.findByKeyword(keyword)
-			.orElseGet(() -> favoriteKeywordRepository.save(
-				FavoriteKeyword.builder()
-					.keyword(keyword)
-					.build()));
+			.orElseGet(() -> favoriteKeywordRepository.save(FavoriteKeyword.builder()
+				.keyword(keyword)
+				.build()));
 		if (memberFavoriteKeywordRepository.existsByMemberAndFavoriteKeyword(member, favoriteKeyword)) {
-			throw new IllegalArgumentException("이미 관심키워드로 등록돼 있습니다.");
+			throw new FavoriteKeywordException(DUPLICATE_FAVORITE_KEYWORD);
 		}
 		if (memberFavoriteKeywordRepository.countByMember(member) >= MAX_KEYWORD_COUNT) {
-			throw new IllegalArgumentException("관심 키워드는 3개까지만 등록 가능합니다.");
+			throw new FavoriteKeywordException(MAX_FAVORITE_KEYWORDS_EXCEEDED);
 		}
 		MemberFavoriteKeyword memberFavoriteKeyword = MemberFavoriteKeyword.builder()
 			.member(member)
@@ -52,7 +55,7 @@ public class FavoriteKeywordService {
 
 	public List<FindFavoriteKeywordResDto> findFavoriteKeywords(VerifiedMember verifiedMember) {
 		Member member = memberRepository.findById(verifiedMember.getId())
-			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 멤버입니다."));
+			.orElseThrow(() -> new AuthException(NOT_FOUND_MEMBER));
 		return memberFavoriteKeywordRepository.findByMember(member).stream()
 			.map(FindFavoriteKeywordResDto::from)
 			.toList();
@@ -60,7 +63,7 @@ public class FavoriteKeywordService {
 
 	public void deleteFavoriteKeyword(VerifiedMember verifiedMember, Long memberFavoriteKeywordId) {
 		MemberFavoriteKeyword memberFavoriteKeyword = memberFavoriteKeywordRepository.findById(memberFavoriteKeywordId)
-			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 관심 키워드 입니다."));
+			.orElseThrow(() -> new FavoriteKeywordException(NOT_FOUND_FAVORITE_KEYWORD));
 		memberFavoriteKeyword.validateAuthority(verifiedMember.getId());
 		memberFavoriteKeywordRepository.delete(memberFavoriteKeyword);
 	}
