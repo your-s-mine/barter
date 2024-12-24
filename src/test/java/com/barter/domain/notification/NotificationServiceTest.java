@@ -13,13 +13,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PagedModel;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.barter.domain.notification.dto.response.FindNotificationResDto;
 import com.barter.domain.notification.dto.response.UpdateNotificationStatusResDto;
@@ -28,6 +28,8 @@ import com.barter.domain.notification.enums.NotificationType;
 import com.barter.domain.notification.respository.NotificationRepository;
 import com.barter.domain.notification.service.NotificationService;
 import com.barter.domain.product.enums.TradeType;
+import com.barter.exception.customexceptions.NotificationException;
+import com.barter.exception.enums.ExceptionCode;
 
 @ExtendWith(MockitoExtension.class)
 public class NotificationServiceTest {
@@ -216,13 +218,13 @@ public class NotificationServiceTest {
 		Long verifiedMemberId = 1L;
 
 		when(notificationRepository.findById(notificationId))
-			.thenThrow(new IllegalArgumentException("Notification not found"));
+			.thenThrow(new NotificationException(ExceptionCode.NOT_FOUND_NOTIFICATION));
 
 		//when & then
 		assertThatThrownBy(() ->
 			notificationService.updateNotificationStatus(notificationId, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("Notification not found");
+			.isInstanceOf(NotificationException.class)
+			.hasMessage(ExceptionCode.NOT_FOUND_NOTIFICATION.getMessage());
 	}
 
 	@Test
@@ -244,8 +246,8 @@ public class NotificationServiceTest {
 		//when & then
 		assertThatThrownBy(() ->
 			notificationService.updateNotificationStatus(notificationId, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("권한이 없습니다.");
+			.isInstanceOf(NotificationException.class)
+			.hasMessage(ExceptionCode.NOT_OWNER_NOTIFICATION.getMessage());
 	}
 
 	@Test
@@ -281,13 +283,13 @@ public class NotificationServiceTest {
 		Long verifiedNotificationId = 1L;
 
 		when(notificationRepository.findById(notificationId))
-			.thenThrow(new IllegalArgumentException("Notification not found"));
+			.thenThrow(new NotificationException(ExceptionCode.NOT_FOUND_NOTIFICATION));
 
 		//when & then
 		assertThatThrownBy(() ->
 			notificationService.deleteNotification(notificationId, verifiedNotificationId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("Notification not found");
+			.isInstanceOf(NotificationException.class)
+			.hasMessage(ExceptionCode.NOT_FOUND_NOTIFICATION.getMessage());
 	}
 
 	@Test
@@ -310,8 +312,8 @@ public class NotificationServiceTest {
 		//when & then
 		assertThatThrownBy(() ->
 			notificationService.deleteNotification(notificationId, verifiedNotificationId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("권한이 없습니다.");
+			.isInstanceOf(NotificationException.class)
+			.hasMessage(ExceptionCode.NOT_OWNER_NOTIFICATION.getMessage());
 	}
 
 	@Test
@@ -334,7 +336,7 @@ public class NotificationServiceTest {
 		//when & then
 		assertThatThrownBy(() ->
 			notificationService.deleteNotification(notificationId, verifiedNotificationId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("읽은 상태의 알람만 삭제할 수 있습니다.");
+			.isInstanceOf(NotificationException.class)
+			.hasMessage(ExceptionCode.NOT_READ_NOTIFICATION.getMessage());
 	}
 }

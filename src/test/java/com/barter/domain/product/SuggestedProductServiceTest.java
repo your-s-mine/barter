@@ -39,6 +39,8 @@ import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.enums.SuggestedStatus;
 import com.barter.domain.product.repository.SuggestedProductRepository;
 import com.barter.domain.product.service.SuggestedProductService;
+import com.barter.exception.customexceptions.ProductException;
+import com.barter.exception.enums.ExceptionCode;
 
 @ExtendWith(MockitoExtension.class)
 public class SuggestedProductServiceTest {
@@ -113,8 +115,8 @@ public class SuggestedProductServiceTest {
 		//when & then
 		assertThatThrownBy(() ->
 			suggestedProductService.createSuggestedProduct(request, multipartFiles, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessageContaining("1 ~ 3개 사이의 이미지를 가져야 합니다.");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_VALID_IMAGE_COUNT.getMessage());
 	}
 
 	@Test
@@ -157,13 +159,13 @@ public class SuggestedProductServiceTest {
 		Long verifiedMemberId = 1L;
 
 		when(suggestedProductRepository.findById(suggestedProductId))
-			.thenThrow(new IllegalArgumentException("Suggested product not found"));
+			.thenThrow(new ProductException(ExceptionCode.NOT_FOUND_SUGGESTED_PRODUCT));
 
 		//when & then
 		assertThatThrownBy(() ->
 			suggestedProductService.findSuggestedProduct(suggestedProductId, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("Suggested product not found");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_FOUND_SUGGESTED_PRODUCT.getMessage());
 	}
 
 	@Test
@@ -188,8 +190,8 @@ public class SuggestedProductServiceTest {
 		//when & then
 		assertThatThrownBy(() ->
 			suggestedProductService.findSuggestedProduct(suggestedProductId, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("권한이 없습니다.");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_OWNER_SUGGESTED_PRODUCT.getMessage());
 	}
 
 	@Test
@@ -315,14 +317,14 @@ public class SuggestedProductServiceTest {
 		Long verifiedMemberId = 1L;
 
 		when(suggestedProductRepository.findById(request.getId())).thenThrow(
-			new IllegalArgumentException("Suggested product not found")
+			new ProductException(ExceptionCode.NOT_FOUND_SUGGESTED_PRODUCT)
 		);
 
 		//when & then
 		assertThatThrownBy(() ->
 			suggestedProductService.updateSuggestedProductInfo(request, multipartFiles, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("Suggested product not found");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_FOUND_SUGGESTED_PRODUCT.getMessage());
 	}
 
 	@Test
@@ -352,8 +354,8 @@ public class SuggestedProductServiceTest {
 		//when & then
 		assertThatThrownBy(() ->
 			suggestedProductService.updateSuggestedProductInfo(request, multipartFiles, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("권한이 없습니다.");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_OWNER_SUGGESTED_PRODUCT.getMessage());
 	}
 
 	@Test
@@ -383,8 +385,8 @@ public class SuggestedProductServiceTest {
 		//when & then
 		assertThatThrownBy(() ->
 			suggestedProductService.updateSuggestedProductInfo(request, multipartFiles, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("PENDING 상태인 경우에만 제안 물품을 수정할 수 있습니다.");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.SUGGESTED_PRODUCT_INFO_UPDATE_IMPOSSIBLE.getMessage());
 	}
 
 	@Test
@@ -416,8 +418,8 @@ public class SuggestedProductServiceTest {
 		//when & then
 		assertThatThrownBy(() ->
 			suggestedProductService.updateSuggestedProductInfo(request, multipartFiles, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("1 ~ 3개 사이의 이미지를 가져야 합니다.");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_VALID_IMAGE_COUNT.getMessage());
 	}
 
 	@Test
@@ -470,14 +472,14 @@ public class SuggestedProductServiceTest {
 		Long verifiedMemberId = 1L;
 
 		when(suggestedProductRepository.findById(request.getId())).thenThrow(
-			new IllegalArgumentException("Suggested product not found")
+			new ProductException(ExceptionCode.NOT_FOUND_SUGGESTED_PRODUCT)
 		);
 
 		//when & then
 		assertThatThrownBy(() ->
 			suggestedProductService.updateSuggestedProductStatus(request, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("Suggested product not found");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_FOUND_SUGGESTED_PRODUCT.getMessage());
 	}
 
 	@Test
@@ -503,8 +505,8 @@ public class SuggestedProductServiceTest {
 		//when & then
 		assertThatThrownBy(() ->
 			suggestedProductService.updateSuggestedProductStatus(request, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("권한이 없습니다.");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_OWNER_SUGGESTED_PRODUCT.getMessage());
 	}
 
 	@Test
@@ -565,13 +567,13 @@ public class SuggestedProductServiceTest {
 		Long verifiedMemberId = 1L;
 
 		when(suggestedProductRepository.findById(suggestedProductId))
-			.thenThrow(new IllegalArgumentException("Suggested product not found"));
+			.thenThrow(new ProductException(ExceptionCode.NOT_FOUND_SUGGESTED_PRODUCT));
 
 		//when & then
 		assertThatThrownBy(() ->
 			suggestedProductService.deleteSuggestedProduct(suggestedProductId, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("Suggested product not found");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_FOUND_SUGGESTED_PRODUCT.getMessage());
 	}
 
 	@Test
@@ -593,8 +595,8 @@ public class SuggestedProductServiceTest {
 		//when & then
 		assertThatThrownBy(() ->
 			suggestedProductService.deleteSuggestedProduct(suggestedProductId, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("권한이 없습니다.");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_OWNER_SUGGESTED_PRODUCT.getMessage());
 	}
 
 	@Test
@@ -616,8 +618,8 @@ public class SuggestedProductServiceTest {
 		//when & then
 		assertThatThrownBy(() ->
 			suggestedProductService.deleteSuggestedProduct(suggestedProductId, verifiedMemberId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("PENDING 상태인 경우에만 제안 물품을 삭제할 수 있습니다.");
+			.isInstanceOf(ProductException.class)
+			.hasMessage(ExceptionCode.NOT_VALID_STATUS_SUGGESTED_PRODUCT_DELETE.getMessage());
 	}
 
 	@Test

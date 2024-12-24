@@ -11,6 +11,8 @@ import com.barter.domain.product.enums.RegisteredStatus;
 import com.barter.domain.product.enums.SuggestedStatus;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.repository.SuggestedProductRepository;
+import com.barter.exception.customexceptions.ProductException;
+import com.barter.exception.enums.ExceptionCode;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,10 +28,10 @@ public class ProductSwitchService {
 		Long suggestedProductId, Long verifiedMemberId
 	) {
 		SuggestedProduct suggestedProduct = suggestedProductRepository.findById(suggestedProductId)
-			.orElseThrow(() -> new IllegalArgumentException("Suggested product not found"));
+			.orElseThrow(() -> new ProductException(ExceptionCode.NOT_FOUND_SUGGESTED_PRODUCT));
 
 		suggestedProduct.checkPermission(verifiedMemberId);
-		suggestedProduct.checkPossibleDelete();
+		suggestedProduct.checkPossibleUpdate();
 
 		RegisteredProduct registeredProduct = RegisteredProduct.builder()
 			.name(suggestedProduct.getName())
@@ -49,10 +51,10 @@ public class ProductSwitchService {
 		Long registeredProductId, Long verifiedMemberId
 	) {
 		RegisteredProduct registeredProduct = registeredProductRepository.findById(registeredProductId)
-			.orElseThrow(() -> new RuntimeException("Registered product not found"));
+			.orElseThrow(() -> new ProductException(ExceptionCode.NOT_FOUND_REGISTERED_PRODUCT));
 
 		registeredProduct.checkPermission(verifiedMemberId);
-		registeredProduct.checkPossibleDelete();
+		registeredProduct.checkPossibleUpdate();
 
 		SuggestedProduct suggestedProduct = SuggestedProduct.builder()
 			.name(registeredProduct.getName())

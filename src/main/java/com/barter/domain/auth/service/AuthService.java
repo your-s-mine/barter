@@ -5,7 +5,6 @@ import static com.barter.exception.enums.ExceptionCode.*;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import com.barter.domain.auth.dto.SignInReqDto;
 import com.barter.domain.auth.dto.SignInResDto;
@@ -31,9 +30,6 @@ public class AuthService {
 	private final JwtUtil jwtUtil;
 
 	public void signUp(SignUpReqDto req) {
-		// 입력값 검증
-		validateSignUpInput(req);
-
 		// 이메일 중복 검증
 		if (memberRepository.existsByEmail(req.getEmail())) {
 			throw new AuthException(DUPLICATE_EMAIL);
@@ -43,26 +39,6 @@ public class AuthService {
 		String hashedPassword = passwordEncoder.encode(req.getPassword());
 		Member signUpMember = Member.createBasicMember(req.getEmail(), hashedPassword, req.getNickname());
 		memberRepository.save(signUpMember);
-	}
-
-	private void validateSignUpInput(SignUpReqDto req) {
-		// 이메일 검증
-		if (!StringUtils.hasText(req.getEmail()) || !req.getEmail().matches("^.+@.+\\..+$")) {
-			throw new IllegalArgumentException("유효한 이메일 형식이어야 합니다.");
-		}
-
-		// 비밀번호 길이 및 조건 검증
-		if (!StringUtils.hasText(req.getPassword()) || req.getPassword().length() < 8) {
-			throw new IllegalArgumentException("비밀번호는 최소 8자 이상이어야 합니다.");
-		}
-		if (!req.getPassword().matches("^(?=.*[A-Za-z])(?=.*\\d).+$")) {
-			throw new IllegalArgumentException("비밀번호는 숫자와 문자를 포함해야 합니다.");
-		}
-
-		// 닉네임 검증
-		if (!StringUtils.hasText(req.getNickname())) {
-			throw new IllegalArgumentException("닉네임은 필수 입력값입니다.");
-		}
 	}
 
 	public SignInResDto signIn(SignInReqDto req) {

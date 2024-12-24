@@ -13,6 +13,7 @@ import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductInfoReqDto;
 import com.barter.domain.product.enums.RegisteredStatus;
 import com.barter.exception.customexceptions.AuthException;
+import com.barter.exception.customexceptions.ProductException;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -74,7 +75,7 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 	// 저의 경우 RegisteredProduct 의 회원 ID 가 파라미터로 전달된 ID 와 같은지만 비교하면 되기 때문입니다.
 	public void checkPermission(Long memberId) {
 		if (!this.member.getId().equals(memberId)) {
-			throw new AuthException(NO_AUTHORITY);
+			throw new ProductException(NOT_OWNER_REGISTERED_PRODUCT);
 		}
 	}
 
@@ -86,7 +87,7 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 
 	public void checkPossibleUpdate() {
 		if (this.status != RegisteredStatus.PENDING) {
-			throw new IllegalArgumentException("PENDING 상태인 경우에만 등록 물품을 수정할 수 있습니다.");
+			throw new ProductException(REGISTERED_PRODUCT_INFO_UPDATE_IMPOSSIBLE);
 		}
 	}
 
@@ -109,7 +110,7 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 
 	public void checkPossibleDelete() {
 		if (this.status != RegisteredStatus.PENDING && this.status != RegisteredStatus.COMPLETED) {
-			throw new IllegalArgumentException("PENDING 또는 COMPLETED 상태인 경우에만 등록 물품을 삭제할 수 있습니다.");
+			throw new ProductException(NOT_VALID_STATUS_REGISTERED_PRODUCT_DELETE);
 		}
 	}
 
