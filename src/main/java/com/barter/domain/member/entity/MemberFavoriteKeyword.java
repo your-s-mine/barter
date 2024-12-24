@@ -1,5 +1,8 @@
 package com.barter.domain.member.entity;
 
+import com.barter.exception.customexceptions.AuthException;
+import com.barter.exception.enums.ExceptionCode;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -34,7 +37,7 @@ public class MemberFavoriteKeyword {
 
 	public void validateAuthority(Long memberId) {
 		if (!member.isEqualsId(memberId)) {
-			throw new IllegalStateException("권한이 없습니다.");
+			throw new AuthException(ExceptionCode.NO_AUTHORITY);
 		}
 	}
 }
