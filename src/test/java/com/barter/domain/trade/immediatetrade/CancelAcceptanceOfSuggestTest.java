@@ -1,6 +1,6 @@
 package com.barter.domain.trade.immediatetrade;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
@@ -18,6 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.member.entity.Member;
+import com.barter.domain.notification.enums.EventKind;
+import com.barter.domain.notification.service.NotificationService;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.entity.TradeProduct;
@@ -35,6 +37,8 @@ public class CancelAcceptanceOfSuggestTest {
 	ImmediateTradeRepository immediateTradeRepository;
 	@Mock
 	TradeProductRepository tradeProductRepository;
+	@Mock
+	NotificationService notificationService;
 	@InjectMocks
 	ImmediateTradeService immediateTradeService;
 
@@ -81,11 +85,19 @@ public class CancelAcceptanceOfSuggestTest {
 		tradeProducts.add(TradeProduct.builder()
 			.suggestedProduct(SuggestedProduct.builder()
 				.status(SuggestedStatus.ACCEPTED)
+				.member(member)
 				.build())
 			.build());
 
 		when(tradeProductRepository.findAllByTradeIdAndTradeType(immediateTrade.getId(), TradeType.IMMEDIATE))
 			.thenReturn(tradeProducts);
+
+		doNothing().when(notificationService).saveTradeNotification(
+			EventKind.IMMEDIATE_TRADE_SUGGEST_CANCEL,
+			tradeProducts.get(0).getSuggestedProduct().getMember().getId(),
+			TradeType.IMMEDIATE,
+			immediateTrade.getId(),
+			immediateTrade.getTitle());
 
 		String result = immediateTradeService.cancelAcceptanceOfSuggest(immediateTrade.getId(), verifiedMember);
 
@@ -110,7 +122,8 @@ public class CancelAcceptanceOfSuggestTest {
 
 		when(immediateTradeRepository.findById(immediateTrade.getId())).thenReturn(Optional.ofNullable(immediateTrade));
 
-		assertThatThrownBy(() -> immediateTradeService.cancelAcceptanceOfSuggest(immediateTrade.getId(), verifiedMember))
+		assertThatThrownBy(
+			() -> immediateTradeService.cancelAcceptanceOfSuggest(immediateTrade.getId(), verifiedMember))
 			.isInstanceOf(IllegalArgumentException.class).hasMessage("IN_PROGRESS 상태의 교환만을 수락 취소할 수 있습니다.");
 
 	}
