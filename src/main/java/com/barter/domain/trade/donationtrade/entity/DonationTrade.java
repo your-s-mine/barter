@@ -1,10 +1,13 @@
 package com.barter.domain.trade.donationtrade.entity;
 
+import static com.barter.exception.enums.ExceptionCode.*;
+
 import java.time.LocalDateTime;
 
 import com.barter.domain.BaseTimeStampEntity;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.trade.enums.TradeStatus;
+import com.barter.exception.customexceptions.DonationTradeException;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -74,14 +77,14 @@ public class DonationTrade extends BaseTimeStampEntity {
 
 	public void validateExceedMaxEndedAt() {
 		if (endedAt.minusDays(MAX_AFTER_DAY).isAfter(LocalDateTime.now())) {
-			throw new IllegalArgumentException("종료일자는 오늘로부터 7일 이내만 가능합니다.");
+			throw new DonationTradeException(INVALID_END_DATE);
 		}
 	}
 
 	public void validateUpdate(Long userId) {
 		product.validateOwner(userId);
 		if (currentAmount > 0) {
-			throw new IllegalArgumentException("이미 요청한 유저가 존재합니다.");
+			throw new DonationTradeException(DUPLICATE_REQUEST);
 		}
 	}
 
@@ -93,7 +96,7 @@ public class DonationTrade extends BaseTimeStampEntity {
 	public void validateDelete(Long userId) {
 		product.validateOwner(userId);
 		if (status.equals(TradeStatus.COMPLETED) || maxAmount == currentAmount) {
-			throw new IllegalArgumentException("이미 마감된 나눔입니다.");
+			throw new DonationTradeException(ALREADY_CLOSED);
 		}
 	}
 
