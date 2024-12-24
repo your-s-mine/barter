@@ -3,6 +3,8 @@ package com.barter.domain.notification.entity;
 import com.barter.domain.BaseTimeStampEntity;
 import com.barter.domain.notification.enums.NotificationType;
 import com.barter.domain.product.enums.TradeType;
+import com.barter.exception.customexceptions.NotificationException;
+import com.barter.exception.enums.ExceptionCode;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -80,7 +82,7 @@ public class Notification extends BaseTimeStampEntity {
 
 	public void checkPossibleDelete() {
 		if (!this.isRead) {
-			throw new IllegalArgumentException("읽은 상태의 알람만 삭제할 수 있습니다.");
+			throw new NotificationException(ExceptionCode.NOT_READ_NOTIFICATION);
 		}
 	}
 
