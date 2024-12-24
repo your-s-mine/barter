@@ -27,6 +27,7 @@ public enum ExceptionCode {
 		HttpStatus.BAD_REQUEST, "PENDING 또는 COMPLETED 상태인 경우에만 제안 물품을 삭제할 수 있습니다."
 	),
 	NOT_SUPPORT_REGISTERED_STATUS(HttpStatus.BAD_REQUEST, "지원하지 않는 등록물품 상태입니다."),
+	NOT_SUPPORT_SUGGESTED_STATUS(HttpStatus.BAD_REQUEST, "지원하지 않는 제안물품 상태입니다."),
 	NOT_VALID_IMAGE_COUNT(HttpStatus.BAD_REQUEST, "1~3개 사이의 이미지를 가질 수 있습니다.");
 
 	private final HttpStatus code;
