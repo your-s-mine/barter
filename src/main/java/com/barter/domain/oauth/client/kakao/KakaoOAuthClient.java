@@ -1,5 +1,7 @@
 package com.barter.domain.oauth.client.kakao;
 
+import static com.barter.exception.enums.ExceptionCode.*;
+
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +16,7 @@ import com.barter.domain.oauth.client.kakao.dto.KakaoLoginMemberInfoResDto;
 import com.barter.domain.oauth.client.kakao.dto.KakaoTokenResDto;
 import com.barter.domain.oauth.dto.LoginOAuthMemberDto;
 import com.barter.domain.oauth.enums.OAuthProvider;
+import com.barter.exception.customexceptions.AuthException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,12 +59,12 @@ public class KakaoOAuthClient implements OAuthClient {
 					.body(body)
 					.retrieve()
 					.onStatus(HttpStatusCode::isError, (req, resp) -> {
-						throw new RuntimeException("카카오 AccessToken 조회 실패");
+						throw new AuthException(KAKAO_ACCESS_TOKEN_FAILURE);
 					})
 					.body(KakaoTokenResDto.class)
 			)
 			.map(KakaoTokenResDto::getAccessToken)
-			.orElseThrow(() -> new RuntimeException("카카오 AccessToken 조회 실패"));
+			.orElseThrow(() -> new AuthException(KAKAO_ACCESS_TOKEN_FAILURE));
 	}
 
 	@Override
@@ -72,7 +75,7 @@ public class KakaoOAuthClient implements OAuthClient {
 					.header("Authorization", "Bearer " + accessToken)
 					.retrieve()
 					.onStatus(HttpStatusCode::isError, (req, resp) -> {
-						throw new RuntimeException("카카오 UserInfo 조회 실패");
+						throw new AuthException(KAKAO_USER_INFO_FAILURE);
 					})
 					.body(KakaoLoginMemberInfoResDto.class))
 			.map(response -> LoginOAuthMemberDto.builder()
@@ -82,7 +85,7 @@ public class KakaoOAuthClient implements OAuthClient {
 				.nickname(response.getProperties().getNickname())
 				.build()
 			)
-			.orElseThrow(() -> new RuntimeException("카카오 UserInfo 조회 실패"));
+			.orElseThrow(() -> new AuthException(KAKAO_USER_INFO_FAILURE));
 	}
 
 	@Override
