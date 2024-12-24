@@ -21,7 +21,7 @@ public class ExceptionResDto {
 
 	public static ExceptionResDto of(ExpectedException exception) {
 		return ExceptionResDto.builder()
-			.message(exception.getExceptionMessage())
+			.message(exception.getMessage())
 			.code(exception.getExceptionCode())
 			.build();
 	}

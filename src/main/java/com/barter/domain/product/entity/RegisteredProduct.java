@@ -1,5 +1,7 @@
 package com.barter.domain.product.entity;
 
+import static com.barter.exception.enums.ExceptionCode.*;
+
 import java.util.List;
 
 import org.hibernate.annotations.JdbcTypeCode;
@@ -10,6 +12,7 @@ import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductInfoReqDto;
 import com.barter.domain.product.enums.RegisteredStatus;
+import com.barter.exception.customexceptions.AuthException;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -71,13 +74,13 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 	// 저의 경우 RegisteredProduct 의 회원 ID 가 파라미터로 전달된 ID 와 같은지만 비교하면 되기 때문입니다.
 	public void checkPermission(Long memberId) {
 		if (!this.member.getId().equals(memberId)) {
-			throw new IllegalArgumentException("권한이 없습니다.");
+			throw new AuthException(NO_AUTHORITY);
 		}
 	}
 
 	public void validateOwner(Long userId) {
 		if (!member.isEqualsId(userId)) {
-			throw new IllegalArgumentException("권한이 없습니다.");
+			throw new AuthException(NO_AUTHORITY);
 		}
 	}
 

@@ -31,6 +31,9 @@ import com.barter.domain.trade.donationtrade.repository.DonationProductMemberRep
 import com.barter.domain.trade.donationtrade.repository.DonationTradeRepository;
 import com.barter.domain.trade.enums.DonationResult;
 import com.barter.domain.trade.enums.TradeStatus;
+import com.barter.exception.customexceptions.AuthException;
+import com.barter.exception.customexceptions.DonationTradeException;
+import com.barter.exception.customexceptions.MemberException;
 
 @ExtendWith(MockitoExtension.class)
 class DonationTradeServiceTest {
@@ -91,7 +94,7 @@ class DonationTradeServiceTest {
 
 		//when && then
 		assertThatThrownBy(() -> donationTradeService.createDonationTrade(verifiedMember, req))
-			.isInstanceOf(IllegalArgumentException.class)
+			.isInstanceOf(AuthException.class)
 			.hasMessageContaining("권한이 없습니다.");
 	}
 
@@ -120,7 +123,7 @@ class DonationTradeServiceTest {
 
 		//when && then
 		assertThatThrownBy(() -> donationTradeService.createDonationTrade(verifiedMember, req))
-			.isInstanceOf(IllegalArgumentException.class)
+			.isInstanceOf(DonationTradeException.class)
 			.hasMessageContaining("종료일자는 오늘로부터 7일 이내만 가능합니다.");
 	}
 
@@ -240,7 +243,7 @@ class DonationTradeServiceTest {
 
 		// when && then
 		assertThatThrownBy(() -> donationTradeService.updateDonationTrade(verifiedMember, tradeId, req))
-			.isInstanceOf(IllegalStateException.class)
+			.isInstanceOf(DonationTradeException.class)
 			.hasMessageContaining("존재하지 않는 나눔 교환");
 	}
 
@@ -296,7 +299,7 @@ class DonationTradeServiceTest {
 
 		// when && then
 		assertThatThrownBy(() -> donationTradeService.deleteDonationTrade(verifiedMember, tradeId))
-			.isInstanceOf(IllegalStateException.class)
+			.isInstanceOf(DonationTradeException.class)
 			.hasMessageContaining("존재하지 않는 나눔 교환");
 	}
 
@@ -345,8 +348,8 @@ class DonationTradeServiceTest {
 
 		// when && then
 		assertThatThrownBy(() -> donationTradeService.suggestDonationTrade(verifiedMember, tradeId))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessageContaining("존재하지 않는 유저");
+			.isInstanceOf(MemberException.class)
+			.hasMessageContaining("존재하지 않는 멤버입니다.");
 	}
 
 	@Test
@@ -363,7 +366,7 @@ class DonationTradeServiceTest {
 
 		// when && then
 		assertThatThrownBy(() -> donationTradeService.suggestDonationTrade(verifiedMember, tradeId))
-			.isInstanceOf(IllegalStateException.class)
+			.isInstanceOf(DonationTradeException.class)
 			.hasMessageContaining("존재하지 않는 나눔 교환");
 	}
 
@@ -419,7 +422,7 @@ class DonationTradeServiceTest {
 		SuggestDonationTradeResDto result = donationTradeService.suggestDonationTrade(verifiedMember, tradeId);
 
 		// then
-		assertThat(result.getMessage()).isEqualTo("나눔 신청 성공");
+		assertThat(result.getMessage()).isEqualTo("나눔 신청에 성공하였습니다.");
 		assertThat(result.getResult()).isEqualTo(DonationResult.SUCCESS);
 		verify(donationTradeRepository, times(1)).save(donationTrade);
 		verify(donationProductMemberRepository, times(1)).save(any(DonationProductMember.class));
