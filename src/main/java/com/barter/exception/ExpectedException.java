@@ -15,7 +15,8 @@ public class ExpectedException extends RuntimeException {
 		this.exceptionCode = exceptionCode;
 	}
 
-	public String getExceptionMessage() {
+	@Override
+	public String getMessage() {
 		return exceptionCode.getMessage();
 	}
 

@@ -1,5 +1,7 @@
 package com.barter.domain.trade.donationtrade.service;
 
+import static com.barter.exception.enums.ExceptionCode.*;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +28,8 @@ import com.barter.domain.trade.donationtrade.repository.DonationProductMemberRep
 import com.barter.domain.trade.donationtrade.repository.DonationTradeRepository;
 import com.barter.domain.trade.enums.DonationResult;
 import com.barter.event.trade.TradeNotificationEvent;
+import com.barter.exception.customexceptions.DonationTradeException;
+import com.barter.exception.customexceptions.MemberException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,6 +37,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DonationTradeService {
 
+	private static final String DONATION_SUGGEST_FAIL_MESSAGE = "이미 마감된 나눔 입니다.";
+	private static final String DONATION_SUGGEST_SUCCESS_MESSAGE = "나눔 신청에 성공하였습니다.";
 	private final DonationTradeRepository donationTradeRepository;
 	private final RegisteredProductRepository registeredProductRepository;
 	private final DonationProductMemberRepository donationProductMemberRepository;
@@ -74,13 +80,13 @@ public class DonationTradeService {
 	public FindDonationTradeResDto findDonationTrade(Long tradeId) {
 		return donationTradeRepository.findById(tradeId)
 			.map(FindDonationTradeResDto::from)
-			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 나눔 교환 입니다."));
+			.orElseThrow(() -> new DonationTradeException(NOT_FOUND_DONATION_TRADE));
 	}
 
 	@Transactional
 	public void updateDonationTrade(VerifiedMember verifiedMember, Long tradeId, UpdateDonationTradeReqDto req) {
 		DonationTrade donationTrade = donationTradeRepository.findById(tradeId)
-			.orElseThrow(() -> new IllegalStateException("존재하지 않는 나눔 교환 입니다."));
+			.orElseThrow(() -> new DonationTradeException(NOT_FOUND_DONATION_TRADE));
 
 		donationTrade.validateUpdate(verifiedMember.getId());
 		donationTrade.update(req.getTitle(), req.getDescription());
@@ -90,7 +96,7 @@ public class DonationTradeService {
 	@Transactional
 	public void deleteDonationTrade(VerifiedMember verifiedMember, Long tradeId) {
 		DonationTrade donationTrade = donationTradeRepository.findById(tradeId)
-			.orElseThrow(() -> new IllegalStateException("존재하지 않는 나눔 교환 입니다."));
+			.orElseThrow(() -> new DonationTradeException(NOT_FOUND_DONATION_TRADE));
 
 		donationTrade.validateDelete(verifiedMember.getId());
 		donationTrade.changeProductStatusPending();
@@ -103,11 +109,11 @@ public class DonationTradeService {
 			throw new IllegalStateException("이미 요청한 유저입니다.");
 		}
 		Member requestMember = memberRepository.findById(verifiedMember.getId())
-			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+			.orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
 		DonationTrade donationTrade = donationTradeRepository.findByIdForUpdate(tradeId)
-			.orElseThrow(() -> new IllegalStateException("존재하지 않는 나눔 교환 입니다."));
+			.orElseThrow(() -> new DonationTradeException(NOT_FOUND_DONATION_TRADE));
 		if (donationTrade.isDonationCompleted()) {
-			return new SuggestDonationTradeResDto("이미 마감된 나눔 입니다.", DonationResult.FAIL);
+			return new SuggestDonationTradeResDto(DONATION_SUGGEST_FAIL_MESSAGE, DonationResult.FAIL);
 		}
 		donationTrade.suggestDonation();
 		DonationProductMember donationProductMember = DonationProductMember.builder()
@@ -122,6 +128,6 @@ public class DonationTradeService {
 			EventKind.DONATION_TRADE_SUGGEST, donationTrade.getProduct().getMember().getId(),
 			TradeType.DONATION, donationTrade.getId(), donationTrade.getTitle()
 		);
-		return new SuggestDonationTradeResDto("나눔 신청 성공", DonationResult.SUCCESS);
+		return new SuggestDonationTradeResDto(DONATION_SUGGEST_SUCCESS_MESSAGE, DonationResult.SUCCESS);
 	}
 }
