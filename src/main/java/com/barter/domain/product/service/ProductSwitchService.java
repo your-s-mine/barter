@@ -31,7 +31,7 @@ public class ProductSwitchService {
 			.orElseThrow(() -> new ProductException(ExceptionCode.NOT_FOUND_SUGGESTED_PRODUCT));
 
 		suggestedProduct.checkPermission(verifiedMemberId);
-		suggestedProduct.checkPossibleDelete();
+		suggestedProduct.checkPossibleUpdate();
 
 		RegisteredProduct registeredProduct = RegisteredProduct.builder()
 			.name(suggestedProduct.getName())
@@ -54,7 +54,7 @@ public class ProductSwitchService {
 			.orElseThrow(() -> new ProductException(ExceptionCode.NOT_FOUND_REGISTERED_PRODUCT));
 
 		registeredProduct.checkPermission(verifiedMemberId);
-		registeredProduct.checkPossibleDelete();
+		registeredProduct.checkPossibleUpdate();
 
 		SuggestedProduct suggestedProduct = SuggestedProduct.builder()
 			.name(registeredProduct.getName())
