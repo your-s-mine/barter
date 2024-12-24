@@ -2,11 +2,12 @@ package com.barter.domain.trade.immediatetrade.entity;
 
 import org.springframework.scheduling.annotation.Async;
 
-import com.amazonaws.services.cloudformation.model.ListStackSetsRequest;
 import com.barter.domain.BaseTimeStampEntity;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.trade.enums.TradeStatus;
 import com.barter.domain.trade.immediatetrade.dto.request.UpdateImmediateTradeReqDto;
+import com.barter.exception.customexceptions.AuthException;
+import com.barter.exception.enums.ExceptionCode;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -77,7 +78,7 @@ public class ImmediateTrade extends BaseTimeStampEntity {
 
 	public void validateAuthority(Long userId) {
 		if (!this.product.getMember().getId().equals(userId)) {
-			throw new IllegalArgumentException("해당 물품에 대한 권한이 없습니다.");
+			throw new AuthException(ExceptionCode.NO_AUTHORITY);
 		}
 	}
 

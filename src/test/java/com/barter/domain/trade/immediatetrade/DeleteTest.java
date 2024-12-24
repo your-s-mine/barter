@@ -16,18 +16,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.entity.RegisteredProduct;
-import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.trade.enums.TradeStatus;
 import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
 import com.barter.domain.trade.immediatetrade.service.ImmediateTradeService;
+import com.barter.exception.customexceptions.AuthException;
+import com.barter.exception.customexceptions.ImmediateTradeException;
 
 @ExtendWith(MockitoExtension.class)
 public class DeleteTest {
 	@Mock
 	ImmediateTradeRepository immediateTradeRepository;
-	@Mock
-	RegisteredProductRepository registeredProductRepository;
 	@InjectMocks
 	ImmediateTradeService immediateTradeService;
 
@@ -84,7 +83,7 @@ public class DeleteTest {
 
 		assertThatThrownBy(() ->
 			immediateTradeService.delete(123L, verifiedMember))
-			.isInstanceOf(IllegalArgumentException.class).hasMessage("해당 교환을 찾을 수 없습니다.");
+			.isInstanceOf(ImmediateTradeException.class).hasMessage("존재하지 않는 즉시 교환입니다.");
 	}
 
 	@Test
@@ -97,6 +96,6 @@ public class DeleteTest {
 
 		assertThatThrownBy(() ->
 			immediateTradeService.delete(immediateTrade.getId(), verifiedMember))
-			.isInstanceOf(IllegalArgumentException.class).hasMessage("해당 물품에 대한 권한이 없습니다.");
+			.isInstanceOf(AuthException.class).hasMessage("권한이 없습니다.");
 	}
 }

@@ -29,6 +29,7 @@ import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
 import com.barter.domain.trade.immediatetrade.service.ImmediateTradeService;
 import com.barter.event.trade.TradeNotificationEvent;
+import com.barter.exception.customexceptions.ImmediateTradeException;
 
 @ExtendWith(MockitoExtension.class)
 public class CreateTest {
@@ -108,6 +109,6 @@ public class CreateTest {
 
 		// when, then
 		assertThatThrownBy(() -> immediateTradeService.create(createImmediateTradeReqDto))
-			.isInstanceOf(IllegalArgumentException.class);
+			.isInstanceOf(ImmediateTradeException.class);
 	}
 }
