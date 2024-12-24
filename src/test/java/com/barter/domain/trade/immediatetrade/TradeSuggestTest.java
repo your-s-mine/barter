@@ -19,6 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.member.entity.Member;
+import com.barter.domain.notification.enums.EventKind;
+import com.barter.domain.notification.service.NotificationService;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.entity.TradeProduct;
@@ -43,6 +45,8 @@ public class TradeSuggestTest {
 	SuggestedProductRepository suggestedProductRepository;
 	@Mock
 	TradeProductRepository tradeProductRepository;
+	@Mock
+	NotificationService notificationService;
 	@InjectMocks
 	ImmediateTradeService immediateTradeService;
 
@@ -55,6 +59,7 @@ public class TradeSuggestTest {
 	SuggestedProduct suggestedProduct2;
 	VerifiedMember suggester;
 	UpdateStatusReqDto updateStatusReqDto;
+	Member member2;
 
 	@BeforeEach
 	void setUp() {
@@ -85,14 +90,22 @@ public class TradeSuggestTest {
 		reqDto = new CreateTradeSuggestProductReqDto();
 		reqDto.getSuggestedProductIds().addAll(Arrays.asList(1L, 2L));
 
+		member2 = Member.builder()
+			.id(2L)
+			.email("test")
+			.password("1234")
+			.build();
+
 		suggestedProduct = SuggestedProduct.builder()
 			.id(1L)
 			.status(SuggestedStatus.PENDING)
+			.member(member2)
 			.build();
 
 		suggestedProduct2 = SuggestedProduct.builder()
 			.id(2L)
 			.status(SuggestedStatus.PENDING)
+			.member(member2)
 			.build();
 
 		suggester = new VerifiedMember(2L, "suggester");
@@ -176,6 +189,13 @@ public class TradeSuggestTest {
 
 		when(tradeProductRepository.findAllByTradeId(immediateTrade.getId())).thenReturn(tradeProducts);
 
+		doNothing().when(notificationService).saveTradeNotification(
+			EventKind.IMMEDIATE_TRADE_SUGGEST_ACCEPT,
+			tradeProducts.get(0).getSuggestedProduct().getMember().getId(),
+			TradeType.IMMEDIATE,
+			immediateTrade.getId(),
+			immediateTrade.getTitle());
+
 		String result = immediateTradeService.acceptTradeSuggest(immediateTrade.getId(), verifiedMember);
 
 		assertThat(result).isEqualTo("제안 수락 완료");
@@ -219,6 +239,15 @@ public class TradeSuggestTest {
 			.tradeType(TradeType.IMMEDIATE)
 			.suggestedProduct(suggestedProduct2)
 			.build());
+
+		when(tradeProductRepository.findAllByTradeId(immediateTrade.getId())).thenReturn(tradeProducts);
+
+		doNothing().when(notificationService).saveTradeNotification(
+			EventKind.IMMEDIATE_TRADE_SUGGEST_DENY,
+			tradeProducts.get(0).getSuggestedProduct().getMember().getId(),
+			TradeType.IMMEDIATE,
+			immediateTrade.getId(),
+			immediateTrade.getTitle());
 
 		immediateTradeService.denyTradeSuggest(immediateTrade.getId(), verifiedMember);
 

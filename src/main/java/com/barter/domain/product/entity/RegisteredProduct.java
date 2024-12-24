@@ -1,5 +1,7 @@
 package com.barter.domain.product.entity;
 
+import static com.barter.exception.enums.ExceptionCode.*;
+
 import java.util.List;
 
 import org.hibernate.annotations.JdbcTypeCode;
@@ -10,6 +12,7 @@ import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductInfoReqDto;
 import com.barter.domain.product.enums.RegisteredStatus;
+import com.barter.exception.customexceptions.AuthException;
 import com.barter.exception.customexceptions.ProductException;
 import com.barter.exception.enums.ExceptionCode;
 
@@ -79,7 +82,7 @@ public class RegisteredProduct extends BaseTimeStampEntity {
 
 	public void validateOwner(Long userId) {
 		if (!member.isEqualsId(userId)) {
-			throw new IllegalArgumentException("권한이 없습니다.");
+			throw new AuthException(NO_AUTHORITY);
 		}
 	}
 

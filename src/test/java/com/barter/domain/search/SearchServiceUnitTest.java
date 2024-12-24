@@ -1,13 +1,24 @@
 package com.barter.domain.search;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.barter.domain.product.entity.RegisteredProduct;
+import com.barter.domain.search.dto.SearchTradeResDto;
+import com.barter.domain.search.entity.SearchKeyword;
 import com.barter.domain.search.repository.SearchHistoryRepository;
 import com.barter.domain.search.repository.SearchKeywordRepository;
 import com.barter.domain.search.service.SearchService;
@@ -37,7 +48,7 @@ public class SearchServiceUnitTest {
 	List<DonationTrade> donationTrades = new ArrayList<>();
 	List<ImmediateTrade> immediateTrades = new ArrayList<>();
 	List<PeriodTrade> periodTrades = new ArrayList<>();
-/*
+
 	@Test
 	@DisplayName("검색 - 기존에 검색 이력이 없어서 생성하는 경우")
 	void searchAndCreateKeywordAndFindTrades() {
@@ -48,20 +59,21 @@ public class SearchServiceUnitTest {
 
 		immediateTrades.add(
 			ImmediateTrade.builder()
+				.product(RegisteredProduct.builder()
+					.id(1L)
+					.build())
 				.title("Immediate banana")
 				.build());
 
 		when(searchKeywordRepository.findByWord(word)).thenReturn(Optional.empty());
 		when(searchKeywordRepository.save(any(SearchKeyword.class))).thenReturn(newKeyword);
-
-		when(immediateTradeRepository.findByTitleOrDescriptionContaining(word, word)).thenReturn(immediateTrades);
+		when(immediateTradeRepository.findImmediateTradesWithProduct(word)).thenReturn(immediateTrades);
 
 		List<SearchTradeResDto> result = searchService.searchKeywordAndFindTrades(word);
 
 		assertThat(result.get(0).getTitle()).isEqualTo("Immediate banana");
 
 		verify(searchKeywordRepository, times(1)).findByWord(word);
-		// save 를 2번 호출하게 됩니다. 생성에 1번, viewCount 를 업데이트 하는데 1번.
 		verify(searchKeywordRepository, times(2)).save(any(SearchKeyword.class));
 
 	}
@@ -76,18 +88,23 @@ public class SearchServiceUnitTest {
 
 		donationTrades.add(
 			DonationTrade.builder()
+				.product(RegisteredProduct.builder()
+					.id(1L)
+					.build())
 				.title("Donation banana")
 				.build());
 
 		periodTrades.add(
 			PeriodTrade.builder()
+				.registeredProduct(RegisteredProduct.builder()
+					.id(1L)
+					.build())
 				.title("PeriodTrade banana")
 				.build());
 
 		when(searchKeywordRepository.findByWord(word)).thenReturn(Optional.of(existingKeyword));
-
-		// when(donationTradeRepository.findByTitleOrDescriptionContaining(word, word)).thenReturn(donationTrades)
-		when(periodTradeRepository.findByTitleOrDescriptionContaining(word, word)).thenReturn(periodTrades);
+		when(donationTradeRepository.findDonationTradesWithProduct(word)).thenReturn(donationTrades);
+		when(periodTradeRepository.findPeriodTradesWithProduct(word)).thenReturn(periodTrades);
 
 		List<SearchTradeResDto> result = searchService.searchKeywordAndFindTrades(word);
 
@@ -96,16 +113,6 @@ public class SearchServiceUnitTest {
 
 		verify(searchKeywordRepository, times(1)).findByWord(word);
 		verify(searchKeywordRepository, times(1)).save(any(SearchKeyword.class));
-	}
-
-	@Test
-	@DisplayName("검색 - 공란으로 검색한 경우")
-	void searchBlank() {
-		String word = " ";
-
-		List<SearchTradeResDto> result = searchService.searchKeywordAndFindTrades(word);
-
-		assertThat(result.get(0).getTitle()).isEqualTo("검색어를 입력해주세요.");
 	}
 
 	@Test
@@ -170,28 +177,16 @@ public class SearchServiceUnitTest {
 	@Test
 	@DisplayName("24시간이 지난 검색 기록 삭제")
 	void deleteHistoryOver24hours() {
-		SearchKeyword banana = SearchKeyword.builder()
-			.word("banana")
-			.build();
-		SearchKeyword apple = SearchKeyword.builder()
-			.word("apple")
-			.build();
-
-		List<SearchHistory> oldHistories = List.of(
-			SearchHistory.builder()
-				.searchKeyword(banana)
-				.build(),
-			SearchHistory.builder()
-				.searchKeyword(apple)
-				.build()
-		);
-
-		when(searchHistoryRepository.findAllBySearchedAt(any())).thenReturn(oldHistories);
+		ArgumentCaptor<LocalDateTime> captor = ArgumentCaptor.forClass(LocalDateTime.class);
 
 		searchService.deleteHistoryOver24hours();
 
-		verify(searchHistoryRepository, times(1)).findAllBySearchedAt(any());
-		verify(searchHistoryRepository, times(1)).deleteAll(oldHistories);
+		verify(searchHistoryRepository, times(1)).deleteBySearchedAtBefore(captor.capture());
+		LocalDateTime capturedTime = captor.getValue();
+
+		// 24시간 전인지 확인
+		LocalDateTime expectedTime = LocalDateTime.now().minusHours(24);
+		assertThat(capturedTime).isBeforeOrEqualTo(expectedTime);
+		assertThat(capturedTime).isAfter(expectedTime.minusSeconds(5)); // 적절한 허용 오차
 	}
- */
 }
