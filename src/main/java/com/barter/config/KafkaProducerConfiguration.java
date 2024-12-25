@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -18,6 +19,9 @@ import com.barter.domain.chat.dto.request.ChatMessageReqDto;
 @Configuration
 public class KafkaProducerConfiguration {
 
+	@Value("${spring.kafka.producer.bootstrap-servers}")
+	private String producer_bootstrapServers;
+
 	// Kafka ProducerFactory 생성 Bean 메서드
 	@Bean
 	public ProducerFactory<String, ChatMessageReqDto> producerFactory() {
@@ -29,7 +33,7 @@ public class KafkaProducerConfiguration {
 	public Map<String, Object> producerConfigurations() {
 		Map<String, Object> producerConfigurations;
 		producerConfigurations = Map.of(
-			ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092",
+			ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, producer_bootstrapServers,
 			ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class,
 			ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class
 		);

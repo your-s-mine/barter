@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -17,6 +18,9 @@ import com.barter.domain.chat.dto.request.ChatMessageReqDto;
 @EnableKafka
 @Configuration
 public class KafkaListenerConfiguration {
+
+	@Value("${spring.kafka.consumer.bootstrap-servers}")
+	private String listener_bootstrapServers;
 
 	// KafkaListener 컨테이너 팩토리를 생성하는 Bean 메서드
 	@Bean
@@ -37,7 +41,7 @@ public class KafkaListenerConfiguration {
 		Map<String, Object> consumerConfigurations;
 
 		consumerConfigurations = Map.of(
-			ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092",
+			ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, listener_bootstrapServers,
 			ConsumerConfig.GROUP_ID_CONFIG, "adopt",
 			ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class,
 			ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializer,
