@@ -2,7 +2,18 @@ package com.barter.domain.member.entity;
 
 import com.barter.domain.BaseTimeStampEntity;
 import com.barter.domain.oauth.enums.OAuthProvider;
-import jakarta.persistence.*;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -38,7 +49,8 @@ public class Member extends BaseTimeStampEntity {
 	private String providerId; // OAuth 제공자 ID 추가
 
 	@Builder
-	public Member(Long id, String email, String nickname, String password, Address address, OAuthProvider provider, String providerId) {
+	public Member(Long id, String email, String nickname, String password, Address address, OAuthProvider provider,
+		String providerId) {
 		this.id = id;
 		this.email = email;
 		this.nickname = nickname;
@@ -50,21 +62,26 @@ public class Member extends BaseTimeStampEntity {
 
 	public static Member createBasicMember(String email, String hashedPassword, String nickname, Address address) {
 		return Member.builder()
-				.email(email)
-				.password(hashedPassword)
-				.nickname(nickname)
-				.address(address)
-				.provider(OAuthProvider.BASIC)
-				.build();
+			.email(email)
+			.password(hashedPassword)
+			.nickname(nickname)
+			.address(address)
+			.provider(OAuthProvider.BASIC)
+			.build();
 	}
 
-	public static Member createOAuthMember(String email, String nickname, String hashedPassword, OAuthProvider provider, String providerId) {
+	public static Member createOAuthMember(String email, String nickname, String hashedPassword, OAuthProvider provider,
+		String providerId) {
 		return Member.builder()
-				.email(email)
-				.password(hashedPassword)
-				.nickname(nickname)
-				.provider(provider)
-				.providerId(providerId)
-				.build();
+			.email(email)
+			.password(hashedPassword)
+			.nickname(nickname)
+			.provider(provider)
+			.providerId(providerId)
+			.build();
+	}
+
+	public boolean isEqualsId(Long userId) {
+		return id.equals(userId);
 	}
 }
