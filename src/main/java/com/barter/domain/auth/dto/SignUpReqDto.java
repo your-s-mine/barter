@@ -22,4 +22,12 @@ public class SignUpReqDto {
 
 	@NotBlank(message = "닉네임은 필수 입력값입니다.")
 	private String nickname;
+
+	@NotBlank(message = "우편번호는 필수 입력값입니다.")
+	private String postNum;
+
+	@NotBlank(message = "주소는 필수 입력값입니다.")
+	private String address1;
+
+	private String address2; // 상세 주소 (선택 사항)
 }
