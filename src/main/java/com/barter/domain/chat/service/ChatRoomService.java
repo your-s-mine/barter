@@ -20,6 +20,10 @@ import com.barter.domain.member.entity.Member;
 import com.barter.domain.member.repository.MemberRepository;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.repository.RegisteredProductRepository;
+import com.barter.exception.customexceptions.AuthException;
+import com.barter.exception.customexceptions.ChatException;
+import com.barter.exception.customexceptions.ProductException;
+import com.barter.exception.enums.ExceptionCode;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,13 +40,13 @@ public class ChatRoomService {
 	public CreateChatRoomResDto createChatRoom(VerifiedMember member, CreateChatRoomReqDto reqDto) {
 
 		Member suggestMember = memberRepository.findById(member.getId())
-			.orElseThrow(() -> new IllegalArgumentException("해당하는 멤버가 없습니다."));
+			.orElseThrow(() -> new AuthException(ExceptionCode.NOT_FOUND_MEMBER));
 
 		RegisteredProduct registeredProduct = registeredProductRepository.findById(reqDto.getRegisterProductId())
-			.orElseThrow(() -> new IllegalArgumentException("해당하는 등록된 물품이 없습니다."));
+			.orElseThrow(() -> new ProductException(ExceptionCode.NOT_FOUND_REGISTERED_PRODUCT));
 
 		if (registeredProduct.getMember().equals(suggestMember)) {
-			throw new IllegalArgumentException("자신이 등록한 물품에 대한 채팅은 불가능 합니다.");
+			throw new ChatException(ExceptionCode.SELF_CHAT_IS_INVALID);
 		}
 
 		// 채팅방 생성
