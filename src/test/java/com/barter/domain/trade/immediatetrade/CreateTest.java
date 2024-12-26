@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
+import com.barter.domain.member.entity.Address;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
 import com.barter.domain.product.entity.RegisteredProduct;
@@ -51,7 +52,7 @@ public class CreateTest {
 
 	@BeforeEach
 	void setUp() {
-		member = Member.createBasicMember("test@test.com", "1234", "test");
+		member = Member.createBasicMember("test@test.com", "1234", "test", Address.builder().build());
 		createRegisteredProductReqDto = new CreateRegisteredProductReqDto(
 			"등록 상품 제목", "등록 상품 설명");
 
