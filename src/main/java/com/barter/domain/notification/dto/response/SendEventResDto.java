@@ -2,12 +2,18 @@ package com.barter.domain.notification.dto.response;
 
 import com.barter.domain.notification.entity.Notification;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
 @Builder
-public class SendTradeEventResDto {
+@NoArgsConstructor
+@AllArgsConstructor
+public class SendEventResDto {
 
 	private Long notificationId;
 	private String message;
@@ -16,8 +22,8 @@ public class SendTradeEventResDto {
 	private String notificationType;
 	private Long memberId;
 
-	public static SendTradeEventResDto from(Notification notification) {
-		return SendTradeEventResDto.builder()
+	public static SendEventResDto from(Notification notification) {
+		return SendEventResDto.builder()
 			.notificationId(notification.getId())
 			.message(notification.getMessage())
 			.tradeType(notification.getTradeType().name())
