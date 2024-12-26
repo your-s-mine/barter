@@ -6,19 +6,12 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
 public class FavoriteTradeResDto {
-    private Long id;
-    private Long memberId;
-    private TradeStatus tradeStatus; // 필드명 수정
-    private Long tradeId; // 필드명 수정
-
-    @Builder
-    public FavoriteTradeResDto(Long id, Long memberId, TradeStatus tradeStatus, Long tradeId) {
-        this.id = id;
-        this.memberId = memberId;
-        this.tradeStatus = tradeStatus;
-        this.tradeId = tradeId;
-    }
+    private final Long id;
+    private final Long memberId;
+    private final TradeStatus tradeStatus; // 필드명 수정
+    private final Long tradeId; // 필드명 수정
 
     public static FavoriteTradeResDto from(FavoriteTrade favoriteTrade) {
         return FavoriteTradeResDto.builder()
