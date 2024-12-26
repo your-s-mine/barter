@@ -57,6 +57,15 @@ public enum ExceptionCode {
 	IT_NOT_PENDING_FOR_SUGGEST(HttpStatus.FORBIDDEN, "PENDING 상태의 교환에만 제안할 수 있습니다."),
 	IT_NOT_IN_PROGRESS_FOR_CANCELING(HttpStatus.FORBIDDEN, "IN_PROGRESS 상태의 교환만을 수락 취소할 수 있습니다."),
 
+	// 기간 교환
+	NOT_FOUND_PERIOD_TRADE(HttpStatus.NOT_FOUND, "존재하지 않는 기간 교환 입니다."),
+	INVALID_PERIOD_TRADE_STATUS_CHANGE(HttpStatus.BAD_REQUEST, "해당 기간 교환에 대해서 불가능한 상태변경 입니다."),
+	INVALID_SELF_ACCEPT(HttpStatus.BAD_REQUEST, "자기 자신을 수락할 수는 없습니다."),
+	INVALID_SELF_DENY(HttpStatus.BAD_REQUEST, "자기 자신을 거절할 수는 없습니다."),
+	ALREADY_SUGGESTED_PRODUCT(HttpStatus.BAD_REQUEST, "다른 교환에 제안된 상품은 제안 할 수 없습니다."),
+
+	// 채팅
+	SELF_CHAT_IS_INVALID(HttpStatus.BAD_REQUEST, "자신이 등록한 물품에 대한 채팅을 불가능합니다."),
 	;
 
 	private final HttpStatus code;

@@ -55,6 +55,7 @@ import com.barter.domain.trade.periodtrade.dto.response.UpdatePeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 import com.barter.domain.trade.periodtrade.repository.PeriodTradeRepository;
 import com.barter.event.trade.PeriodTradeEvent.PeriodTradeCloseEvent;
+import com.barter.exception.customexceptions.PeriodTradeException;
 
 @ExtendWith(MockitoExtension.class)
 class PeriodTradeServiceTest {
@@ -323,8 +324,8 @@ class PeriodTradeServiceTest {
 
 		// when & then
 		assertThatThrownBy(() -> periodTradeService.suggestPeriodTrade(verifiedMember, tradeId, reqDto))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("해당하는 기간 거래를 찾을 수 없습니다.");
+			.isInstanceOf(PeriodTradeException.class)
+			.hasMessage("존재하지 않는 기간 교환 입니다.");
 
 		verify(periodTradeRepository, times(1)).findById(tradeId);
 		verifyNoMoreInteractions(periodTradeRepository);
@@ -351,7 +352,7 @@ class PeriodTradeServiceTest {
 
 		// when & then
 		assertThatThrownBy(() -> periodTradeService.suggestPeriodTrade(verifiedMember, tradeId, reqDto))
-			.isInstanceOf(IllegalArgumentException.class)
+			.isInstanceOf(PeriodTradeException.class)
 			.hasMessage("다른 교환에 제안된 상품은 제안 할 수 없습니다.");
 
 		verify(periodTradeRepository, times(1)).findById(tradeId);
