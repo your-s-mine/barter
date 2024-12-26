@@ -46,6 +46,9 @@ import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 import com.barter.domain.trade.periodtrade.repository.PeriodTradeRepository;
 import com.barter.event.trade.PeriodTradeEvent.PeriodTradeCloseEvent;
 import com.barter.event.trade.TradeNotificationEvent;
+import com.barter.exception.customexceptions.PeriodTradeException;
+import com.barter.exception.customexceptions.ProductException;
+import com.barter.exception.enums.ExceptionCode;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -67,7 +70,7 @@ public class PeriodTradeService {
 
 		RegisteredProduct registeredProduct = registeredProductRepository.findById(reqDto.getRegisteredProductId())
 			.orElseThrow(
-				() -> new IllegalArgumentException("없는 등록된 물건입니다.")
+				() -> new ProductException(ExceptionCode.NOT_FOUND_REGISTERED_PRODUCT)
 			);
 
 		registeredProduct.validateOwner(member.getId());
@@ -101,7 +104,7 @@ public class PeriodTradeService {
 	@Transactional
 	public FindPeriodTradeResDto findPeriodTradeById(Long id) {
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
-			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
+			() -> new PeriodTradeException(ExceptionCode.NOT_FOUND_PERIOD_TRADE)
 		);
 
 		periodTrade.addViewCount();
@@ -119,7 +122,7 @@ public class PeriodTradeService {
 	public UpdatePeriodTradeResDto updatePeriodTrade(VerifiedMember member, Long id, UpdatePeriodTradeReqDto reqDto) {
 
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
-			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
+			() -> new PeriodTradeException(ExceptionCode.NOT_FOUND_PERIOD_TRADE)
 		);
 		periodTrade.validateAuthority(member.getId());
 		periodTrade.validateIsCompleted();
@@ -133,7 +136,7 @@ public class PeriodTradeService {
 	public void deletePeriodTrade(VerifiedMember member, Long id) {
 
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
-			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
+			() -> new PeriodTradeException(ExceptionCode.NOT_FOUND_PERIOD_TRADE)
 		);
 
 		periodTrade.updateRegisteredProduct(RegisteredStatus.PENDING);
@@ -149,7 +152,7 @@ public class PeriodTradeService {
 		SuggestedPeriodTradeReqDto reqDto) {
 
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
-			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
+			() -> new PeriodTradeException(ExceptionCode.NOT_FOUND_PERIOD_TRADE)
 		);
 
 		periodTrade.validateSuggestAuthority(member.getId()); // 자신의 교환 (게시글) 에 제안 불가
@@ -184,14 +187,14 @@ public class PeriodTradeService {
 	public StatusUpdateResDto updatePeriodTradeStatus(VerifiedMember member, Long id, StatusUpdateReqDto reqDto) {
 
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
-			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
+			() -> new PeriodTradeException(ExceptionCode.NOT_FOUND_PERIOD_TRADE)
 		);
 
 		periodTrade.validateAuthority(member.getId()); // 교환 (게시글)의 주인만 변경 가능
 		periodTrade.validateIsCompleted(); // 이미 완료된 교환 건은 수정 불가
 		boolean isStatusUpdatable = periodTrade.updatePeriodTradeStatus(reqDto.getTradeStatus());
 		if (!isStatusUpdatable) {
-			throw new IllegalArgumentException("불가능한 상태 변경 입니다.");
+			throw new PeriodTradeException(ExceptionCode.INVALID_PERIOD_TRADE_STATUS_CHANGE);
 		}
 		List<TradeProduct> allTradeProducts = tradeProductRepository.findTradeProductsWithSuggestedProductByPeriodTradeId(
 			TradeType.PERIOD, periodTrade.getId());
@@ -262,11 +265,11 @@ public class PeriodTradeService {
 	public AcceptPeriodTradeResDto acceptPeriodTrade(VerifiedMember member, Long id, AcceptPeriodTradeReqDto reqDto) {
 
 		if (member.getId().equals(reqDto.getSuggestedMemberId())) {
-			throw new IllegalArgumentException("자기 자신을 수락할 수는 없습니다.");
+			throw new PeriodTradeException(ExceptionCode.INVALID_SELF_ACCEPT);
 		}
 
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
-			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
+			() -> new PeriodTradeException(ExceptionCode.NOT_FOUND_PERIOD_TRADE)
 		);
 		periodTrade.validateAuthority(member.getId());
 
@@ -325,11 +328,11 @@ public class PeriodTradeService {
 	public DenyPeriodTradeResDto denyPeriodTrade(VerifiedMember member, Long id, DenyPeriodTradeReqDto reqDto) {
 
 		if (member.getId().equals(reqDto.getSuggestedMemberId())) {
-			throw new IllegalArgumentException("자기 자신을 거절할 수는 없습니다.");
+			throw new PeriodTradeException(ExceptionCode.INVALID_SELF_DENY);
 		}
 
 		PeriodTrade periodTrade = periodTradeRepository.findById(id).orElseThrow(
-			() -> new IllegalArgumentException("해당하는 기간 거래를 찾을 수 없습니다.")
+			() -> new PeriodTradeException(ExceptionCode.NOT_FOUND_PERIOD_TRADE)
 		);
 		periodTrade.validateAuthority(member.getId());
 
@@ -364,7 +367,7 @@ public class PeriodTradeService {
 	@Transactional
 	public void closePeriodTrade(Long periodTradeId) {
 		PeriodTrade periodTrade = periodTradeRepository.findById(periodTradeId).orElseThrow(
-			() -> new IllegalArgumentException("해당 기간 거래를 찾을 수 없습니다.")
+			() -> new PeriodTradeException(ExceptionCode.NOT_FOUND_PERIOD_TRADE)
 		);
 		periodTrade.updatePeriodTradeStatus(TradeStatus.CLOSED);
 		List<TradeProduct> allTradeProducts = tradeProductRepository.findTradeProductsWithSuggestedProductByPeriodTradeId(
@@ -397,9 +400,9 @@ public class PeriodTradeService {
 		return productIds.stream()
 			.map(id -> {
 					SuggestedProduct product = suggestedProductRepository.findById(id)
-						.orElseThrow(() -> new IllegalArgumentException("해당 id 의 등록된 제품이 없습니다."));
+						.orElseThrow(() -> new ProductException(ExceptionCode.NOT_FOUND_SUGGESTED_PRODUCT));
 					if (!product.getStatus().equals(SuggestedStatus.PENDING)) {
-						throw new IllegalArgumentException("다른 교환에 제안된 상품은 제안 할 수 없습니다.");
+						throw new PeriodTradeException(ExceptionCode.ALREADY_SUGGESTED_PRODUCT);
 					}
 					product.checkPermission(memberId); // 자신의 물건만 등록 가능
 
