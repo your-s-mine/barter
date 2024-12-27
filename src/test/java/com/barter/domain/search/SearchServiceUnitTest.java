@@ -59,7 +59,7 @@ public class SearchServiceUnitTest {
 
 		immediateTrades.add(
 			ImmediateTrade.builder()
-				.product(RegisteredProduct.builder()
+				.registeredProduct(RegisteredProduct.builder()
 					.id(1L)
 					.build())
 				.title("Immediate banana")

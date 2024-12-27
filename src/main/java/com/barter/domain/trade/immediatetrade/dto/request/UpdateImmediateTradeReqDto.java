@@ -3,10 +3,12 @@ package com.barter.domain.trade.immediatetrade.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
+@Builder
 public class UpdateImmediateTradeReqDto {
 	private Long registeredProductId;
 	@NotBlank

@@ -64,12 +64,16 @@ public class CreateTest {
 			.member(member)
 			.build();
 
-		createImmediateTradeReqDto = new CreateImmediateTradeReqDto(registeredProduct.getId(), "즉시 교환 제목", "즉시 교환 설명");
+		createImmediateTradeReqDto = CreateImmediateTradeReqDto.builder()
+			.registeredProductId(registeredProduct.getId())
+			.title("제목")
+			.description("설명")
+			.build();
 
 		immediateTrade = ImmediateTrade.builder()
 			.title(createImmediateTradeReqDto.getTitle())
 			.description(createImmediateTradeReqDto.getDescription())
-			.product(registeredProduct)
+			.registeredProduct(registeredProduct)
 			.status(TradeStatus.PENDING)
 			.viewCount(0)
 			.build();
@@ -91,8 +95,8 @@ public class CreateTest {
 		FindImmediateTradeResDto resDto = immediateTradeService.create(createImmediateTradeReqDto);
 
 		// then
-		assertThat(resDto.getTitle()).isEqualTo("즉시 교환 제목");
-		assertThat(resDto.getDescription()).isEqualTo("즉시 교환 설명");
+		assertThat(resDto.getTitle()).isEqualTo("제목");
+		assertThat(resDto.getDescription()).isEqualTo("설명");
 		assertThat(resDto.getProductId()).isEqualTo(registeredProduct.getId());
 
 		TradeNotificationEvent capturedEvent = eventCaptor.getValue();
