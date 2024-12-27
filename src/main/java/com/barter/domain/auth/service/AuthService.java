@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.barter.domain.auth.dto.FindAddressResDto;
 import com.barter.domain.auth.dto.SignInReqDto;
 import com.barter.domain.auth.dto.SignInResDto;
 import com.barter.domain.auth.dto.SignUpReqDto;
@@ -41,18 +42,18 @@ public class AuthService {
 
 		// Address 객체 생성 (주소 정보 포함)
 		Address address = Address.builder()
-				.postNum(req.getPostNum())
-				.address1(req.getAddress1())
-				.address2(req.getAddress2())
-				.build();
+			.postNum(req.getPostNum())
+			.address1(req.getAddress1())
+			.address2(req.getAddress2())
+			.build();
 
 		// Member 객체 생성 (주소 포함)
 		Member member = Member.builder()
-				.email(req.getEmail())
-				.password(hashedPassword)
-				.nickname(req.getNickname())
-				.address(address) // 주소 추가
-				.build();
+			.email(req.getEmail())
+			.password(hashedPassword)
+			.nickname(req.getNickname())
+			.address(address) // 주소 추가
+			.build();
 
 		// 저장
 		memberRepository.save(member);
@@ -60,7 +61,7 @@ public class AuthService {
 
 	public SignInResDto signIn(SignInReqDto req) {
 		Member member = memberRepository.findByEmail(req.getEmail())
-				.orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
+			.orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
 
 		if (!passwordEncoder.matches(req.getPassword(), member.getPassword())) {
 			throw new AuthException(INVALID_PASSWORD);
@@ -68,32 +69,39 @@ public class AuthService {
 
 		String token = jwtUtil.createToken(member.getId(), member.getEmail());
 		return SignInResDto.builder()
-				.accessToken(token)
-				.build();
+			.accessToken(token)
+			.build();
 	}
 
 	public void signupWithOAuth(OAuthProvider provider, LoginOAuthMemberDto memberInfo) {
 		UUID uuid = UUID.randomUUID();
 
 		Member socialMember = Member.builder()
-				.provider(provider)
-				.providerId(memberInfo.getId())
-				.email(memberInfo.getEmail())
-				.password(passwordEncoder.encode(uuid.toString()))
-				.nickname(memberInfo.getNickname())
-				.build();
+			.provider(provider)
+			.providerId(memberInfo.getId())
+			.email(memberInfo.getEmail())
+			.password(passwordEncoder.encode(uuid.toString()))
+			.nickname(memberInfo.getNickname())
+			.build();
 
 		memberRepository.save(socialMember);
 	}
 
 	public LoginOAuthMemberResDto signinWithOAuth(OAuthProvider provider, LoginOAuthMemberDto memberInfo) {
 		return memberRepository.findByProviderAndProviderId(provider, memberInfo.getId())
-				.map(member -> {
-					String accessToken = jwtUtil.createToken(member.getId(), member.getEmail());
-					return LoginOAuthMemberResDto.builder()
-							.accessToken(accessToken)
-							.build();
-				})
-				.orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
+			.map(member -> {
+				String accessToken = jwtUtil.createToken(member.getId(), member.getEmail());
+				return LoginOAuthMemberResDto.builder()
+					.accessToken(accessToken)
+					.build();
+			})
+			.orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
+	}
+
+	public FindAddressResDto findAddress(Long memberId) {
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
+
+		return FindAddressResDto.from(member);
 	}
 }
