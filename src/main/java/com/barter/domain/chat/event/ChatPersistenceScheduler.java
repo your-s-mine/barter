@@ -18,7 +18,7 @@ public class ChatPersistenceScheduler {
 	private final ChatCachingService chatCachingService;
 	private final ChattingRepository chattingRepository;
 
-	@Scheduled(fixedRate = 60000)
+	@Scheduled(fixedRate = 60000)// 60초 마다 캐시 살펴봄
 	public void persistChatMessages() {
 		Set<String> keys = chatCachingService.getAllKeys();
 

@@ -30,7 +30,7 @@ public class ChatCachingService {
 		redisTemplate.opsForList().rightPush(key, message);
 		List<ChattingContent> cachedMessages = redisTemplate.opsForList().range(key, 0, -1);
 		cachedMessages.forEach(c -> log.info("Cached Message: {}", c));
-		redisTemplate.expire(key, Duration.ofMinutes(1)); // 5분동안 캐시에 유지
+		redisTemplate.expire(key, Duration.ofMinutes(3)); // 3분동안 캐시에 유지
 	}
 
 	public List<ChattingContent> getCachedMessages(String roomId) {

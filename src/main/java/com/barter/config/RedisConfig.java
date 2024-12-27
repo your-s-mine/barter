@@ -7,6 +7,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -14,6 +15,7 @@ import com.barter.domain.chat.collections.ChattingContent;
 import com.barter.domain.notification.service.NotificationService;
 
 @Configuration
+@EnableRedisRepositories(basePackages = "com.barter.domain.chat.repository")
 public class RedisConfig {
 
 	@Bean
