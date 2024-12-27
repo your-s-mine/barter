@@ -35,7 +35,7 @@ public class ChatController {
 			.roomId(roomId)
 			.message(chatMessageReqDto.getMessage())
 			.userId(Long.valueOf(userId))
-			.chatTime(LocalDateTime.now().toString())
+			.chatTime(LocalDateTime.now())
 			.build();
 
 		chatCachingService.cacheMessage(roomId, chattingContent);
