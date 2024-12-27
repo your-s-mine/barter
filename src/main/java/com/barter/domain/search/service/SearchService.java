@@ -12,13 +12,16 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.barter.domain.member.repository.MemberRepository;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.search.dto.ConvertRegisteredProductDto;
+import com.barter.domain.search.dto.SearchTradeReqDto;
 import com.barter.domain.search.dto.SearchTradeResDto;
 import com.barter.domain.search.entity.SearchHistory;
 import com.barter.domain.search.entity.SearchKeyword;
 import com.barter.domain.search.repository.SearchHistoryRepository;
 import com.barter.domain.search.repository.SearchKeywordRepository;
+import com.barter.domain.search.util.DistanceCalculator;
 import com.barter.domain.trade.donationtrade.entity.DonationTrade;
 import com.barter.domain.trade.donationtrade.repository.DonationTradeRepository;
 import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
@@ -39,9 +42,11 @@ public class SearchService {
 	private final DonationTradeRepository donationTradeRepository;
 	private final ImmediateTradeRepository immediateTradeRepository;
 	private final PeriodTradeRepository periodTradeRepository;
+	private final MemberRepository memberRepository;
+	private final DistanceCalculator distanceCalculator;
 
 	@Transactional
-	public List<SearchTradeResDto> searchKeywordAndFindTrades(String word) {
+	public List<SearchTradeResDto> searchKeywordAndFindTrades(String word, SearchTradeReqDto reqDto) {
 
 		SearchKeyword searchKeyword = searchKeywordRepository.findByWord(word)
 			.orElseGet(() -> searchKeywordRepository.save(
@@ -58,14 +63,14 @@ public class SearchService {
 
 		asyncUpdateSearchKeywordCount(searchKeyword.getId(), searchKeyword);
 
-		List<DonationTrade> donationTrades = donationTradeRepository.findDonationTradesWithProduct(word);
-		List<ImmediateTrade> immediateTrades = immediateTradeRepository.findImmediateTradesWithProduct(word);
-		List<PeriodTrade> periodTrades = periodTradeRepository.findPeriodTradesWithProduct(word);
+		// 즉시 교환에만 '위치' 적용했으므로 즉시 교환만 검색. todo: 다른 교환에도 '위치' 추가 예정
+
+		List<ImmediateTrade> immediateTrades = immediateTradeRepository.findImmediateTradesWithProduct(word,
+			reqDto.getAddress1());
 
 		List<SearchTradeResDto> tradeDtos = new ArrayList<>();
-		tradeDtos.addAll(mapDonationTradesToSearchTradeRes(donationTrades));
-		tradeDtos.addAll(mapImmediateTradesToSearchTradeRes(immediateTrades));
-		tradeDtos.addAll(mapPeriodTradesToSearchTradeRes(periodTrades));
+		tradeDtos.addAll(
+			mapImmediateTradesToSearchTradeRes(immediateTrades, reqDto.getLongitude(), reqDto.getLatitude()));
 
 		if (tradeDtos.isEmpty()) {
 			tradeDtos.add(SearchTradeResDto.builder()
@@ -114,22 +119,36 @@ public class SearchService {
 		searchKeywordRepository.save(searchKeyword);
 	}
 
+	private List<SearchTradeResDto> mapImmediateTradesToSearchTradeRes(List<ImmediateTrade> trades,
+		Double memberLongitude,
+		Double memberLatitude) {
+
+		List<SearchTradeResDto> resDtos = new ArrayList<>();
+		for (ImmediateTrade it : trades) {
+			Double itLatitude = it.getLatitude();
+			Double itLongitude = it.getLongitude();
+
+			Double distance = distanceCalculator.calculateDistance(memberLatitude, memberLongitude, itLatitude,
+				itLongitude);
+
+			resDtos.add(SearchTradeResDto.builder()
+				.title(it.getTitle())
+				.product(createConvertedProductDto(it.getRegisteredProduct()))
+				.tradeStatus(it.getStatus())
+				.viewCount(it.getViewCount())
+				.distance(distance)
+				.build()
+			);
+		}
+
+		return resDtos;
+	}
+
 	private List<SearchTradeResDto> mapDonationTradesToSearchTradeRes(List<DonationTrade> trades) {
 		return trades.stream()
 			.map(trade -> SearchTradeResDto.builder()
 				.title(trade.getTitle())
 				.product(createConvertedProductDto(trade.getProduct()))
-				.tradeStatus(trade.getStatus())
-				.viewCount(trade.getViewCount())
-				.build())
-			.toList();
-	}
-
-	private List<SearchTradeResDto> mapImmediateTradesToSearchTradeRes(List<ImmediateTrade> trades) {
-		return trades.stream()
-			.map(trade -> SearchTradeResDto.builder()
-				.title(trade.getTitle())
-				.product(createConvertedProductDto(trade.getRegisteredProduct()))
 				.tradeStatus(trade.getStatus())
 				.viewCount(trade.getViewCount())
 				.build())

@@ -12,6 +12,8 @@ public interface ImmediateTradeRepository extends JpaRepository<ImmediateTrade, 
 
 	@Query("SELECT it FROM ImmediateTrade it " +
 		"JOIN FETCH it.registeredProduct p " +
-		"WHERE it.title LIKE %:keyword% OR it.description LIKE %:keyword%")
-	List<ImmediateTrade> findImmediateTradesWithProduct(@Param("keyword") String keyword);
+		"WHERE it.title LIKE %:keyword% OR it.description LIKE %:keyword% AND it.address1 LIKE %:address1% "
+	)
+	List<ImmediateTrade> findImmediateTradesWithProduct(@Param("keyword") String keyword, String address1);
+
 }

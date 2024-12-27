@@ -27,7 +27,8 @@ public class FindImmediateTradeResDto {
 	private Double latitude;
 
 	@Builder
-	public FindImmediateTradeResDto(String title, String description, RegisteredProduct registeredProduct, LocalDateTime createdAt,
+	public FindImmediateTradeResDto(String title, String description, RegisteredProduct registeredProduct,
+		LocalDateTime createdAt,
 		LocalDateTime updatedAt, TradeStatus tradeStatus, int viewCount, String address1, String address2,
 		Double longitude,
 		Double latitude) {
@@ -53,6 +54,8 @@ public class FindImmediateTradeResDto {
 			.updatedAt(immediateTrade.getUpdatedAt())
 			.tradeStatus(immediateTrade.getStatus())
 			.viewCount(immediateTrade.getViewCount())
+			.latitude(immediateTrade.getLatitude())
+			.longitude(immediateTrade.getLongitude())
 			.build();
 	}
 }

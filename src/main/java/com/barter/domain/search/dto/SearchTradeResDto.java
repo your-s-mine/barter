@@ -13,13 +13,15 @@ public class SearchTradeResDto {
 	private ConvertRegisteredProductDto product;
 	private TradeStatus tradeStatus;
 	private int viewCount;
+	private Double distance;
 
 	@Builder
 	public SearchTradeResDto(String title, ConvertRegisteredProductDto product, TradeStatus tradeStatus,
-		int viewCount) {
+		int viewCount, Double distance) {
 		this.title = title;
 		this.product = product;
 		this.tradeStatus = tradeStatus;
 		this.viewCount = viewCount;
+		this.distance = distance;
 	}
 }
