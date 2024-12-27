@@ -39,8 +39,6 @@ public class ChatController {
 			.build();
 
 		chatCachingService.cacheMessage(roomId, chattingContent);
-
-		// 일단 이거는 한명이 나가도 유지되어야 함 (나중에 채팅 로그 저장하면 해당 로그를 보여줄 수 있음)
 		kafkaProducerService.sendMessageToKafka(chatMessageReqDto);
 
 		log.info("CHAT : {}", chatMessageReqDto.getMessage());
