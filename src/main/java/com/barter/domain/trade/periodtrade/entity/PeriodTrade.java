@@ -2,19 +2,15 @@ package com.barter.domain.trade.periodtrade.entity;
 
 import java.time.LocalDateTime;
 
-import com.barter.domain.BaseTimeStampEntity;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.enums.RegisteredStatus;
+import com.barter.domain.trade.TradeCommonEntity;
 import com.barter.domain.trade.enums.TradeStatus;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -25,38 +21,28 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "PERIOD_TRADES")
-public class PeriodTrade extends BaseTimeStampEntity {
+public class PeriodTrade extends TradeCommonEntity {
 
 	private static final int MAX_AFTER_DAY = 7;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private String title;
-	private String description;
-	@ManyToOne(fetch = FetchType.LAZY)
-	private RegisteredProduct registeredProduct;
-	@Enumerated(EnumType.STRING)
-	private TradeStatus status;
-	private int viewCount;
 	private LocalDateTime endedAt;
 
 	@Builder
 	public PeriodTrade(Long id, String title, String description, RegisteredProduct registeredProduct,
-		TradeStatus status,
-		int viewCount, LocalDateTime endedAt) {
+		TradeStatus status, int viewCount, String address1, String address2, Double longitude, Double latitude,
+		LocalDateTime endedAt) {
+
+		super(title, description, registeredProduct, status, viewCount, address1, address2, longitude, latitude);
 		this.id = id;
-		this.title = title;
-		this.description = description;
-		this.registeredProduct = registeredProduct;
-		this.status = status;
-		this.viewCount = viewCount;
 		this.endedAt = endedAt;
 
 	}
 
 	public static PeriodTrade createInitPeriodTrade(String title, String description, RegisteredProduct product,
-		LocalDateTime endedAt) {
+		String address1, String address2, Double longitude, Double latitude, LocalDateTime endedAt) {
 
 		return PeriodTrade.builder()
 			.title(title)
@@ -64,6 +50,10 @@ public class PeriodTrade extends BaseTimeStampEntity {
 			.registeredProduct(product)
 			.status(TradeStatus.PENDING)
 			.viewCount(0)
+			.address1(address1)
+			.address2(address2)
+			.longitude(longitude)
+			.latitude(latitude)
 			.endedAt(endedAt)
 			.build();
 	}
@@ -80,12 +70,17 @@ public class PeriodTrade extends BaseTimeStampEntity {
 	}
 
 	public void addViewCount() {
-		this.viewCount++;
+		super.addViewCount();
 	}
 
-	public void update(String title, String description) {
+	public void update(String title, String description, String address1, String address2, Double longitude,
+		Double latitude) {
 		this.title = title;
 		this.description = description;
+		this.address1 = address1;
+		this.address2 = address2;
+		this.longitude = longitude;
+		this.latitude = latitude;
 	}
 
 	public void validateIsCompleted() {
@@ -105,12 +100,6 @@ public class PeriodTrade extends BaseTimeStampEntity {
 			throw new IllegalArgumentException("진행 중인 기간 거래만 수락이 가능합니다.");
 		}
 	}
-
-	// public void validateIsPending() {
-	// 	if (this.status.equals(TradeStatus.PENDING)) {
-	// 		throw new IllegalArgumentException("아직 시작되지 않은 기간 거래 입니다.");
-	// 	}
-	// }
 
 	public void validateAuthority(Long userId) {
 		if (!this.registeredProduct.getMember().getId().equals(userId)) {
@@ -153,10 +142,6 @@ public class PeriodTrade extends BaseTimeStampEntity {
 		}
 		return false;
 
-	}
-
-	public void updatePeriodTradeStatusCompleted() {
-		this.status = TradeStatus.COMPLETED;
 	}
 
 	public void updatePeriodTradeStatusInProgress() {

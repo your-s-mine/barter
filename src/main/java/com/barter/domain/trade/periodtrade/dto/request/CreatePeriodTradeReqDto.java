@@ -21,4 +21,12 @@ public class CreatePeriodTradeReqDto {
 	private Long registeredProductId;
 	@NotNull(message = "마감일은 필수입니다.")
 	private LocalDateTime endedAt;
+	@NotNull
+	private String address1;
+	@NotNull
+	private String address2;
+	@NotNull
+	private Double longitude;
+	@NotNull
+	private Double latitude;
 }

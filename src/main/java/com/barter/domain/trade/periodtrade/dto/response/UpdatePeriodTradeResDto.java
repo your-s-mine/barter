@@ -9,7 +9,9 @@ import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Getter
 @NoArgsConstructor
 public class UpdatePeriodTradeResDto {
@@ -22,11 +24,13 @@ public class UpdatePeriodTradeResDto {
 	private TradeStatus tradeStatus;
 	private int viewCount;
 	private LocalDateTime endedAt;
+	private String address1;
+	private String address2;
 
 	@Builder
 	public UpdatePeriodTradeResDto(Long periodTradesId, String title, String description, RegisteredProduct product,
 		LocalDateTime createdAt, LocalDateTime updatedAt, TradeStatus tradeStatus, int viewCount, LocalDateTime endedAt
-	) {
+		, String address1, String address2) {
 		this.periodTradesId = periodTradesId;
 		this.title = title;
 		this.description = description;
@@ -36,6 +40,8 @@ public class UpdatePeriodTradeResDto {
 		this.tradeStatus = tradeStatus;
 		this.viewCount = viewCount;
 		this.endedAt = endedAt;
+		this.address1 = address1;
+		this.address2 = address2;
 
 	}
 
@@ -50,6 +56,8 @@ public class UpdatePeriodTradeResDto {
 			.viewCount(periodTrade.getViewCount())
 			.tradeStatus(periodTrade.getStatus())
 			.endedAt(periodTrade.getEndedAt())
+			.address1(periodTrade.getAddress1())
+			.address2(periodTrade.getAddress2())
 			.build();
 	}
 }

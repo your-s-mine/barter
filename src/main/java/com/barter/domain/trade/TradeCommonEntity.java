@@ -22,19 +22,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class TradeCommonEntity extends BaseTimeStampEntity {
 
-	String title;
-	String description;
+	protected String title;
+	protected String description;
 	@ManyToOne
-	RegisteredProduct registeredProduct;
+	protected RegisteredProduct registeredProduct;
 	@Enumerated(EnumType.STRING)
-	TradeStatus status;
+	protected TradeStatus status;
 	int viewCount;
-	String address1;
-	String address2;
+	protected String address1;
+	protected String address2;
 	// longitude = 경도, x
-	Double longitude;
+	protected Double longitude;
 	// latitude = 위도, y
-	Double latitude;
+	protected Double latitude;
 
 	public TradeCommonEntity(String title, String description, RegisteredProduct registeredProduct, TradeStatus status,
 		int viewCount, String address1, String address2, Double longitude, Double latitude) {

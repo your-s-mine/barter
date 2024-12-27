@@ -22,11 +22,13 @@ public class FindPeriodTradeResDto {
 	private TradeStatus tradeStatus;
 	private int viewCount;
 	private LocalDateTime endedAt;
+	private String address1;
+	private String address2;
 
 	@Builder
 	public FindPeriodTradeResDto(Long periodTradesId, String title, String description, RegisteredProduct product,
 		LocalDateTime createdAt, LocalDateTime updatedAt, TradeStatus tradeStatus, int viewCount, LocalDateTime endedAt
-	) {
+		, String address1, String address2) {
 		this.periodTradesId = periodTradesId;
 		this.title = title;
 		this.description = description;
@@ -36,6 +38,8 @@ public class FindPeriodTradeResDto {
 		this.tradeStatus = tradeStatus;
 		this.viewCount = viewCount;
 		this.endedAt = endedAt;
+		this.address1 = address1;
+		this.address2 = address2;
 
 	}
 
@@ -50,6 +54,8 @@ public class FindPeriodTradeResDto {
 			.tradeStatus(periodTrade.getStatus())
 			.viewCount(periodTrade.getViewCount())
 			.endedAt(periodTrade.getEndedAt())
+			.address1(periodTrade.getAddress1())
+			.address2(periodTrade.getAddress2())
 			.build();
 	}
 
