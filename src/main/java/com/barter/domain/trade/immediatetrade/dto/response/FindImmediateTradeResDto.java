@@ -16,29 +16,39 @@ public class FindImmediateTradeResDto {
 
 	private String title;
 	private String description;
-	private Long productId;
+	private Long registerProductId;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 	private TradeStatus tradeStatus;
 	private int viewCount;
+	private String address1;
+	private String address2;
+	private Double longitude;
+	private Double latitude;
 
 	@Builder
-	public FindImmediateTradeResDto(String title, String description, RegisteredProduct product,
-		LocalDateTime createdAt, LocalDateTime updatedAt, TradeStatus tradeStatus, int viewCount) {
+	public FindImmediateTradeResDto(String title, String description, RegisteredProduct registeredProduct, LocalDateTime createdAt,
+		LocalDateTime updatedAt, TradeStatus tradeStatus, int viewCount, String address1, String address2,
+		Double longitude,
+		Double latitude) {
 		this.title = title;
 		this.description = description;
-		this.productId = product.getId();
+		this.registerProductId = registeredProduct.getId();
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 		this.tradeStatus = tradeStatus;
 		this.viewCount = viewCount;
+		this.address1 = address1;
+		this.address2 = address2;
+		this.longitude = longitude;
+		this.latitude = latitude;
 	}
 
 	public static FindImmediateTradeResDto from(ImmediateTrade immediateTrade) {
 		return FindImmediateTradeResDto.builder()
 			.title(immediateTrade.getTitle())
 			.description(immediateTrade.getDescription())
-			.product(immediateTrade.getRegisteredProduct())
+			.registeredProduct(immediateTrade.getRegisteredProduct())
 			.createdAt(immediateTrade.getCreatedAt())
 			.updatedAt(immediateTrade.getUpdatedAt())
 			.tradeStatus(immediateTrade.getStatus())
