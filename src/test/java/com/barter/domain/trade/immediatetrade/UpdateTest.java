@@ -62,7 +62,7 @@ public class UpdateTest {
 			.id(1L)
 			.title("즉시 교환 제목")
 			.description("즉시 교환 설명")
-			.product(registeredProduct)
+			.registeredProduct(registeredProduct)
 			.status(TradeStatus.PENDING)
 			.viewCount(0)
 			.build();
@@ -72,8 +72,11 @@ public class UpdateTest {
 	@DisplayName("즉시 교환 수정: 성공")
 	void updateSuccess() throws IllegalAccessException {
 		// given
-		UpdateImmediateTradeReqDto reqDto = new UpdateImmediateTradeReqDto(registeredProduct.getId(), "수정된 제목",
-			"수정된 설명");
+		UpdateImmediateTradeReqDto reqDto = UpdateImmediateTradeReqDto.builder()
+			.registeredProductId(registeredProduct.getId())
+			.title("제목 수정")
+			.description("설명 수정")
+			.build();
 
 		when(immediateTradeRepository.findById(immediateTrade.getId())).thenReturn(Optional.ofNullable(immediateTrade));
 		when(registeredProductRepository.findById(registeredProduct.getId())).thenReturn(
@@ -84,8 +87,8 @@ public class UpdateTest {
 		FindImmediateTradeResDto result = immediateTradeService.update(verifiedMember, immediateTrade.getId(), reqDto);
 
 		// then
-		assertThat(result.getTitle()).isEqualTo("수정된 제목");
-		assertThat(result.getDescription()).isEqualTo("수정된 설명");
+		assertThat(result.getTitle()).isEqualTo("제목 수정");
+		assertThat(result.getDescription()).isEqualTo("설명 수정");
 		verify(immediateTradeRepository).save(any());
 	}
 
@@ -93,8 +96,11 @@ public class UpdateTest {
 	@DisplayName("즉시 교환 수정: 실패 - 교환을 찾지 못하는 경우")
 	void updateFailureNotFoundTrade() {
 		// given
-		UpdateImmediateTradeReqDto reqDto = new UpdateImmediateTradeReqDto(registeredProduct.getId(),
-			registeredProduct.getName(), registeredProduct.getDescription());
+		UpdateImmediateTradeReqDto reqDto = UpdateImmediateTradeReqDto.builder()
+			.registeredProductId(registeredProduct.getId())
+			.title("제목 수정")
+			.description("설명 수정")
+			.build();
 
 		// when, then
 		assertThatThrownBy(() ->
@@ -106,7 +112,11 @@ public class UpdateTest {
 	@DisplayName("즉시 교환 수정: 실패 - 수정 권한이 없는 경우")
 	void updateFailureNoAuthority() {
 		// given
-		UpdateImmediateTradeReqDto reqDto = new UpdateImmediateTradeReqDto(2L, "수정된 제목", "수정된 설명");
+		UpdateImmediateTradeReqDto reqDto = UpdateImmediateTradeReqDto.builder()
+			.registeredProductId(2L)
+			.title("제목 수정")
+			.description("설명 수정")
+			.build();
 
 		when(immediateTradeRepository.findById(immediateTrade.getId())).thenReturn(Optional.ofNullable(immediateTrade));
 
@@ -122,8 +132,11 @@ public class UpdateTest {
 	@DisplayName("즉시 교환 수정: 실패 - 등록 물품을 찾을 수 없는 경우")
 	void updateFailureNotFoundProduct() {
 		// given
-		UpdateImmediateTradeReqDto reqDto = new UpdateImmediateTradeReqDto(2L, "수정된 제목", "수정된 설명");
-
+		UpdateImmediateTradeReqDto reqDto = UpdateImmediateTradeReqDto.builder()
+			.registeredProductId(registeredProduct.getId())
+			.title("제목 수정")
+			.description("설명 수정")
+			.build();
 		when(immediateTradeRepository.findById(immediateTrade.getId())).thenReturn(Optional.ofNullable(immediateTrade));
 
 		// when, then

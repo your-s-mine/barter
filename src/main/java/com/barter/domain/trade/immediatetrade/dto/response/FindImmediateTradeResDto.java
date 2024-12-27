@@ -38,7 +38,7 @@ public class FindImmediateTradeResDto {
 		return FindImmediateTradeResDto.builder()
 			.title(immediateTrade.getTitle())
 			.description(immediateTrade.getDescription())
-			.product(immediateTrade.getProduct())
+			.product(immediateTrade.getRegisteredProduct())
 			.createdAt(immediateTrade.getCreatedAt())
 			.updatedAt(immediateTrade.getUpdatedAt())
 			.tradeStatus(immediateTrade.getStatus())

@@ -43,6 +43,12 @@ services:
     depends_on:
       - zookeeper
 
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+
   spring:
     image: backho31595/barter-application
     container_name: app
@@ -52,24 +58,11 @@ services:
       - db-server
       - mongodb
       - kafka
-    environment:
-      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
-      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
-      - SPRING_DATA_MONGODB_URI=${SPRING_DATA_MONGODB_URI}
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=${SPRING_KAFKA_BOOTSTRAP_SERVERS}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-      - CLOUD_AWS_CREDENTIALS_ACCESS_KEY=${CLOUD_AWS_CREDENTIALS_ACCESS_KEY}
-      - CLOUD_AWS_CREDENTIALS_SECRET_KEY=${CLOUD_AWS_CREDENTIALS_SECRET_KEY}
-      - CLOUD_AWS_REGION_STATIC=${CLOUD_AWS_REGION_STATIC}
-      - CLOUD_AWS_S3_BUCKET=${CLOUD_AWS_S3_BUCKET}
-      - OAUTH2_KAKAO_CLIENT_ID=${OAUTH2_KAKAO_CLIENT_ID}
-      - OAUTH2_KAKAO_REDIRECT_URL=${OAUTH2_KAKAO_REDIRECT_URL}
-      - KAKAO_API_KEY=${KAKAO_API_KEY}
 
 volumes:
   db_data:
   mongo_data:
+  redis_data:
 
 networks:
   default:

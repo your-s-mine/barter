@@ -60,9 +60,13 @@ public class ImmediateTradeService {
 		ImmediateTrade immediateTrade = ImmediateTrade.builder()
 			.title(reqDto.getTitle())
 			.description(reqDto.getDescription())
-			.product(registeredProduct)
+			.registeredProduct(registeredProduct)
 			.status(TradeStatus.PENDING)
 			.viewCount(0)
+			.address1(reqDto.getAddress1())
+			.address2(reqDto.getAddress2())
+			.longitude(reqDto.getLongitude())
+			.latitude(reqDto.getLatitude())
 			.build();
 
 		registeredProduct.changeStatusRegistering();
@@ -70,7 +74,7 @@ public class ImmediateTradeService {
 		publisher.publishEvent(TradeNotificationEvent.builder()
 			.tradeId(savedTrade.getId())
 			.type(TradeType.IMMEDIATE)
-			.productName(savedTrade.getProduct().getName())
+			.productName(savedTrade.getRegisteredProduct().getName())
 			.build());
 		return FindImmediateTradeResDto.from(savedTrade);
 	}
@@ -173,7 +177,7 @@ public class ImmediateTradeService {
 
 		// 알림 (교환 등록자에게)
 		notificationService.saveTradeNotification(
-			EventKind.IMMEDIATE_TRADE_SUGGEST, immediateTrade.getProduct().getMember().getId(),
+			EventKind.IMMEDIATE_TRADE_SUGGEST, immediateTrade.getRegisteredProduct().getMember().getId(),
 			TradeType.IMMEDIATE, immediateTrade.getId(), immediateTrade.getTitle()
 		);
 
@@ -189,7 +193,7 @@ public class ImmediateTradeService {
 		immediateTrade.validateAuthority(member.getId());
 
 		immediateTrade.changeStatusInProgress();
-		immediateTrade.getProduct().changeStatusAccepted();
+		immediateTrade.getRegisteredProduct().changeStatusAccepted();
 
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeId(tradeId);
 
@@ -250,7 +254,7 @@ public class ImmediateTradeService {
 		}
 
 		immediateTrade.changeStatusCompleted();
-		immediateTrade.getProduct().changeStatusCompleted();
+		immediateTrade.getRegisteredProduct().changeStatusCompleted();
 
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(tradeId,
 			TradeType.IMMEDIATE);
@@ -276,7 +280,7 @@ public class ImmediateTradeService {
 
 		// 알림 (교환 등록자에게)
 		notificationService.saveTradeNotification(
-			EventKind.IMMEDIATE_TRADE_COMPLETE, immediateTrade.getProduct().getMember().getId(),
+			EventKind.IMMEDIATE_TRADE_COMPLETE, immediateTrade.getRegisteredProduct().getMember().getId(),
 			TradeType.IMMEDIATE, updatedTrade.getId(), updatedTrade.getTitle()
 		);
 		// 알림 (교환에 성공한 제안자에게)
