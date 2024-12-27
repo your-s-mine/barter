@@ -65,6 +65,9 @@ dependencies {
 
     // redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    // redis LocalDatetime Serialize-Deserialize
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.3'
+
 }
 
 tasks.named('test') {

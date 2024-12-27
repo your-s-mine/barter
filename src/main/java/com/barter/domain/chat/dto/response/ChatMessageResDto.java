@@ -31,7 +31,6 @@ public class ChatMessageResDto {
 		return ChatMessageResDto.builder()
 			.roomId(chattingContent.getRoomId())
 			.message(chattingContent.getMessage())
-			.chatTime(chattingContent.getChatTime())
 			.build();
 	}
 }

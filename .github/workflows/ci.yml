@@ -1,0 +1,29 @@
+name: CI - Test Code 검증
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types:
+      - opened
+      - ready_for_review
+    branches:
+      - develop
+jobs:
+  testing-pr-opend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          cache-write-only: true
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Test with Gradle
+        run: ./gradlew test
