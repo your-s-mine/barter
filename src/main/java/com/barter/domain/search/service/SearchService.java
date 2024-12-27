@@ -129,7 +129,7 @@ public class SearchService {
 		return trades.stream()
 			.map(trade -> SearchTradeResDto.builder()
 				.title(trade.getTitle())
-				.product(createConvertedProductDto(trade.getProduct()))
+				.product(createConvertedProductDto(trade.getRegisteredProduct()))
 				.tradeStatus(trade.getStatus())
 				.viewCount(trade.getViewCount())
 				.build())

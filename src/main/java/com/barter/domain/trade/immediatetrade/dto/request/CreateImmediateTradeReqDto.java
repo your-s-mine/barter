@@ -17,4 +17,12 @@ public class CreateImmediateTradeReqDto {
 	@NotBlank
 	@Size(min = 5, message = "설명은 5글자 이상만 가능합니다.")
 	String description;
+	@NotBlank
+	String address1;
+	@NotBlank
+	String address2;
+	@NotBlank
+	Double longitude;
+	@NotBlank
+	Double latitude;
 }
