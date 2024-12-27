@@ -23,8 +23,8 @@ public class CreateImmediateTradeReqDto {
 	String address1;
 	@NotBlank
 	String address2;
-	@NotBlank
+	@NotNull
 	Double longitude;
-	@NotBlank
+	@NotNull
 	Double latitude;
 }

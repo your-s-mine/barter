@@ -83,7 +83,7 @@ public class FindAndFindAllTest {
 		// then
 		assertThat(resDto.getTitle()).isEqualTo("제목");
 		assertThat(resDto.getDescription()).isEqualTo("설명");
-		assertThat(resDto.getProductId()).isEqualTo(registeredProduct.getId());
+		assertThat(resDto.getRegisterProductId()).isEqualTo(registeredProduct.getId());
 		verify(immediateTradeRepository).findById(id);
 	}
 
