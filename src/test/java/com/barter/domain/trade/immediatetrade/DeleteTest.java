@@ -56,7 +56,7 @@ public class DeleteTest {
 			.id(1L)
 			.title("즉시 교환 제목")
 			.description("즉시 교환 설명")
-			.product(registeredProduct)
+			.registeredProduct(registeredProduct)
 			.status(TradeStatus.PENDING)
 			.viewCount(0)
 			.build();
