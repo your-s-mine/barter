@@ -77,7 +77,7 @@ public class PeriodTradeService {
 		registeredProduct.validatePendingStatusBeforeUpload();
 
 		PeriodTrade periodTrade = PeriodTrade.createInitPeriodTrade(reqDto.getTitle(), reqDto.getDescription(),
-			registeredProduct,
+			registeredProduct, reqDto.getAddress1(), reqDto.getAddress2(), reqDto.getLongitude(), reqDto.getLatitude(),
 			reqDto.getEndedAt());
 
 		registeredProduct.updateStatus(RegisteredStatus.REGISTERING.toString());
@@ -126,7 +126,8 @@ public class PeriodTradeService {
 		);
 		periodTrade.validateAuthority(member.getId());
 		periodTrade.validateIsCompleted();
-		periodTrade.update(reqDto.getTitle(), reqDto.getDescription());
+		periodTrade.update(reqDto.getTitle(), reqDto.getDescription(), reqDto.getAddress1(), reqDto.getAddress2(),
+			reqDto.getLongitude(), reqDto.getLatitude());
 
 		return UpdatePeriodTradeResDto.from(periodTrade);
 
