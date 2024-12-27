@@ -54,6 +54,8 @@ public class FindImmediateTradeResDto {
 			.updatedAt(immediateTrade.getUpdatedAt())
 			.tradeStatus(immediateTrade.getStatus())
 			.viewCount(immediateTrade.getViewCount())
+			.address1(immediateTrade.getAddress1())
+			.address2(immediateTrade.getAddress2())
 			.latitude(immediateTrade.getLatitude())
 			.longitude(immediateTrade.getLongitude())
 			.build();
