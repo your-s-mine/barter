@@ -669,10 +669,10 @@ class PeriodTradeServiceTest {
 
 		// Then
 		assertNotNull(result);
-		assertEquals(1, result.size());  // Since both products are by the same member, expect one entry
+		assertEquals(1, result.size());
 		FindPeriodTradeSuggestionResDto dto = result.get(0);
 		assertEquals(1L, dto.getMemberId());
-		assertEquals(2, dto.getSuggestedProducts().size());  // We expect two products in the list
+		assertEquals(2, dto.getSuggestedProducts().size());
 
 		FindSuggestedProductResDto suggestedProductDto1 = dto.getSuggestedProducts().get(0);
 		assertEquals("Product 1", suggestedProductDto1.getName());
@@ -683,9 +683,5 @@ class PeriodTradeServiceTest {
 		assertEquals("Description 2", suggestedProductDto2.getDescription());
 
 	}
-
-	// 테스트 코드 작성 목록
-	// 1. 기간 거래 상태 업데이트 (수정 필요)
-	// 2. 기간 거래 수락 및 거절 업데이트 (수정 필요)
 
 }
