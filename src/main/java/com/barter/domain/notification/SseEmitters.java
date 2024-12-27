@@ -3,14 +3,13 @@ package com.barter.domain.notification;
 import static com.barter.domain.notification.enums.EventKind.*;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import com.barter.domain.notification.dto.response.SendTradeEventResDto;
+import com.barter.domain.notification.dto.PublishMessageDto;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,13 +26,25 @@ public class SseEmitters {
 
 		setCallbacks(memberId, emitter);
 
-		sendEvent(memberId, DEFAULT.getEventName(), DEFAULT.getEventMessage());
+		sendDefaultEvent(memberId, emitter);
 
 		return emitter;
 	}
 
-	public void sendEvent(Long memberId, String eventName, Object data) {
-		SseEmitter emitter = emitterMap.get(memberId);
+	private void sendDefaultEvent(Long memberId, SseEmitter emitter) {
+		try {
+			emitter.send(SseEmitter.event()
+				.id(String.valueOf(memberId))
+				.name(DEFAULT.getEventName())
+				.data(DEFAULT.getEventMessage())
+			);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public void sendEvent(PublishMessageDto data) {
+		SseEmitter emitter = emitterMap.get(data.getData().getMemberId());
 		if (emitter == null) {
 			// 전달 대상 사용자의 SseEmitter 가 없다면 접속하지 않은 사용자이므로 이벤트 전달 중지
 			log.info("전달 대상 사용자 접속하지 않음");
@@ -42,31 +53,12 @@ public class SseEmitters {
 
 		try {
 			emitter.send(SseEmitter.event()
-				.id(String.valueOf(memberId))
-				.name(eventName)
-				.data(data)
+				.id(String.valueOf(data.getData().getMemberId()))
+				.name(data.getEventName())
+				.data(data.getData())
 			);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
-		}
-	}
-
-	public void sendAllSameEvent(String eventName, List<SendTradeEventResDto> data) {
-		for (SendTradeEventResDto d : data) {
-			SseEmitter emitter = emitterMap.get(d.getMemberId());
-			if (emitter == null) {
-				continue;
-			}
-
-			try {
-				emitter.send(SseEmitter.event()
-					.id(String.valueOf(d.getMemberId()))
-					.name(eventName)
-					.data(d)
-				);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
 		}
 	}
 

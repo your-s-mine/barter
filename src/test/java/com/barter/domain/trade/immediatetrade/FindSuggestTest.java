@@ -29,6 +29,7 @@ import com.barter.domain.trade.immediatetrade.dto.response.FindSuggestForImmedia
 import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
 import com.barter.domain.trade.immediatetrade.service.ImmediateTradeService;
+import com.barter.exception.customexceptions.ProductException;
 
 @ExtendWith(MockitoExtension.class)
 public class FindSuggestTest {
@@ -154,6 +155,6 @@ public class FindSuggestTest {
 
 		assertThatThrownBy(() ->
 			immediateTradeService.findSuggestForImmediateTrade(immediateTrade.getId(), verifiedMember))
-			.isInstanceOf(IllegalArgumentException.class).hasMessage("제안 물품을 찾을 수 없습니다");
+			.isInstanceOf(ProductException.class).hasMessage("존재하지 않는 제안물품입니다.");
 	}
 }

@@ -1,18 +1,21 @@
 package com.barter.domain.notification.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.connection.Message;
+import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.barter.domain.notification.SseEmitters;
+import com.barter.domain.notification.dto.PublishMessageDto;
 import com.barter.domain.notification.dto.response.FindNotificationResDto;
-import com.barter.domain.notification.dto.response.SendTradeEventResDto;
+import com.barter.domain.notification.dto.response.SendEventResDto;
 import com.barter.domain.notification.dto.response.UpdateNotificationStatusResDto;
 import com.barter.domain.notification.entity.Notification;
 import com.barter.domain.notification.enums.EventKind;
@@ -20,6 +23,8 @@ import com.barter.domain.notification.respository.NotificationRepository;
 import com.barter.domain.product.enums.TradeType;
 import com.barter.exception.customexceptions.NotificationException;
 import com.barter.exception.enums.ExceptionCode;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,10 +32,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class NotificationService {
+public class NotificationService implements MessageListener {
 
 	private final NotificationRepository notificationRepository;
 	private final SseEmitters sseEmitters;
+	private final RedisTemplate<String, Object> redisTemplate;
+	private final ObjectMapper objectMapper;
 
 	public SseEmitter subscribe(Long memberId) {
 		return sseEmitters.saveEmitter(memberId);
@@ -87,7 +94,10 @@ public class NotificationService {
 		);
 		Notification savedNotification = notificationRepository.save(createdNotification);
 
-		sseEmitters.sendEvent(memberId, eventKind.getEventName(), SendTradeEventResDto.from(savedNotification));
+		PublishMessageDto publishMessage = PublishMessageDto.from(
+			eventKind.getEventName(), SendEventResDto.from(savedNotification)
+		);
+		publishEvent("activity", publishMessage);
 	}
 
 	public void saveKeywordNotification(
@@ -95,16 +105,36 @@ public class NotificationService {
 	) {
 		String completedEventMessage = eventKind.getEventMessage();
 
-		List<Notification> createdNotifications = new ArrayList<>();
 		for (Long memberId : memberIds) {
 			Notification createdNotification = Notification.createKeywordNotification(
 				completedEventMessage, tradeType, tradeId, memberId
 			);
-			createdNotifications.add(createdNotification);
-		}
-		List<Notification> savedNotifications = notificationRepository.saveAll(createdNotifications);
+			Notification savedNotification = notificationRepository.save(createdNotification);
 
-		List<SendTradeEventResDto> data = savedNotifications.stream().map(SendTradeEventResDto::from).toList();
-		sseEmitters.sendAllSameEvent(eventKind.getEventName(), data);
+			PublishMessageDto publishMessage = PublishMessageDto.from(
+				eventKind.getEventName(), SendEventResDto.from(savedNotification)
+			);
+			publishEvent("keyword", publishMessage);
+		}
+	}
+
+	private void publishEvent(String channel, PublishMessageDto data) {
+		try {
+			String jsonData = objectMapper.writeValueAsString(data);
+			redisTemplate.convertAndSend(channel, jsonData);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public void onMessage(Message message, byte[] pattern) {
+		try {
+			String jsonMessage = redisTemplate.getStringSerializer().deserialize(message.getBody());
+			PublishMessageDto publishedMessage = objectMapper.readValue(jsonMessage, PublishMessageDto.class);
+			sseEmitters.sendEvent(publishedMessage);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }
