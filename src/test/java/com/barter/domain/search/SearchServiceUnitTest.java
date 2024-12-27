@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,12 +17,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.barter.domain.member.entity.Address;
+import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.entity.RegisteredProduct;
+import com.barter.domain.search.dto.SearchTradeReqDto;
 import com.barter.domain.search.dto.SearchTradeResDto;
 import com.barter.domain.search.entity.SearchKeyword;
 import com.barter.domain.search.repository.SearchHistoryRepository;
 import com.barter.domain.search.repository.SearchKeywordRepository;
 import com.barter.domain.search.service.SearchService;
+import com.barter.domain.search.util.DistanceCalculator;
 import com.barter.domain.trade.donationtrade.entity.DonationTrade;
 import com.barter.domain.trade.donationtrade.repository.DonationTradeRepository;
 import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
@@ -42,12 +47,38 @@ public class SearchServiceUnitTest {
 	ImmediateTradeRepository immediateTradeRepository;
 	@Mock
 	PeriodTradeRepository periodTradeRepository;
+	@Mock
+	DistanceCalculator distanceCalculator;
 	@InjectMocks
 	SearchService searchService;
 
 	List<DonationTrade> donationTrades = new ArrayList<>();
 	List<ImmediateTrade> immediateTrades = new ArrayList<>();
 	List<PeriodTrade> periodTrades = new ArrayList<>();
+	Member member;
+	SearchTradeReqDto reqDto;
+	Double distance = 10.12;
+
+	@BeforeEach
+	void setUp() {
+		member = Member.createBasicMember("test@test.com", "1234", "test", Address.builder().build());
+
+		reqDto = SearchTradeReqDto.builder()
+			.address1("상수동")
+			.longitude(12.123)
+			.latitude(40.123)
+			.build();
+
+		immediateTrades.add(
+			ImmediateTrade.builder()
+				.registeredProduct(RegisteredProduct.builder()
+					.id(1L)
+					.build())
+				.title("Immediate banana")
+				.latitude(12.1234)
+				.longitude(40.546)
+				.build());
+	}
 
 	@Test
 	@DisplayName("검색 - 기존에 검색 이력이 없어서 생성하는 경우")
@@ -57,21 +88,17 @@ public class SearchServiceUnitTest {
 			.word(word)
 			.build();
 
-		immediateTrades.add(
-			ImmediateTrade.builder()
-				.registeredProduct(RegisteredProduct.builder()
-					.id(1L)
-					.build())
-				.title("Immediate banana")
-				.build());
-
 		when(searchKeywordRepository.findByWord(word)).thenReturn(Optional.empty());
 		when(searchKeywordRepository.save(any(SearchKeyword.class))).thenReturn(newKeyword);
-		when(immediateTradeRepository.findImmediateTradesWithProduct(word)).thenReturn(immediateTrades);
+		when(immediateTradeRepository.findImmediateTradesWithProduct(word, reqDto.getAddress1())).thenReturn(
+			immediateTrades);
+		when(distanceCalculator.calculateDistance(reqDto.getLatitude(), reqDto.getLongitude(),
+			immediateTrades.get(0).getLatitude(), immediateTrades.get(0).getLongitude())).thenReturn(distance);
 
-		List<SearchTradeResDto> result = searchService.searchKeywordAndFindTrades(word);
+		List<SearchTradeResDto> result = searchService.searchKeywordAndFindTrades(word, reqDto);
 
 		assertThat(result.get(0).getTitle()).isEqualTo("Immediate banana");
+		assertThat(result.get(0).getDistance()).isEqualTo(distance);
 
 		verify(searchKeywordRepository, times(1)).findByWord(word);
 		verify(searchKeywordRepository, times(2)).save(any(SearchKeyword.class));
@@ -86,30 +113,15 @@ public class SearchServiceUnitTest {
 			.word(word)
 			.build();
 
-		donationTrades.add(
-			DonationTrade.builder()
-				.product(RegisteredProduct.builder()
-					.id(1L)
-					.build())
-				.title("Donation banana")
-				.build());
-
-		periodTrades.add(
-			PeriodTrade.builder()
-				.registeredProduct(RegisteredProduct.builder()
-					.id(1L)
-					.build())
-				.title("PeriodTrade banana")
-				.build());
-
 		when(searchKeywordRepository.findByWord(word)).thenReturn(Optional.of(existingKeyword));
-		when(donationTradeRepository.findDonationTradesWithProduct(word)).thenReturn(donationTrades);
-		when(periodTradeRepository.findPeriodTradesWithProduct(word)).thenReturn(periodTrades);
+		when(immediateTradeRepository.findImmediateTradesWithProduct(word, reqDto.getAddress1())).thenReturn(
+			immediateTrades);
+		when(distanceCalculator.calculateDistance(reqDto.getLatitude(), reqDto.getLongitude(),
+			immediateTrades.get(0).getLatitude(), immediateTrades.get(0).getLongitude())).thenReturn(distance);
 
-		List<SearchTradeResDto> result = searchService.searchKeywordAndFindTrades(word);
+		List<SearchTradeResDto> result = searchService.searchKeywordAndFindTrades(word, reqDto);
 
-		assertThat(result.get(0).getTitle()).isEqualTo("Donation banana");
-		assertThat(result.get(1).getTitle()).isEqualTo("PeriodTrade banana");
+		assertThat(result.get(0).getTitle()).isEqualTo("Immediate banana");
 
 		verify(searchKeywordRepository, times(1)).findByWord(word);
 		verify(searchKeywordRepository, times(1)).save(any(SearchKeyword.class));
@@ -126,7 +138,7 @@ public class SearchServiceUnitTest {
 		when(searchKeywordRepository.findByWord(word)).thenReturn(Optional.empty());
 		when(searchKeywordRepository.save(any(SearchKeyword.class))).thenReturn(newKeyword);
 
-		List<SearchTradeResDto> result = searchService.searchKeywordAndFindTrades(word);
+		List<SearchTradeResDto> result = searchService.searchKeywordAndFindTrades(word, reqDto);
 
 		assertThat(result.get(0).getTitle()).isEqualTo("검색 결과가 없습니다.");
 
