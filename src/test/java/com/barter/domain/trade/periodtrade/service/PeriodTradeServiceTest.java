@@ -116,9 +116,15 @@ class PeriodTradeServiceTest {
 			.description("test description")
 			.registeredProductId(registeredProduct.getId())
 			.endedAt(LocalDateTime.now().plusDays(5))
+			.address1("경기도")
+			.address2("용인시")
+			.longitude(32.333)
+			.latitude(121.12)
 			.build();
 
-		PeriodTrade periodTrade = PeriodTrade.createInitPeriodTrade("title", "description", registeredProduct,
+		PeriodTrade periodTrade = PeriodTrade.createInitPeriodTrade(reqDto.getTitle(), reqDto.getDescription(),
+			registeredProduct,
+			reqDto.getAddress1(), reqDto.getAddress2(), reqDto.getLongitude(), reqDto.getLatitude(),
 			LocalDateTime.now().plusDays(1));
 
 		when(registeredProductRepository.findById(reqDto.getRegisteredProductId()))
@@ -625,7 +631,13 @@ class PeriodTradeServiceTest {
 
 		String newTitle = "새 제목";
 		String newDescription = "새 설명";
-		UpdatePeriodTradeReqDto reqDto = new UpdatePeriodTradeReqDto(newTitle, newDescription);
+		String newAddress1 = "새 주소 1";
+		String newAddress2 = "새 주소 2";
+		Double longitude = 1.0;
+		Double latitude = 2.0;
+
+		UpdatePeriodTradeReqDto reqDto = new UpdatePeriodTradeReqDto(newTitle, newDescription, newAddress1, newAddress2,
+			longitude, latitude);
 
 		PeriodTrade periodTrade = PeriodTrade.builder()
 			.id(1L)
