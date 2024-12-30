@@ -22,7 +22,7 @@ import com.barter.domain.search.entity.SearchKeyword;
 import com.barter.domain.search.repository.SearchHistoryRepository;
 import com.barter.domain.search.repository.SearchKeywordRepository;
 import com.barter.domain.search.util.DistanceCalculator;
-import com.barter.domain.trade.donationtrade.entity.DonationTrade;
+import com.barter.domain.trade.TradeCommonEntity;
 import com.barter.domain.trade.donationtrade.repository.DonationTradeRepository;
 import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
@@ -63,14 +63,17 @@ public class SearchService {
 
 		asyncUpdateSearchKeywordCount(searchKeyword.getId(), searchKeyword);
 
-		// 즉시 교환에만 '위치' 적용했으므로 즉시 교환만 검색. todo: 다른 교환에도 '위치' 추가 예정
+		// todo: 기부 교환에 '위치' 추가되면, 검색에 기부 교환 추가
 
 		List<ImmediateTrade> immediateTrades = immediateTradeRepository.findImmediateTradesWithProduct(word,
 			reqDto.getAddress1());
 
+		List<PeriodTrade> periodTrades = periodTradeRepository.findPeriodTradesWithProduct(word,
+			reqDto.getAddress1());
+
 		List<SearchTradeResDto> tradeDtos = new ArrayList<>();
-		tradeDtos.addAll(
-			mapImmediateTradesToSearchTradeRes(immediateTrades, reqDto.getLongitude(), reqDto.getLatitude()));
+		tradeDtos.addAll(mapTradesToSearchTradeRes(immediateTrades, reqDto.getLongitude(), reqDto.getLatitude()));
+		tradeDtos.addAll(mapTradesToSearchTradeRes(periodTrades, reqDto.getLongitude(), reqDto.getLatitude()));
 
 		if (tradeDtos.isEmpty()) {
 			tradeDtos.add(SearchTradeResDto.builder()
@@ -119,51 +122,28 @@ public class SearchService {
 		searchKeywordRepository.save(searchKeyword);
 	}
 
-	private List<SearchTradeResDto> mapImmediateTradesToSearchTradeRes(List<ImmediateTrade> trades,
-		Double memberLongitude,
-		Double memberLatitude) {
+	private <T extends TradeCommonEntity> List<SearchTradeResDto> mapTradesToSearchTradeRes(List<T> trades,
+		Double memberLongitude, Double memberLatitude) {
 
 		List<SearchTradeResDto> resDtos = new ArrayList<>();
-		for (ImmediateTrade it : trades) {
-			Double itLatitude = it.getLatitude();
-			Double itLongitude = it.getLongitude();
+		for (T trade : trades) {
+			Double latitude = trade.getLatitude();
+			Double longitude = trade.getLongitude();
 
-			Double distance = distanceCalculator.calculateDistance(memberLatitude, memberLongitude, itLatitude,
-				itLongitude);
+			Double distance = distanceCalculator.calculateDistance(memberLatitude, memberLongitude, latitude,
+				longitude);
 
 			resDtos.add(SearchTradeResDto.builder()
-				.title(it.getTitle())
-				.product(createConvertedProductDto(it.getRegisteredProduct()))
-				.tradeStatus(it.getStatus())
-				.viewCount(it.getViewCount())
+				.title(trade.getTitle())
+				.product(createConvertedProductDto(trade.getRegisteredProduct()))
+				.tradeStatus(trade.getStatus())
+				.viewCount(trade.getViewCount())
 				.distance(distance)
 				.build()
 			);
 		}
 
 		return resDtos;
-	}
-
-	private List<SearchTradeResDto> mapDonationTradesToSearchTradeRes(List<DonationTrade> trades) {
-		return trades.stream()
-			.map(trade -> SearchTradeResDto.builder()
-				.title(trade.getTitle())
-				.product(createConvertedProductDto(trade.getProduct()))
-				.tradeStatus(trade.getStatus())
-				.viewCount(trade.getViewCount())
-				.build())
-			.toList();
-	}
-
-	private List<SearchTradeResDto> mapPeriodTradesToSearchTradeRes(List<PeriodTrade> trades) {
-		return trades.stream()
-			.map(trade -> SearchTradeResDto.builder()
-				.title(trade.getTitle())
-				.product(createConvertedProductDto(trade.getRegisteredProduct()))
-				.tradeStatus(trade.getStatus())
-				.viewCount(trade.getViewCount())
-				.build())
-			.toList();
 	}
 
 	private ConvertRegisteredProductDto createConvertedProductDto(RegisteredProduct product) {
