@@ -1,5 +1,7 @@
 package com.barter.config;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -9,10 +11,12 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import com.barter.domain.chat.collections.ChattingContent;
 import com.barter.domain.notification.service.NotificationService;
+import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeResDto;
 
 @Configuration
 @EnableRedisRepositories(basePackages = "com.barter.domain.chat.repository")
@@ -32,6 +36,24 @@ public class RedisConfig {
 		template.setConnectionFactory(redisConnectionFactory);
 		template.setKeySerializer(new StringRedisSerializer());
 		template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+		return template;
+	}
+
+	@Bean(name = "periodTradeRedisTemplate")
+	public RedisTemplate<String, List<FindPeriodTradeResDto>> periodTradeRedisTemplate(
+		RedisConnectionFactory redisConnectionFactory
+	) {
+		RedisTemplate<String, List<FindPeriodTradeResDto>> template = new RedisTemplate<>();
+		template.setConnectionFactory(redisConnectionFactory);
+
+		template.setKeySerializer(new StringRedisSerializer());
+
+		// List<FindPeriodTradeResDto>에 맞는 직렬화 방식 설정
+		Jackson2JsonRedisSerializer<List> serializer =
+			new Jackson2JsonRedisSerializer<>(List.class);
+
+		template.setValueSerializer(serializer);
+
 		return template;
 	}
 

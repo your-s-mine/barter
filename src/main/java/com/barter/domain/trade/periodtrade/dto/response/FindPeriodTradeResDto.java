@@ -1,33 +1,33 @@
 package com.barter.domain.trade.periodtrade.dto.response;
 
-import java.time.LocalDateTime;
-
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.trade.enums.TradeStatus;
 import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class FindPeriodTradeResDto {
 	private Long periodTradesId;
 	private String title;
 	private String description;
 	private Long registeredProductId;
-	private LocalDateTime createdAt;
-	private LocalDateTime updatedAt;
+	private String createdAt;
+	private String updatedAt;
 	private TradeStatus tradeStatus;
 	private int viewCount;
-	private LocalDateTime endedAt;
+	private String endedAt;
 	private String address1;
 	private String address2;
 
 	@Builder
 	public FindPeriodTradeResDto(Long periodTradesId, String title, String description, RegisteredProduct product,
-		LocalDateTime createdAt, LocalDateTime updatedAt, TradeStatus tradeStatus, int viewCount, LocalDateTime endedAt
+		String createdAt, String updatedAt, TradeStatus tradeStatus, int viewCount, String endedAt
 		, String address1, String address2) {
 		this.periodTradesId = periodTradesId;
 		this.title = title;
@@ -49,11 +49,11 @@ public class FindPeriodTradeResDto {
 			.title(periodTrade.getTitle())
 			.description(periodTrade.getDescription())
 			.product(periodTrade.getRegisteredProduct())
-			.createdAt(periodTrade.getCreatedAt())
-			.updatedAt(periodTrade.getUpdatedAt())
+			.createdAt(periodTrade.getCreatedAt().toString())
+			.updatedAt(periodTrade.getUpdatedAt().toString())
 			.tradeStatus(periodTrade.getStatus())
 			.viewCount(periodTrade.getViewCount())
-			.endedAt(periodTrade.getEndedAt())
+			.endedAt(periodTrade.getEndedAt().toString())
 			.address1(periodTrade.getAddress1())
 			.address2(periodTrade.getAddress2())
 			.build();
