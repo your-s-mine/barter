@@ -1,7 +1,9 @@
 package com.barter.config;
 
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
@@ -20,12 +22,15 @@ public class CacheConfig {
 	@Bean
 	@Primary
 	public CacheManager suggestionListCacheManager() {
-		return new ConcurrentMapCacheManager("suggestionList");
+		ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager();
+		cacheManager.setCacheNames(Collections.singletonList("suggestionList"));
+		return cacheManager;
 	}
 
 	@Bean
 	public CacheManager immediateTradeListCacheManager() {
-		CaffeineCacheManager cacheManager = new CaffeineCacheManager("immediateTradeList");
+		CaffeineCacheManager cacheManager = new CaffeineCacheManager();
+		cacheManager.setCacheNames(Collections.singletonList("immediateTradeList"));
 		cacheManager.setCaffeine(Caffeine.newBuilder()
 			.expireAfterWrite(24, TimeUnit.HOURS)
 			.maximumSize(10000));
@@ -33,8 +38,9 @@ public class CacheConfig {
 	}
 
 	@Bean
-	public CacheResolver cacheResolver(CacheManager suggestionListCacheManager,
-		CacheManager immediateTradeListCacheManager) {
+	public CacheResolver cacheResolver(
+		@Qualifier("suggestionListCacheManager") CacheManager suggestionListCacheManager,
+		@Qualifier("immediateTradeListCacheManager") CacheManager immediateTradeListCacheManager) {
 		return new CustomCacheResolver(suggestionListCacheManager, immediateTradeListCacheManager);
 	}
 }
