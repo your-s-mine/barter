@@ -4,6 +4,7 @@ import com.barter.exception.customexceptions.AuthException;
 import com.barter.exception.enums.ExceptionCode;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,9 +24,9 @@ public class MemberFavoriteKeyword {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	private Member member;
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	private FavoriteKeyword favoriteKeyword;
 
 	@Builder
