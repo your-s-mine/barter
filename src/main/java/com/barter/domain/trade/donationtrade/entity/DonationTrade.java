@@ -15,6 +15,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -25,7 +26,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "DONATION_TRADES")
+@Table(name = "DONATION_TRADES", indexes = {
+	@Index(name = "idx_updated_at", columnList = "updated_at")
+})
 public class DonationTrade extends BaseTimeStampEntity {
 
 	private static final int MAX_AFTER_DAY = 7;
