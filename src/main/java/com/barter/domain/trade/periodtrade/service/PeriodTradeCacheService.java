@@ -7,12 +7,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.barter.domain.trade.periodtrade.dto.response.FindPeriodTradeResDto;
 import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
+import com.barter.domain.trade.periodtrade.repository.PeriodTradeCustomRepositoryImpl;
 import com.barter.domain.trade.periodtrade.repository.PeriodTradeRepository;
 
 import lombok.extern.slf4j.Slf4j;
@@ -22,14 +22,17 @@ import lombok.extern.slf4j.Slf4j;
 public class PeriodTradeCacheService {
 
 	private final PeriodTradeRepository periodTradeRepository;
+	private final PeriodTradeCustomRepositoryImpl periodTradeCustomRepository;
 
 	@Qualifier("periodTradeRedisTemplate")
 	private final RedisTemplate<String, List<FindPeriodTradeResDto>> redisTemplate;
 
 	public PeriodTradeCacheService(PeriodTradeRepository periodTradeRepository,
+		PeriodTradeCustomRepositoryImpl periodTradeCustomRepository,
 		RedisTemplate<String, List<FindPeriodTradeResDto>> redisTemplate) {
 		this.periodTradeRepository = periodTradeRepository;
 		this.redisTemplate = redisTemplate;
+		this.periodTradeCustomRepository = periodTradeCustomRepository;
 
 	}
 
@@ -68,7 +71,8 @@ public class PeriodTradeCacheService {
 
 		if (cachedTrades == null) { // 첫 페이지에만 적용해보기
 			System.out.println("if 문 실행");
-			Slice<PeriodTrade> periodTradePage = periodTradeRepository.findPeriodTradeByUpdatedAt(pageable);
+			List<PeriodTrade> periodTradePage = periodTradeCustomRepository.paginationCoveringIndex(
+				pageable);
 
 			System.out.println("-----------> offset : " + pageNumber * pageSize);
 
@@ -78,7 +82,7 @@ public class PeriodTradeCacheService {
 				.map(FindPeriodTradeResDto::from)
 				.toList();
 
-			if (pageNumber == 1) {
+			if (pageNumber == 0) { // 1페이지만 캐싱 적용 (디폴트 값 updatedAt 순서이므로)
 				redisTemplate.opsForValue().set(cacheKey, cachedTrades, Duration.ofMinutes(10));
 			}
 		}
@@ -98,8 +102,7 @@ public class PeriodTradeCacheService {
 
 	private long countTotalTrades() {
 		return periodTradeRepository.count();
+		//TODO :  캐싱 적용 필요 (위 count 자체가 db에서 계속 불러오는 것이다.)
 	}
-
-	// TODO : sorting 관련 로직 추가 필요 (현재는 id 값을 통해서 가져오고 있음)
 
 }
