@@ -4,15 +4,17 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.barter.domain.product.entity.TradeProduct;
-import com.barter.domain.product.repository.TradeProductRepository;
-import com.barter.domain.review.entity.Review;
-import com.barter.domain.review.dto.ReviewResponseDto;
-import com.barter.domain.review.repository.ReviewRepository;
-import com.barter.domain.member.repository.MemberRepository;
+
 import com.barter.domain.auth.dto.VerifiedMember;
+import com.barter.domain.member.repository.MemberRepository;
+import com.barter.domain.product.repository.TradeProductRepository;
+import com.barter.domain.review.dto.ReviewResponseDto;
+import com.barter.domain.review.entity.Review;
+import com.barter.domain.review.repository.ReviewRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,7 +26,17 @@ public class ReviewService {
     private final MemberRepository memberRepository;
     private final TradeProductRepository tradeProductRepository;
 
+    /**
+     * 리뷰 생성 메서드. 새로운 리뷰를 생성하며, 캐시를 무효화합니다.
+     * @param verifiedMember 리뷰 작성자 정보
+     * @param revieweeId 리뷰 대상자 ID
+     * @param tradeProductId 거래 상품 ID
+     * @param content 리뷰 내용
+     * @param score 리뷰 점수
+     * @return 생성된 리뷰의 DTO
+     */
     @Transactional
+    @CacheEvict(value = "reviewCache", key = "#verifiedMember.id")
     public ReviewResponseDto createReview(VerifiedMember verifiedMember, Long revieweeId, Long tradeProductId, String content, Double score) {
         // 리뷰 작성자 확인
         memberRepository.findById(verifiedMember.getId())
@@ -56,9 +68,16 @@ public class ReviewService {
         // 저장 및 ReviewResponseDto 반환
         return ReviewResponseDto.from(reviewRepository.save(review));
     }
+
+    /**
+     * 나의 평판(리뷰) 조회 메서드. Redis 캐시에서 데이터를 우선적으로 가져옵니다.
+     * @param verifiedMember 현재 인증된 사용자 정보
+     * @return 사용자에 대한 리뷰 목록
+     */
     @Transactional(readOnly = true)
+    @Cacheable(value = "reviewCache", key = "#verifiedMember.id", unless = "#result.isEmpty()")
     public List<ReviewResponseDto> getMyReputationReviews(VerifiedMember verifiedMember) {
-        // 나의 평판(리뷰) 조회
+        System.out.println("Fetching reviews from the database...");
         List<Review> reviews = reviewRepository.findByRevieweeId(verifiedMember.getId());
 
         return reviews.stream()
