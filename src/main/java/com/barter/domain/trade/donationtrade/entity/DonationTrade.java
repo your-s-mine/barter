@@ -12,6 +12,7 @@ import com.barter.exception.customexceptions.DonationTradeException;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -39,7 +40,7 @@ public class DonationTrade extends BaseTimeStampEntity {
 	private Long id;
 	private String title;
 	private String description;
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	private RegisteredProduct product;
 	@Enumerated(EnumType.STRING)
 	private TradeStatus status;
