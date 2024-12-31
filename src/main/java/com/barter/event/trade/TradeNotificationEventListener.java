@@ -3,6 +3,8 @@ package com.barter.event.trade;
 import java.util.List;
 
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 
 import com.barter.common.KeywordHelper;
@@ -18,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j(topic = "TradeNotificationEventListener")
 @Component
+@EnableAsync
 @RequiredArgsConstructor
 public class TradeNotificationEventListener {
 
@@ -25,6 +28,7 @@ public class TradeNotificationEventListener {
 	private final MemberFavoriteKeywordRepository memberFavoriteKeywordRepository;
 	private final NotificationService notificationService;
 
+	@Async
 	@EventListener
 	public void sendNotificationToMember(TradeNotificationEvent event) {
 		List<String> keywords = KeywordHelper.extractKeywords(event.getProductName());
