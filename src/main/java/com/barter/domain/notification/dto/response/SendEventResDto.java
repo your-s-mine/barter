@@ -15,7 +15,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class SendEventResDto {
 
-	private Long notificationId;
 	private String message;
 	private String tradeType;
 	private Long tradeId;
@@ -24,7 +23,6 @@ public class SendEventResDto {
 
 	public static SendEventResDto from(Notification notification) {
 		return SendEventResDto.builder()
-			.notificationId(notification.getId())
 			.message(notification.getMessage())
 			.tradeType(notification.getTradeType().name())
 			.tradeId(notification.getTradeId())
