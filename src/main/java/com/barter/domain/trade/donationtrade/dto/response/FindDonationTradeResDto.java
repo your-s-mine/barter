@@ -2,6 +2,7 @@ package com.barter.domain.trade.donationtrade.dto.response;
 
 import java.time.LocalDateTime;
 
+import com.barter.domain.product.dto.response.FindRegisteredProductResDto;
 import com.barter.domain.trade.donationtrade.entity.DonationTrade;
 import com.barter.domain.trade.enums.TradeStatus;
 
@@ -13,8 +14,7 @@ public class FindDonationTradeResDto {
 	private Long id;
 	private String title;
 	private String description;
-	// TODO: RegisteredProductDto 필요
-	// private RegisteredProduct product;
+	private FindRegisteredProductResDto productResDto;
 	private TradeStatus status;
 	private Integer viewCount;
 	private Integer maxAmount;
@@ -23,11 +23,13 @@ public class FindDonationTradeResDto {
 	private LocalDateTime endedAt;
 
 	@Builder
-	public FindDonationTradeResDto(Long id, String title, String description, TradeStatus status, Integer viewCount,
-		Integer maxAmount, Integer currentAmount, LocalDateTime createdAt, LocalDateTime endedAt) {
+	public FindDonationTradeResDto(Long id, String title, String description, FindRegisteredProductResDto productResDto,
+		TradeStatus status, Integer viewCount, Integer maxAmount, Integer currentAmount, LocalDateTime createdAt,
+		LocalDateTime endedAt) {
 		this.id = id;
 		this.title = title;
 		this.description = description;
+		this.productResDto = productResDto;
 		this.status = status;
 		this.viewCount = viewCount;
 		this.maxAmount = maxAmount;
@@ -43,6 +45,7 @@ public class FindDonationTradeResDto {
 			.description(donationTrade.getDescription())
 			.status(donationTrade.getStatus())
 			.viewCount(donationTrade.getViewCount())
+			.productResDto(FindRegisteredProductResDto.from(donationTrade.getProduct()))
 			.maxAmount(donationTrade.getMaxAmount())
 			.currentAmount(donationTrade.getCurrentAmount())
 			.createdAt(donationTrade.getCreatedAt())

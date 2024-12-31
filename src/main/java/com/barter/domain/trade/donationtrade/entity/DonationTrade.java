@@ -12,9 +12,11 @@ import com.barter.exception.customexceptions.DonationTradeException;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -25,7 +27,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "DONATION_TRADES")
+@Table(name = "DONATION_TRADES", indexes = {
+	@Index(name = "idx_updated_at", columnList = "updated_at")
+})
 public class DonationTrade extends BaseTimeStampEntity {
 
 	private static final int MAX_AFTER_DAY = 7;
@@ -36,7 +40,7 @@ public class DonationTrade extends BaseTimeStampEntity {
 	private Long id;
 	private String title;
 	private String description;
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	private RegisteredProduct product;
 	@Enumerated(EnumType.STRING)
 	private TradeStatus status;
