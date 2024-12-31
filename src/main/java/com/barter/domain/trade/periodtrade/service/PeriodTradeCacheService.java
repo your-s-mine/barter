@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +43,7 @@ public class PeriodTradeCacheService {
 	// 		.map(FindPeriodTradeResDto::from)
 	// 		.toList();
 	//
-	// 	// TODO : 수정 필요 위 코드에서 현재는 1분마다 거의 더미데이터 30만건에 달하는 데이터를 캐시에 저장하고 있음 (이는 서버에 문제가 발생할 가능성도 있다.)
+	//
 	//
 	// 	log.info("기간 교환 캐시 업데이트 진행 {}", LocalDateTime.now());
 	// 	log.info("캐싱 정보 {}", periodTradeResDtos);
@@ -65,18 +66,21 @@ public class PeriodTradeCacheService {
 		System.out.println("cachedTrades = " + cachedTrades);
 		System.out.println("pageable = " + pageable.getPageNumber());
 
-		if (cachedTrades == null) {
+		if (cachedTrades == null) { // 첫 페이지에만 적용해보기
 			System.out.println("if 문 실행");
-			Page<PeriodTrade> periodTradePage = periodTradeRepository.findAll(pageable);
+			Slice<PeriodTrade> periodTradePage = periodTradeRepository.findPeriodTradeByUpdatedAt(pageable);
+
+			System.out.println("-----------> offset : " + pageNumber * pageSize);
+
 			System.out.println("periodTradePage = " + periodTradePage);
 
-			cachedTrades = periodTradePage.getContent()
-				.stream()
+			cachedTrades = periodTradePage.stream()
 				.map(FindPeriodTradeResDto::from)
 				.toList();
 
-			redisTemplate.opsForValue().set(cacheKey, cachedTrades, Duration.ofMinutes(10));
-
+			if (pageNumber == 1) {
+				redisTemplate.opsForValue().set(cacheKey, cachedTrades, Duration.ofMinutes(10));
+			}
 		}
 
 		int start = 0;
@@ -95,5 +99,7 @@ public class PeriodTradeCacheService {
 	private long countTotalTrades() {
 		return periodTradeRepository.count();
 	}
+
+	// TODO : sorting 관련 로직 추가 필요 (현재는 id 값을 통해서 가져오고 있음)
 
 }

@@ -3,6 +3,7 @@ package com.barter.domain.trade.periodtrade.controller;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
@@ -49,7 +50,8 @@ public class PeriodTradeController {
 	}
 
 	@GetMapping("/period-trades")
-	public ResponseEntity<PagedModel<FindPeriodTradeResDto>> findPeriodTrades(@PageableDefault Pageable pageable) {
+	public ResponseEntity<PagedModel<FindPeriodTradeResDto>> findPeriodTrades(
+		@PageableDefault(sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) {
 		return ResponseEntity.status(HttpStatus.OK).body(
 			periodTradeService.findPeriodTrades(pageable)
 		);
