@@ -13,7 +13,7 @@ public interface PeriodTradeRepository extends JpaRepository<PeriodTrade, Long> 
 
 	@Query("SELECT pt FROM PeriodTrade pt " +
 		"JOIN FETCH pt.registeredProduct p " +
-		"WHERE pt.title LIKE %:keyword% OR pt.description LIKE %:keyword% AND pt.address1 LIKE %:address1% "
+		"WHERE (pt.title LIKE %:keyword% OR pt.description LIKE %:keyword%) AND pt.address1 LIKE %:address1% "
 	)
-	List<PeriodTrade> findPeriodTradesWithProduct(@Param("keyword") String keyword, String address1);
+	List<PeriodTrade> findPeriodTradesWithProduct(@Param("keyword") String keyword, @Param("address1") String address1);
 }
