@@ -3,8 +3,10 @@ package com.barter.domain.search.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
@@ -43,7 +45,6 @@ public class SearchService {
 	private final DonationTradeRepository donationTradeRepository;
 	private final ImmediateTradeRepository immediateTradeRepository;
 	private final PeriodTradeRepository periodTradeRepository;
-	private final MemberRepository memberRepository;
 	private final DistanceCalculator distanceCalculator;
 
 	@Transactional
@@ -66,11 +67,11 @@ public class SearchService {
 
 		// todo: 기부 교환에 '위치' 추가되면, 검색에 기부 교환 추가
 
-		List<ImmediateTrade> immediateTrades = immediateTradeRepository.findImmediateTradesWithProduct(word,
-			reqDto.getAddress1());
+		CompletableFuture<List<ImmediateTrade>> immediateTradesFuture = findImmediateTradesAsync(word, reqDto.getAddress1());
+		CompletableFuture<List<PeriodTrade>> periodTradesFuture = findPeriodTradesAsync(word, reqDto.getAddress1());
 
-		List<PeriodTrade> periodTrades = periodTradeRepository.findPeriodTradesWithProduct(word,
-			reqDto.getAddress1());
+		List<ImmediateTrade> immediateTrades = immediateTradesFuture.join();
+		List<PeriodTrade> periodTrades = periodTradesFuture.join();
 
 		List<SearchTradeResDto> tradeDtos = new ArrayList<>();
 		tradeDtos.addAll(mapTradesToSearchTradeRes(immediateTrades, reqDto.getLongitude(), reqDto.getLatitude()));
@@ -115,12 +116,23 @@ public class SearchService {
 	}
 
 	@Async
-	public void asyncUpdateSearchKeywordCount(Long searchKeywordId, SearchKeyword searchKeyword) {
+	public CompletableFuture<List<ImmediateTrade>> findImmediateTradesAsync(String word, String address1) {
+		return CompletableFuture.completedFuture(immediateTradeRepository.findImmediateTradesWithProduct(word, address1));
+	}
+
+	@Async
+	public CompletableFuture<List<PeriodTrade>> findPeriodTradesAsync(String word, String address1) {
+		return CompletableFuture.completedFuture(periodTradeRepository.findPeriodTradesWithProduct(word, address1));
+	}
+
+	@Async
+	public CompletableFuture<Void> asyncUpdateSearchKeywordCount(Long searchKeywordId, SearchKeyword searchKeyword) {
 		LocalDateTime since = LocalDateTime.now().minusHours(24);
 		Long recentCount = searchHistoryRepository.countRecentSearches(searchKeywordId, since);
 
 		searchKeyword.updateCount(recentCount);
 		searchKeywordRepository.save(searchKeyword);
+		return CompletableFuture.completedFuture(null);
 	}
 
 	private List<SearchTradeResDto> mapTradesToSearchTradeRes(List<? extends TradeCommonEntity> trades,
