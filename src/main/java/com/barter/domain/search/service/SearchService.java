@@ -48,6 +48,7 @@ public class SearchService {
 	private final DistanceCalculator distanceCalculator;
 
 	@Transactional
+	@Cacheable(cacheNames = "searchResults", key = "#word + '-' + #reqDto.address1", cacheManager = "searchCacheManager")
 	public List<SearchTradeResDto> searchKeywordAndFindTrades(String word, SearchTradeReqDto reqDto) {
 
 		SearchKeyword searchKeyword = searchKeywordRepository.findByWord(word)
