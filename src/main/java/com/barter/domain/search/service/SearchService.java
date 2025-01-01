@@ -3,6 +3,7 @@ package com.barter.domain.search.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
@@ -122,28 +123,19 @@ public class SearchService {
 		searchKeywordRepository.save(searchKeyword);
 	}
 
-	private <T extends TradeCommonEntity> List<SearchTradeResDto> mapTradesToSearchTradeRes(List<T> trades,
+	private List<SearchTradeResDto> mapTradesToSearchTradeRes(List<? extends TradeCommonEntity> trades,
 		Double memberLongitude, Double memberLatitude) {
-
-		List<SearchTradeResDto> resDtos = new ArrayList<>();
-		for (T trade : trades) {
-			Double latitude = trade.getLatitude();
-			Double longitude = trade.getLongitude();
-
-			Double distance = distanceCalculator.calculateDistance(memberLatitude, memberLongitude, latitude,
-				longitude);
-
-			resDtos.add(SearchTradeResDto.builder()
+		return trades.stream()
+			.map(trade -> SearchTradeResDto.builder()
 				.title(trade.getTitle())
 				.product(createConvertedProductDto(trade.getRegisteredProduct()))
 				.tradeStatus(trade.getStatus())
 				.viewCount(trade.getViewCount())
-				.distance(distance)
-				.build()
-			);
-		}
-
-		return resDtos;
+				.distance(distanceCalculator.calculateDistance(
+					memberLatitude, memberLongitude,
+					trade.getLatitude(), trade.getLongitude()))
+				.build())
+			.collect(Collectors.toList());
 	}
 
 	private ConvertRegisteredProductDto createConvertedProductDto(RegisteredProduct product) {
