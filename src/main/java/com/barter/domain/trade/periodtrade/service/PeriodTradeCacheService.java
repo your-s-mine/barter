@@ -27,12 +27,17 @@ public class PeriodTradeCacheService {
 	@Qualifier("periodTradeRedisTemplate")
 	private final RedisTemplate<String, List<FindPeriodTradeResDto>> redisTemplate;
 
+	@Qualifier("periodTradeCountRedisTemplate")
+	private final RedisTemplate<String, Long> periodTradeCountRedisTemplate;
+
 	public PeriodTradeCacheService(PeriodTradeRepository periodTradeRepository,
 		PeriodTradeCustomRepositoryImpl periodTradeCustomRepository,
-		RedisTemplate<String, List<FindPeriodTradeResDto>> redisTemplate) {
+		RedisTemplate<String, List<FindPeriodTradeResDto>> redisTemplate,
+		RedisTemplate<String, Long> periodTradeCountRedisTemplate) {
 		this.periodTradeRepository = periodTradeRepository;
 		this.redisTemplate = redisTemplate;
 		this.periodTradeCustomRepository = periodTradeCustomRepository;
+		this.periodTradeCountRedisTemplate = periodTradeCountRedisTemplate;
 
 	}
 
@@ -82,7 +87,7 @@ public class PeriodTradeCacheService {
 				.map(FindPeriodTradeResDto::from)
 				.toList();
 
-			if (pageNumber == 0) { // 1페이지만 캐싱 적용 (디폴트 값 updatedAt 순서이므로)
+			if (pageNumber == 0) { // 0페이지만 캐싱 적용 (디폴트 값 updatedAt 순서이므로)
 				redisTemplate.opsForValue().set(cacheKey, cachedTrades, Duration.ofMinutes(10));
 			}
 		}
@@ -100,9 +105,20 @@ public class PeriodTradeCacheService {
 		return new PageImpl<>(pagedTrades, pageable, countTotalTrades());
 	}
 
+	private static final String TOTAL_TRADES_COUNT_CACHE_KEY = "totalTradesCount";
+
 	private long countTotalTrades() {
-		return periodTradeRepository.count();
-		//TODO :  캐싱 적용 필요 (위 count 자체가 db에서 계속 불러오는 것이다.)
+		Long cachedCount = periodTradeCountRedisTemplate.opsForValue().get(TOTAL_TRADES_COUNT_CACHE_KEY);
+
+		if (cachedCount == null) {
+			long totalTradesCount = periodTradeRepository.count();
+			periodTradeCountRedisTemplate.opsForValue()
+				.set(TOTAL_TRADES_COUNT_CACHE_KEY, totalTradesCount, Duration.ofMinutes(10));
+			System.out.println("카운트 캐싱 실행됨");
+			return totalTradesCount;
+		}
+
+		return cachedCount;
 	}
 
 }
