@@ -74,6 +74,9 @@ class PeriodTradeServiceTest {
 	private NotificationService notificationService;
 
 	@Mock
+	private PeriodTradeCacheService periodTradeCacheService;
+
+	@Mock
 	private PeriodTradeRepository periodTradeRepository;
 	@Mock
 	private ApplicationEventPublisher eventPublisher;
@@ -478,8 +481,7 @@ class PeriodTradeServiceTest {
 
 		Page mockPage = mock(Page.class);
 		when(mockPage.getContent()).thenReturn(tradeList);
-		when(periodTradeRepository.findAll(pageable)).thenReturn(mockPage);
-		when(mockPage.map(any())).thenReturn(mockPage);
+		when(periodTradeCacheService.getPeriodTradesFromCache(pageable)).thenReturn(mockPage);
 
 		// when
 		PagedModel<FindPeriodTradeResDto> result = periodTradeService.findPeriodTrades(pageable);
@@ -488,8 +490,7 @@ class PeriodTradeServiceTest {
 		assertThat(result).isNotNull();
 		assertThat(result.getContent()).hasSize(2);
 		assertThat(result.getContent()).containsExactly(resDto1, resDto2);
-		verify(periodTradeRepository, times(1)).findAll(pageable);
-		verify(mockPage, times(1)).map(any());
+		verify(periodTradeCacheService, times(1)).getPeriodTradesFromCache(pageable);
 
 	}
 
