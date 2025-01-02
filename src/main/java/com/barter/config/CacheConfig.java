@@ -31,16 +31,29 @@ public class CacheConfig {
 	public CacheManager immediateTradeListCacheManager() {
 		CaffeineCacheManager cacheManager = new CaffeineCacheManager();
 		cacheManager.setCacheNames(Collections.singletonList("immediateTradeList"));
-		cacheManager.setCaffeine(Caffeine.newBuilder()
-			.expireAfterWrite(24, TimeUnit.HOURS)
-			.maximumSize(10000));
+		cacheManager.setCaffeine(caffeineCacheBuilder());
+		return cacheManager;
+	}
+
+	@Bean
+	public CacheManager searchCacheManager() {
+		CaffeineCacheManager cacheManager = new CaffeineCacheManager();
+		cacheManager.setCacheNames(Collections.singletonList("searchResults"));
+		cacheManager.setCaffeine(caffeineCacheBuilder());
 		return cacheManager;
 	}
 
 	@Bean
 	public CacheResolver cacheResolver(
 		@Qualifier("suggestionListCacheManager") CacheManager suggestionListCacheManager,
-		@Qualifier("immediateTradeListCacheManager") CacheManager immediateTradeListCacheManager) {
-		return new CustomCacheResolver(suggestionListCacheManager, immediateTradeListCacheManager);
+		@Qualifier("immediateTradeListCacheManager") CacheManager immediateTradeListCacheManager,
+		@Qualifier("searchCacheManager") CacheManager searchListCacheManager) {
+		return new CustomCacheResolver(suggestionListCacheManager, immediateTradeListCacheManager, searchListCacheManager);
+	}
+
+	private Caffeine<Object, Object> caffeineCacheBuilder() {
+		return Caffeine.newBuilder()
+			.expireAfterWrite(24, TimeUnit.HOURS)
+			.maximumSize(10000);
 	}
 }
