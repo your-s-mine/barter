@@ -64,6 +64,7 @@ public class PeriodTradeService {
 	private final TradeProductRepository tradeProductRepository;
 	private final ApplicationEventPublisher eventPublisher;
 	private final NotificationService notificationService;
+	private final PeriodTradeCacheService periodTradeCacheService;
 
 	@Transactional
 	public CreatePeriodTradeResDto createPeriodTrades(VerifiedMember member, CreatePeriodTradeReqDto reqDto) {
@@ -96,8 +97,7 @@ public class PeriodTradeService {
 
 	@Transactional(readOnly = true)
 	public PagedModel<FindPeriodTradeResDto> findPeriodTrades(Pageable pageable) {
-		Page<FindPeriodTradeResDto> trades = periodTradeRepository.findAll(pageable)
-			.map(FindPeriodTradeResDto::from);
+		Page<FindPeriodTradeResDto> trades = periodTradeCacheService.getPeriodTradesFromCache(pageable);
 		return new PagedModel<>(trades);
 	}
 
