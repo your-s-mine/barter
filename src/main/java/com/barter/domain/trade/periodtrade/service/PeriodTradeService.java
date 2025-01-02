@@ -107,7 +107,7 @@ public class PeriodTradeService {
 			() -> new PeriodTradeException(ExceptionCode.NOT_FOUND_PERIOD_TRADE)
 		);
 
-		periodTrade.addViewCount();
+		periodTradeCacheService.addViewCount(periodTrade);
 
 		return FindPeriodTradeResDto.from(periodTrade);
 	}
