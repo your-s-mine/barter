@@ -16,4 +16,11 @@ public interface PeriodTradeRepository extends JpaRepository<PeriodTrade, Long> 
 		"WHERE (pt.title LIKE %:keyword% OR pt.description LIKE %:keyword%) AND pt.address1 LIKE %:address1% "
 	)
 	List<PeriodTrade> findPeriodTradesWithProduct(@Param("keyword") String keyword, @Param("address1") String address1);
+
+	// @Query("SELECT pt FROM PeriodTrade pt ORDER BY pt.updatedAt DESC LIMIT :pageSize OFFSET :offset")
+	// Slice<PeriodTrade> findPeriodTradeByUpdatedAt(@Param("pageSize") int pageSize, @Param("offset") int offset);
+
+	@Query("SELECT pt FROM PeriodTrade pt ORDER BY pt.updatedAt DESC")
+	Slice<PeriodTrade> findPeriodTradeByUpdatedAt(Pageable pageable);
+
 }
