@@ -98,12 +98,6 @@ public class PeriodTrade extends TradeCommonEntity {
 		}
 	}
 
-	public void validateInProgress() {
-		if (!this.status.equals(TradeStatus.IN_PROGRESS)) {
-			throw new IllegalArgumentException("진행 중인 기간 거래만 수락이 가능합니다.");
-		}
-	}
-
 	public void validateAuthority(Long userId) {
 		if (!this.registeredProduct.getMember().getId().equals(userId)) {
 			throw new IllegalArgumentException("해당 물품에 대한 수정 권한이 없습니다.");
@@ -138,7 +132,6 @@ public class PeriodTrade extends TradeCommonEntity {
 			this.status = status;
 			this.registeredProduct.updateStatus(RegisteredStatus.PENDING.toString());
 			return true;
-			// 추가적으로 다른 제안 물품은 pending 상태로 변경해야 한다.
 		}
 		if (status.equals(this.status)) {
 			return true;

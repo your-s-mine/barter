@@ -74,22 +74,16 @@ public class PeriodTradeCacheService {
 	// 기간 교환 조회 ---------------------------------------------------------
 	// 캐시에서 데이터 조회
 	public Page<FindPeriodTradeResDto> getPeriodTradesFromCache(Pageable pageable) {
-		System.out.println("기간 교환 캐시 도입 부");
 
 		int pageNumber = pageable.getPageNumber();
 		int pageSize = pageable.getPageSize();
 
 		String cacheKey = PERIOD_TRADE_CACHE_KEY + "_PAGE_" + pageNumber + "_SIZE_" + pageSize;
-		System.out.println("cacheKey = " + cacheKey);
 
 		List<FindPeriodTradeResDto> cachedTrades = redisTemplate.opsForValue()
 			.get(cacheKey);
 
-		System.out.println("cachedTrades = " + cachedTrades);
-		System.out.println("pageable = " + pageable.getPageNumber());
-
 		if (cachedTrades == null) { // 첫 페이지에만 적용해보기
-			System.out.println("if 문 실행");
 			List<PeriodTrade> periodTradePage = periodTradeCustomRepository.paginationCoveringIndex(
 				pageable);
 
@@ -108,13 +102,8 @@ public class PeriodTradeCacheService {
 
 		int start = 0;
 		int end = Math.min(start + pageSize, cachedTrades.size());
-		System.out.println("start = " + start);
-		System.out.println("end = " + end);
 
 		List<FindPeriodTradeResDto> pagedTrades = cachedTrades.subList(start, end);
-
-		System.out.println("cachedTrades.size() = " + cachedTrades.size());
-		System.out.println("pageable = " + pageable);
 
 		return new PageImpl<>(pagedTrades, pageable, countTotalTrades());
 	}
@@ -128,7 +117,6 @@ public class PeriodTradeCacheService {
 			long totalTradesCount = periodTradeRepository.count();
 			periodTradeLongRedisTemplate.opsForValue()
 				.set(TOTAL_TRADES_COUNT_CACHE_KEY, totalTradesCount, Duration.ofMinutes(10));
-			System.out.println("카운트 캐싱 실행됨");
 			return totalTradesCount;
 		}
 
