@@ -13,12 +13,10 @@ import com.barter.common.s3.S3Service;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductInfoReqDto;
-import com.barter.domain.product.dto.request.UpdateRegisteredProductStatusReqDto;
 import com.barter.domain.product.dto.response.CreateRegisteredProductResDto;
 import com.barter.domain.product.dto.response.FindAvailableRegisteredProductResDto;
 import com.barter.domain.product.dto.response.FindRegisteredProductResDto;
 import com.barter.domain.product.dto.response.UpdateRegisteredProductInfoResDto;
-import com.barter.domain.product.dto.response.UpdateRegisteredProductStatusResDto;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.repository.RegisteredProductRepository;
 import com.barter.domain.product.validator.ImageCountValidator;
@@ -89,20 +87,6 @@ public class RegisteredProductService {
 		foundProduct.updateInfo(request);
 		RegisteredProduct updatedProduct = registeredProductRepository.save(foundProduct);
 		return UpdateRegisteredProductInfoResDto.from(updatedProduct);
-	}
-
-	@Transactional
-	public UpdateRegisteredProductStatusResDto updateRegisteredProductStatus(
-		UpdateRegisteredProductStatusReqDto request, Long verifiedMemberId
-	) {
-		RegisteredProduct foundProduct = registeredProductRepository.findById(request.getId())
-			.orElseThrow(() -> new ProductException(ExceptionCode.NOT_FOUND_REGISTERED_PRODUCT));
-
-		foundProduct.checkPermission(verifiedMemberId);
-
-		foundProduct.updateStatus(request.getStatus());
-		RegisteredProduct updatedProduct = registeredProductRepository.save(foundProduct);
-		return UpdateRegisteredProductStatusResDto.form(updatedProduct);
 	}
 
 	@Transactional

@@ -29,12 +29,10 @@ import com.barter.common.s3.S3Service;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateSuggestedProductReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductInfoReqDto;
-import com.barter.domain.product.dto.request.UpdateSuggestedProductStatusReqDto;
 import com.barter.domain.product.dto.response.CreateSuggestedProductResDto;
 import com.barter.domain.product.dto.response.FindAvailableSuggestedProductResDto;
 import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
 import com.barter.domain.product.dto.response.UpdateSuggestedProductInfoResDto;
-import com.barter.domain.product.dto.response.UpdateSuggestedProductStatusResDto;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.enums.SuggestedStatus;
 import com.barter.domain.product.repository.SuggestedProductRepository;
@@ -420,93 +418,6 @@ public class SuggestedProductServiceTest {
 			suggestedProductService.updateSuggestedProductInfo(request, multipartFiles, verifiedMemberId))
 			.isInstanceOf(ProductException.class)
 			.hasMessage(ExceptionCode.NOT_VALID_IMAGE_COUNT.getMessage());
-	}
-
-	@Test
-	@DisplayName("제안 물품 상태 수정 - 성공 테스트")
-	void updateSuggestedProductStatusTest_Success() {
-		//given
-		UpdateSuggestedProductStatusReqDto request = UpdateSuggestedProductStatusReqDto.builder()
-			.id(1L)
-			.status("SUGGESTING")
-			.build();
-
-		Long verifiedMemberId = 1L;
-
-		when(suggestedProductRepository.findById(request.getId())).thenReturn(
-			Optional.of(SuggestedProduct.builder()
-				.id(1L)
-				.status(SuggestedStatus.PENDING)
-				.member(Member.builder().id(verifiedMemberId).build())
-				.build()
-			)
-		);
-
-		when(suggestedProductRepository.save(any())).thenReturn(
-			SuggestedProduct.builder()
-				.id(1L)
-				.status(SuggestedStatus.SUGGESTING)
-				.build()
-		);
-
-		//when
-		UpdateSuggestedProductStatusResDto response = suggestedProductService.updateSuggestedProductStatus(
-			request, verifiedMemberId
-		);
-
-		//then
-		assertThat(response).isNotNull();
-		assertThat(response.getId()).isEqualTo(request.getId());
-		assertThat(response.getStatus()).isEqualTo(request.getStatus());
-	}
-
-	@Test
-	@DisplayName("제안 물품 상태 수정 - 수정 제안 물품이 존재하지 않는 경우 예외 테스트")
-	void updateSuggestedProductStatusTest_Exception1() {
-		//given
-		UpdateSuggestedProductStatusReqDto request = UpdateSuggestedProductStatusReqDto.builder()
-			.id(1L)
-			.status("SUGGESTING")
-			.build();
-
-		Long verifiedMemberId = 1L;
-
-		when(suggestedProductRepository.findById(request.getId())).thenThrow(
-			new ProductException(ExceptionCode.NOT_FOUND_SUGGESTED_PRODUCT)
-		);
-
-		//when & then
-		assertThatThrownBy(() ->
-			suggestedProductService.updateSuggestedProductStatus(request, verifiedMemberId))
-			.isInstanceOf(ProductException.class)
-			.hasMessage(ExceptionCode.NOT_FOUND_SUGGESTED_PRODUCT.getMessage());
-	}
-
-	@Test
-	@DisplayName("제안 물품 상태 수정 - 수정 권한 예외 테스트")
-	void updateSuggestedProductStatusTest_Exception2() {
-		//given
-		UpdateSuggestedProductStatusReqDto request = UpdateSuggestedProductStatusReqDto.builder()
-			.id(1L)
-			.status("SUGGESTING")
-			.build();
-
-		Long verifiedMemberId = 2L;
-
-		when(suggestedProductRepository.findById(request.getId())).thenReturn(
-			Optional.of(SuggestedProduct.builder()
-				.id(1L)
-				.status(SuggestedStatus.PENDING)
-				.member(Member.builder().id(1L).build())
-				.build()
-			)
-		);
-
-		//when & then
-		assertThatThrownBy(() ->
-			suggestedProductService.updateSuggestedProductStatus(request, verifiedMemberId))
-			.isInstanceOf(ProductException.class)
-			.hasMessage(ExceptionCode.NOT_OWNER_SUGGESTED_PRODUCT.getMessage());
 	}
 
 	@Test

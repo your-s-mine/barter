@@ -25,13 +25,11 @@ import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.product.dto.request.CreateSuggestedProductReqDto;
 import com.barter.domain.product.dto.request.SwitchSuggestedProductReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductInfoReqDto;
-import com.barter.domain.product.dto.request.UpdateSuggestedProductStatusReqDto;
 import com.barter.domain.product.dto.response.CreateSuggestedProductResDto;
 import com.barter.domain.product.dto.response.FindAvailableSuggestedProductResDto;
 import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
 import com.barter.domain.product.dto.response.SwitchSuggestedProductResDto;
 import com.barter.domain.product.dto.response.UpdateSuggestedProductInfoResDto;
-import com.barter.domain.product.dto.response.UpdateSuggestedProductStatusResDto;
 import com.barter.domain.product.service.ProductSwitchService;
 import com.barter.domain.product.service.SuggestedProductService;
 
@@ -84,15 +82,6 @@ public class SuggestedProductController {
 		return suggestedProductService.updateSuggestedProductInfo(
 			request, Objects.requireNonNullElseGet(multipartFiles, ArrayList::new), verifiedMember.getId()
 		);
-	}
-
-	@PatchMapping("/status")
-	@ResponseStatus(HttpStatus.OK)
-	public UpdateSuggestedProductStatusResDto updateSuggestedProductStatus(
-		@RequestBody @Valid UpdateSuggestedProductStatusReqDto request,
-		VerifiedMember verifiedMember
-	) {
-		return suggestedProductService.updateSuggestedProductStatus(request, verifiedMember.getId());
 	}
 
 	@DeleteMapping("/{suggestedProductId}")
