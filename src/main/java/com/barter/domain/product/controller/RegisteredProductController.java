@@ -25,13 +25,11 @@ import com.barter.domain.auth.dto.VerifiedMember;
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.SwitchRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductInfoReqDto;
-import com.barter.domain.product.dto.request.UpdateRegisteredProductStatusReqDto;
 import com.barter.domain.product.dto.response.CreateRegisteredProductResDto;
 import com.barter.domain.product.dto.response.FindAvailableRegisteredProductResDto;
 import com.barter.domain.product.dto.response.FindRegisteredProductResDto;
 import com.barter.domain.product.dto.response.SwitchRegisteredProductResDto;
 import com.barter.domain.product.dto.response.UpdateRegisteredProductInfoResDto;
-import com.barter.domain.product.dto.response.UpdateRegisteredProductStatusResDto;
 import com.barter.domain.product.service.ProductSwitchService;
 import com.barter.domain.product.service.RegisteredProductService;
 
@@ -84,15 +82,6 @@ public class RegisteredProductController {
 		return registeredProductService.updateRegisteredProductInfo(
 			request, Objects.requireNonNullElseGet(multipartFiles, ArrayList::new), verifiedMember.getId()
 		);
-	}
-
-	@PatchMapping("/status")
-	@ResponseStatus(HttpStatus.OK)
-	public UpdateRegisteredProductStatusResDto updateRegisteredProductStatus(
-		@RequestBody @Valid UpdateRegisteredProductStatusReqDto request,
-		VerifiedMember verifiedMember
-	) {
-		return registeredProductService.updateRegisteredProductStatus(request, verifiedMember.getId());
 	}
 
 	@DeleteMapping("/{registeredProductId}")

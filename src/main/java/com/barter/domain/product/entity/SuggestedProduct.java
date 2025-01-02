@@ -106,10 +106,6 @@ public class SuggestedProduct extends BaseTimeStampEntity {
 		this.images.addAll(images);
 	}
 
-	public void updateStatus(String status) {
-		this.status = SuggestedStatus.findSuggestedStatus(status);
-	}
-
 	public void changeStatusPending() {
 		this.status = SuggestedStatus.PENDING;
 	}
