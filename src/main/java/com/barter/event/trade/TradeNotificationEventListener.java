@@ -6,7 +6,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StopWatch;
 
 import com.barter.common.KeywordHelper;
 import com.barter.domain.member.entity.FavoriteKeyword;
@@ -32,9 +31,6 @@ public class TradeNotificationEventListener {
 	@Async
 	@EventListener
 	public void sendNotificationToMember(TradeNotificationEvent event) {
-		StopWatch stopWatch = new StopWatch();
-		stopWatch.start();
-
 		List<String> keywords = KeywordHelper.extractKeywords(event.getProductName());
 		List<FavoriteKeyword> existsKeywords = favoriteKeywordRepository.findByKeywordIn(keywords);
 		List<MemberFavoriteKeyword> keywordMembers = memberFavoriteKeywordRepository
@@ -45,8 +41,5 @@ public class TradeNotificationEventListener {
 		notificationService.saveKeywordNotification(
 			EventKind.KEYWORD, memberIds, event.getType(), event.getTradeId()
 		);
-
-		stopWatch.stop();
-		log.info(stopWatch.prettyPrint());
 	}
 }
