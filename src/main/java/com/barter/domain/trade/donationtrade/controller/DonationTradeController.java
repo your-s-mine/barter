@@ -23,6 +23,7 @@ import com.barter.domain.trade.donationtrade.dto.response.CreateDonationTradeRes
 import com.barter.domain.trade.donationtrade.dto.response.FindDonationTradeResDto;
 import com.barter.domain.trade.donationtrade.dto.response.SuggestDonationTradeResDto;
 import com.barter.domain.trade.donationtrade.service.DonationTradeService;
+import com.barter.lock.RedissonLockService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 public class DonationTradeController {
 
 	private final DonationTradeService donationTradeService;
+	private final RedissonLockService redissonLockService;
 
 	@GetMapping
 	public ResponseEntity<PagedModel<FindDonationTradeResDto>> findDonationTrades(
@@ -64,10 +66,15 @@ public class DonationTradeController {
 	public ResponseEntity<SuggestDonationTradeResDto> suggestDonationTrade(
 		VerifiedMember verifiedMember,
 		@PathVariable("tradeId") Long tradeId
-	) {
+	) throws Throwable {
 		return ResponseEntity
 			.status(HttpStatus.OK)
-			.body(donationTradeService.suggestDonationTrade(verifiedMember, tradeId));
+			.body(
+				redissonLockService.process(
+					"donationTrades",
+					tradeId,
+					10,
+					() -> donationTradeService.suggestDonationTrade(verifiedMember, tradeId)));
 	}
 
 	@PatchMapping("/{tradeId}")

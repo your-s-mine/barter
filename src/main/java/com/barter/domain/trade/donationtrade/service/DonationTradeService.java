@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.barter.domain.auth.dto.VerifiedMember;
@@ -103,14 +104,14 @@ public class DonationTradeService {
 		donationTradeRepository.delete(donationTrade);
 	}
 
-	@Transactional
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public SuggestDonationTradeResDto suggestDonationTrade(VerifiedMember verifiedMember, Long tradeId) {
 		if (donationProductMemberRepository.existsByMemberIdAndDonationTradeId(verifiedMember.getId(), tradeId)) {
 			throw new IllegalStateException("이미 요청한 유저입니다.");
 		}
 		Member requestMember = memberRepository.findById(verifiedMember.getId())
 			.orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
-		DonationTrade donationTrade = donationTradeRepository.findByIdForUpdate(tradeId)
+		DonationTrade donationTrade = donationTradeRepository.findById(tradeId)
 			.orElseThrow(() -> new DonationTradeException(NOT_FOUND_DONATION_TRADE));
 		if (donationTrade.isDonationCompleted()) {
 			return new SuggestDonationTradeResDto(DONATION_SUGGEST_FAIL_MESSAGE, DonationResult.FAIL);
