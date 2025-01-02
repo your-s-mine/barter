@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
@@ -48,7 +49,7 @@ public class SearchService {
 	private final DistanceCalculator distanceCalculator;
 
 	@Transactional
-	@Cacheable(cacheNames = "searchResults", key = "#word + '-' + #reqDto.address1", cacheManager = "searchCacheManager")
+	@CachePut(cacheNames = "searchResults", key = "#word + '-' + #reqDto.address1", cacheManager = "searchCacheManager")
 	public List<SearchTradeResDto> searchKeywordAndFindTrades(String word, SearchTradeReqDto reqDto) {
 
 		SearchKeyword searchKeyword = searchKeywordRepository.findByWord(word)
