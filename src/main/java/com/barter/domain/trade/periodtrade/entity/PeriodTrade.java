@@ -11,6 +11,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -20,7 +21,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "PERIOD_TRADES")
+@Table(name = "PERIOD_TRADES", indexes = {
+	@Index(name = "idx_updated_at", columnList = "updated_at")
+})
 public class PeriodTrade extends TradeCommonEntity {
 
 	private static final int MAX_AFTER_DAY = 7;
