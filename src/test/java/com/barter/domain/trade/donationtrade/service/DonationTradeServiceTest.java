@@ -362,7 +362,7 @@ class DonationTradeServiceTest {
 
 		when(donationProductMemberRepository.existsByMemberIdAndDonationTradeId(1L, 100L)).thenReturn(false);
 		when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
-		when(donationTradeRepository.findByIdForUpdate(tradeId)).thenReturn(Optional.empty());
+		when(donationTradeRepository.findById(tradeId)).thenReturn(Optional.empty());
 
 		// when && then
 		assertThatThrownBy(() -> donationTradeService.suggestDonationTrade(verifiedMember, tradeId))
@@ -381,7 +381,7 @@ class DonationTradeServiceTest {
 
 		when(donationProductMemberRepository.existsByMemberIdAndDonationTradeId(1L, 100L)).thenReturn(false);
 		when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
-		when(donationTradeRepository.findByIdForUpdate(tradeId)).thenReturn(Optional.of(donationTrade));
+		when(donationTradeRepository.findById(tradeId)).thenReturn(Optional.of(donationTrade));
 		when(donationTrade.isDonationCompleted()).thenReturn(true);
 
 		// when
@@ -414,7 +414,7 @@ class DonationTradeServiceTest {
 
 		when(donationProductMemberRepository.existsByMemberIdAndDonationTradeId(1L, 100L)).thenReturn(false);
 		when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
-		when(donationTradeRepository.findByIdForUpdate(tradeId)).thenReturn(Optional.of(donationTrade));
+		when(donationTradeRepository.findById(tradeId)).thenReturn(Optional.of(donationTrade));
 		when(donationTradeRepository.save(donationTrade)).thenReturn(donationTrade);
 		doNothing().when(notificationService).saveTradeNotification(any(), any(), any(), any(), any());
 
