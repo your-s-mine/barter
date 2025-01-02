@@ -3,68 +3,60 @@ package com.barter.domain.search;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.DefaultTypedTuple;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SessionCallback;
+import org.springframework.data.redis.core.ZSetOperations;
 
-import com.barter.domain.member.entity.Address;
-import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.entity.RegisteredProduct;
+import com.barter.domain.product.enums.RegisteredStatus;
 import com.barter.domain.search.dto.SearchTradeReqDto;
 import com.barter.domain.search.dto.SearchTradeResDto;
-import com.barter.domain.search.entity.SearchKeyword;
-import com.barter.domain.search.repository.SearchHistoryRepository;
-import com.barter.domain.search.repository.SearchKeywordRepository;
 import com.barter.domain.search.service.SearchService;
 import com.barter.domain.search.util.DistanceCalculator;
-import com.barter.domain.trade.donationtrade.entity.DonationTrade;
-import com.barter.domain.trade.donationtrade.repository.DonationTradeRepository;
+import com.barter.domain.trade.enums.TradeStatus;
 import com.barter.domain.trade.immediatetrade.entity.ImmediateTrade;
 import com.barter.domain.trade.immediatetrade.repository.ImmediateTradeRepository;
-import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 import com.barter.domain.trade.periodtrade.repository.PeriodTradeRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class SearchServiceUnitTest {
-
 	@Mock
-	SearchKeywordRepository searchKeywordRepository;
+	private RedisTemplate<String, String> redisTemplate;
 	@Mock
-	SearchHistoryRepository searchHistoryRepository;
+	private ImmediateTradeRepository immediateTradeRepository;
 	@Mock
-	DonationTradeRepository donationTradeRepository;
+	private PeriodTradeRepository periodTradeRepository;
 	@Mock
-	ImmediateTradeRepository immediateTradeRepository;
+	private DistanceCalculator distanceCalculator;
 	@Mock
-	PeriodTradeRepository periodTradeRepository;
-	@Mock
-	DistanceCalculator distanceCalculator;
+	private ZSetOperations<String, String> zSetOperations;
 	@InjectMocks
-	SearchService searchService;
+	private SearchService searchService;
 
-	List<DonationTrade> donationTrades = new ArrayList<>();
-	List<ImmediateTrade> immediateTrades = new ArrayList<>();
-	List<PeriodTrade> periodTrades = new ArrayList<>();
-	Member member;
-	SearchTradeReqDto reqDto;
-	Double distance = 10.12;
+	private List<ImmediateTrade> immediateTrades = new ArrayList<>();
+	private SearchTradeReqDto reqDto;
+	private Double distance = 10.12;
+	private static final String TEST_LOCATION = "상수동";
 
 	@BeforeEach
 	void setUp() {
-		member = Member.createBasicMember("test@test.com", "1234", "test", Address.builder().build());
-
 		reqDto = SearchTradeReqDto.builder()
-			.address1("상수동")
+			.address1(TEST_LOCATION)
 			.longitude(12.123)
 			.latitude(40.123)
 			.build();
@@ -73,132 +65,98 @@ public class SearchServiceUnitTest {
 			ImmediateTrade.builder()
 				.registeredProduct(RegisteredProduct.builder()
 					.id(1L)
+					.name("banana")
+					.description("fresh banana")
+					.status(RegisteredStatus.PENDING)
 					.build())
 				.title("Immediate banana")
 				.latitude(12.1234)
 				.longitude(40.546)
+				.status(TradeStatus.PENDING)
+				.viewCount(10)
 				.build());
-	}
-
-	@Test
-	@DisplayName("검색 - 기존에 검색 이력이 없어서 생성하는 경우")
-	void searchAndCreateKeywordAndFindTrades() {
-		String word = "banana";
-		SearchKeyword newKeyword = SearchKeyword.builder()
-			.word(word)
-			.build();
-
-		when(searchKeywordRepository.findByWord(word)).thenReturn(Optional.empty());
-		when(searchKeywordRepository.save(any(SearchKeyword.class))).thenReturn(newKeyword);
-		when(immediateTradeRepository.findImmediateTradesWithProduct(word, reqDto.getAddress1())).thenReturn(
-			immediateTrades);
-		when(distanceCalculator.calculateDistance(reqDto.getLatitude(), reqDto.getLongitude(),
-			immediateTrades.get(0).getLatitude(), immediateTrades.get(0).getLongitude())).thenReturn(distance);
-
-		List<SearchTradeResDto> result = searchService.searchKeywordAndFindTrades(word, reqDto);
-
-		assertThat(result.get(0).getTitle()).isEqualTo("Immediate banana");
-		assertThat(result.get(0).getDistance()).isEqualTo(distance);
-
-		verify(searchKeywordRepository, times(1)).findByWord(word);
-		verify(searchKeywordRepository, times(2)).save(any(SearchKeyword.class));
 
 	}
 
 	@Test
-	@DisplayName("검색 - 기존에 검색 이력이 있는 경우")
+	@DisplayName("검색어 저장 및 검색 결과 조회")
 	void searchKeywordAndFindTrades() {
+		// Given
 		String word = "banana";
-		SearchKeyword existingKeyword = SearchKeyword.builder()
-			.word(word)
-			.build();
 
-		when(searchKeywordRepository.findByWord(word)).thenReturn(Optional.of(existingKeyword));
-		when(immediateTradeRepository.findImmediateTradesWithProduct(word, reqDto.getAddress1())).thenReturn(
-			immediateTrades);
-		when(distanceCalculator.calculateDistance(reqDto.getLatitude(), reqDto.getLongitude(),
-			immediateTrades.get(0).getLatitude(), immediateTrades.get(0).getLongitude())).thenReturn(distance);
+		when(redisTemplate.execute(any(SessionCallback.class)))
+			.thenReturn(Arrays.asList(1D, true));
+		when(immediateTradeRepository.findImmediateTradesWithProduct(word, TEST_LOCATION))
+			.thenReturn(immediateTrades);
+		when(periodTradeRepository.findPeriodTradesWithProduct(word, TEST_LOCATION))
+			.thenReturn(Collections.emptyList());
+		when(distanceCalculator.calculateDistance(
+			reqDto.getLatitude(), reqDto.getLongitude(),
+			immediateTrades.get(0).getLatitude(),
+			immediateTrades.get(0).getLongitude()))
+			.thenReturn(distance);
 
+		// When
 		List<SearchTradeResDto> result = searchService.searchKeywordAndFindTrades(word, reqDto);
 
-		assertThat(result.get(0).getTitle()).isEqualTo("Immediate banana");
+		// Then
+		assertThat(result).hasSize(1);
+		SearchTradeResDto dto = result.get(0);
+		assertThat(dto.getTitle()).isEqualTo("Immediate banana");
+		assertThat(dto.getDistance()).isEqualTo(distance);
+		assertThat(dto.getViewCount()).isEqualTo(10);
+		assertThat(dto.getTradeStatus()).isEqualTo(TradeStatus.PENDING);
 
-		verify(searchKeywordRepository, times(1)).findByWord(word);
-		verify(searchKeywordRepository, times(1)).save(any(SearchKeyword.class));
+		verify(redisTemplate).execute(any(SessionCallback.class));
+		verify(immediateTradeRepository).findImmediateTradesWithProduct(word, TEST_LOCATION);
+		verify(periodTradeRepository).findPeriodTradesWithProduct(word, TEST_LOCATION);
 	}
 
 	@Test
-	@DisplayName("검색 - 검색 결과가 없는 경우")
+	@DisplayName("검색 결과가 없는 경우")
 	void searchedNothing() {
-		String word = "apple";
-		SearchKeyword newKeyword = SearchKeyword.builder()
-			.word(word)
-			.build();
+		// Given
+		String word = "nonexistent";
 
-		when(searchKeywordRepository.findByWord(word)).thenReturn(Optional.empty());
-		when(searchKeywordRepository.save(any(SearchKeyword.class))).thenReturn(newKeyword);
+		when(redisTemplate.execute(any(SessionCallback.class)))
+			.thenReturn(Arrays.asList(1D, true));
+		when(immediateTradeRepository.findImmediateTradesWithProduct(word, TEST_LOCATION))
+			.thenReturn(Collections.emptyList());
+		when(periodTradeRepository.findPeriodTradesWithProduct(word, TEST_LOCATION))
+			.thenReturn(Collections.emptyList());
 
+		// When
 		List<SearchTradeResDto> result = searchService.searchKeywordAndFindTrades(word, reqDto);
 
+		// Then
+		assertThat(result).hasSize(1);
 		assertThat(result.get(0).getTitle()).isEqualTo("검색 결과가 없습니다.");
 
-		verify(searchKeywordRepository, times(1)).findByWord(word);
-		// save 를 2번 호출하게 됩니다. 생성에 1번, viewCount 를 업데이트 하는데 1번.
-		verify(searchKeywordRepository, times(2)).save(any(SearchKeyword.class));
+		verify(redisTemplate).execute(any(SessionCallback.class));
+		verify(immediateTradeRepository).findImmediateTradesWithProduct(word, TEST_LOCATION);
+		verify(periodTradeRepository).findPeriodTradesWithProduct(word, TEST_LOCATION);
 	}
 
 	@Test
-	@DisplayName("인기 top10")
+	@DisplayName("인기 검색어 조회")
 	void findPopularKeywords() {
-		List<SearchKeyword> searchKeywords = new ArrayList<>();
+		// Given
+		Set<ZSetOperations.TypedTuple<String>> mockTuples = new HashSet<>();
+		mockTuples.add(new DefaultTypedTuple<>("banana", 5.0));
+		mockTuples.add(new DefaultTypedTuple<>("apple", 3.0));
 
-		searchKeywords.add(
-			SearchKeyword.builder()
-				.word("banana")
-				.count(10L)
-				.build()
-		);
+		when(zSetOperations.rangeByScoreWithScores(anyString(), anyDouble(), anyDouble()))
+			.thenReturn(mockTuples);
+		when(redisTemplate.opsForZSet()).thenReturn(zSetOperations);
 
-		searchKeywords.add(
-			SearchKeyword.builder()
-				.word("apple")
-				.count(1L)
-				.build()
-		);
 
-		when(searchKeywordRepository.findTop10ByOrderByCountDesc()).thenReturn(searchKeywords);
+		// When
+		List<String> result = searchService.findPopularKeywords(TEST_LOCATION);
 
-		List<String> result = searchService.findPopularKeywords();
+		// Then
+		assertThat(result).hasSize(2);
+		assertThat(result).containsExactly("banana", "apple");
 
-		assertThat(result.get(0)).isEqualTo("banana");
-		assertThat(result.get(1)).isEqualTo("apple");
-	}
-
-	@Test
-	@DisplayName("인기 검색어를 찾을 수 없는 경우")
-	void findPopularKeywordsButFoundNothing() {
-		List<SearchKeyword> searchKeywords = new ArrayList<>();
-
-		when(searchKeywordRepository.findTop10ByOrderByCountDesc()).thenReturn(searchKeywords);
-
-		List<String> result = searchService.findPopularKeywords();
-
-		assertThat(result.get(0)).isEqualTo("인기 검색어를 찾을 수 없습니다");
-	}
-
-	@Test
-	@DisplayName("24시간이 지난 검색 기록 삭제")
-	void deleteHistoryOver24hours() {
-		ArgumentCaptor<LocalDateTime> captor = ArgumentCaptor.forClass(LocalDateTime.class);
-
-		searchService.deleteHistoryOver24hours();
-
-		verify(searchHistoryRepository, times(1)).deleteBySearchedAtBefore(captor.capture());
-		LocalDateTime capturedTime = captor.getValue();
-
-		// 24시간 전인지 확인
-		LocalDateTime expectedTime = LocalDateTime.now().minusHours(24);
-		assertThat(capturedTime).isBeforeOrEqualTo(expectedTime);
-		assertThat(capturedTime).isAfter(expectedTime.minusSeconds(5)); // 적절한 허용 오차
+		verify(zSetOperations, times(24)).rangeByScoreWithScores(anyString(), anyDouble(), anyDouble());
 	}
 }
