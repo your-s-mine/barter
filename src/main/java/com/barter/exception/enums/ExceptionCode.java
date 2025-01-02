@@ -66,6 +66,9 @@ public enum ExceptionCode {
 
 	// 채팅
 	SELF_CHAT_IS_INVALID(HttpStatus.BAD_REQUEST, "자신이 등록한 물품에 대한 채팅을 불가능합니다."),
+
+	// 검색
+	FAIL_TO_FETCH_TRADE_RESULT(HttpStatus.SERVICE_UNAVAILABLE, "검색 결과를 불러오는데 실패했습니다."),
 	;
 
 	private final HttpStatus code;
