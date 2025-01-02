@@ -520,7 +520,7 @@ class PeriodTradeServiceTest {
 		// then
 		assertThat(result).isNotNull();
 		assertThat(result.getTitle()).isEqualTo(resDto.getTitle());
-		assertThat(periodTrade.getViewCount()).isEqualTo(1);
+		assertThat(periodTrade.getViewCount()).isEqualTo(0); // 캐싱처리 되어야 하므로
 		verify(periodTradeRepository, times(1)).findById(id);
 
 	}

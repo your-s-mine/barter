@@ -2,6 +2,7 @@ package com.barter.domain.trade.periodtrade.service;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -28,7 +29,7 @@ public class PeriodTradeCacheService {
 	private final RedisTemplate<String, List<FindPeriodTradeResDto>> redisTemplate;
 
 	@Qualifier("periodTradeCountRedisTemplate")
-	private final RedisTemplate<String, Long> periodTradeCountRedisTemplate;
+	private final RedisTemplate<String, Long> periodTradeLongRedisTemplate;
 
 	public PeriodTradeCacheService(PeriodTradeRepository periodTradeRepository,
 		PeriodTradeCustomRepositoryImpl periodTradeCustomRepository,
@@ -37,27 +38,40 @@ public class PeriodTradeCacheService {
 		this.periodTradeRepository = periodTradeRepository;
 		this.redisTemplate = redisTemplate;
 		this.periodTradeCustomRepository = periodTradeCustomRepository;
-		this.periodTradeCountRedisTemplate = periodTradeCountRedisTemplate;
+		this.periodTradeLongRedisTemplate = periodTradeCountRedisTemplate;
 
 	}
 
+	// 조회 수 -------------------------------------------------------------
+
 	private static final String PERIOD_TRADE_CACHE_KEY = "periodTrades";
 
-	// @Scheduled(fixedRate = 6000000) // 1분 마다 캐시 업데이트
-	// public void updateCache() {
-	//
-	// 	List<FindPeriodTradeResDto> periodTradeResDtos = periodTradeRepository.findAll()
-	// 		.stream()
-	// 		.map(FindPeriodTradeResDto::from)
-	// 		.toList();
-	//
-	//
-	//
-	// 	log.info("기간 교환 캐시 업데이트 진행 {}", LocalDateTime.now());
-	// 	log.info("캐싱 정보 {}", periodTradeResDtos);
-	// 	//redisTemplate.opsForValue().set(PERIOD_TRADE_CACHE_KEY, periodTradeResDtos);
-	// }
+	// 조회 수 증가
+	public void addViewCount(PeriodTrade periodTrade) {
+		String cacheKey = PERIOD_TRADE_CACHE_KEY + "_VIEWCOUNT_" + periodTrade.getId();
+		periodTradeLongRedisTemplate.opsForValue().increment(cacheKey, 1);
 
+	}
+
+	// 조회 수 가져오기
+	public Long getViewCount(Long periodTradeId) {
+		String cacheKey = PERIOD_TRADE_CACHE_KEY + "_VIEWCOUNT_" + periodTradeId;
+		Long viewCount = periodTradeLongRedisTemplate.opsForValue().get(cacheKey);
+		return viewCount != null ? viewCount : 0L;
+	}
+
+	// 조회 수 Key 값 조회
+	public Set<String> getViewCountKeys() {
+		return periodTradeLongRedisTemplate.keys(PERIOD_TRADE_CACHE_KEY + "_VIEWCOUNT_*");
+	}
+
+	// 캐시에서 삭제
+	public void deleteCachedViewCount(Long periodTradeId) {
+		String cacheKey = PERIOD_TRADE_CACHE_KEY + "_VIEWCOUNT_" + periodTradeId;
+		periodTradeLongRedisTemplate.delete(cacheKey);
+	}
+
+	// 기간 교환 조회 ---------------------------------------------------------
 	// 캐시에서 데이터 조회
 	public Page<FindPeriodTradeResDto> getPeriodTradesFromCache(Pageable pageable) {
 		System.out.println("기간 교환 캐시 도입 부");
@@ -108,11 +122,11 @@ public class PeriodTradeCacheService {
 	private static final String TOTAL_TRADES_COUNT_CACHE_KEY = "totalTradesCount";
 
 	private long countTotalTrades() {
-		Long cachedCount = periodTradeCountRedisTemplate.opsForValue().get(TOTAL_TRADES_COUNT_CACHE_KEY);
+		Long cachedCount = periodTradeLongRedisTemplate.opsForValue().get(TOTAL_TRADES_COUNT_CACHE_KEY);
 
 		if (cachedCount == null) {
 			long totalTradesCount = periodTradeRepository.count();
-			periodTradeCountRedisTemplate.opsForValue()
+			periodTradeLongRedisTemplate.opsForValue()
 				.set(TOTAL_TRADES_COUNT_CACHE_KEY, totalTradesCount, Duration.ofMinutes(10));
 			System.out.println("카운트 캐싱 실행됨");
 			return totalTradesCount;
