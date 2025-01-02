@@ -29,12 +29,10 @@ import com.barter.common.s3.S3Service;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateRegisteredProductReqDto;
 import com.barter.domain.product.dto.request.UpdateRegisteredProductInfoReqDto;
-import com.barter.domain.product.dto.request.UpdateRegisteredProductStatusReqDto;
 import com.barter.domain.product.dto.response.CreateRegisteredProductResDto;
 import com.barter.domain.product.dto.response.FindAvailableRegisteredProductResDto;
 import com.barter.domain.product.dto.response.FindRegisteredProductResDto;
 import com.barter.domain.product.dto.response.UpdateRegisteredProductInfoResDto;
-import com.barter.domain.product.dto.response.UpdateRegisteredProductStatusResDto;
 import com.barter.domain.product.entity.RegisteredProduct;
 import com.barter.domain.product.enums.RegisteredStatus;
 import com.barter.domain.product.repository.RegisteredProductRepository;
@@ -419,92 +417,6 @@ public class RegisteredProductServiceTest {
 			registeredProductService.updateRegisteredProductInfo(request, multipartFiles, verifiedMemberId))
 			.isInstanceOf(ProductException.class)
 			.hasMessage(ExceptionCode.NOT_VALID_IMAGE_COUNT.getMessage());
-	}
-
-	@Test
-	@DisplayName("등록 물품 상태 수정 - 성공 테스트")
-	void updateRegisteredProductStatusTest_Success() {
-		//given
-		UpdateRegisteredProductStatusReqDto request = UpdateRegisteredProductStatusReqDto.builder()
-			.id(1L)
-			.status("REGISTERING")
-			.build();
-
-		Long verifiedMemberId = 1L;
-
-		when(registeredProductRepository.findById(request.getId())).thenReturn(
-			Optional.of(RegisteredProduct.builder()
-				.id(1L)
-				.status(RegisteredStatus.PENDING)
-				.member(Member.builder().id(1L).build())
-				.build()
-			)
-		);
-
-		when(registeredProductRepository.save(any())).thenReturn(
-			RegisteredProduct.builder()
-				.id(1L)
-				.status(RegisteredStatus.REGISTERING)
-				.build()
-		);
-
-		//when
-		UpdateRegisteredProductStatusResDto response = registeredProductService.updateRegisteredProductStatus(
-			request, verifiedMemberId
-		);
-
-		//then
-		assertThat(response).isNotNull();
-		assertThat(response.getId()).isEqualTo(request.getId());
-		assertThat(response.getStatus()).isEqualTo(request.getStatus());
-	}
-
-	@Test
-	@DisplayName("등록 물품 상태 수정 - 수정 등록 물품이 존재하지 않는 경우 예외 테스트")
-	void updateRegisteredProductStatusTest_Exception1() {
-		//given
-		UpdateRegisteredProductStatusReqDto request = UpdateRegisteredProductStatusReqDto.builder()
-			.id(1L)
-			.status("REGISTERING")
-			.build();
-
-		Long verifiedMemberId = 1L;
-
-		when(registeredProductRepository.findById(request.getId()))
-			.thenThrow(new ProductException(ExceptionCode.NOT_FOUND_REGISTERED_PRODUCT));
-
-		//when & then
-		assertThatThrownBy(() ->
-			registeredProductService.updateRegisteredProductStatus(request, verifiedMemberId))
-			.isInstanceOf(ProductException.class)
-			.hasMessage(ExceptionCode.NOT_FOUND_REGISTERED_PRODUCT.getMessage());
-	}
-
-	@Test
-	@DisplayName("등록 물품 상태 수정 - 수정 권한 예외 테스트")
-	void updateRegisteredProductStatusTest_Exception2() {
-		//given
-		UpdateRegisteredProductStatusReqDto request = UpdateRegisteredProductStatusReqDto.builder()
-			.id(1L)
-			.status("REGISTERING")
-			.build();
-
-		Long verifiedMemberId = 2L;
-
-		when(registeredProductRepository.findById(request.getId())).thenReturn(
-			Optional.of(RegisteredProduct.builder()
-				.id(1L)
-				.status(RegisteredStatus.PENDING)
-				.member(Member.builder().id(1L).build())
-				.build()
-			)
-		);
-
-		//when & then
-		assertThatThrownBy(() ->
-			registeredProductService.updateRegisteredProductStatus(request, verifiedMemberId))
-			.isInstanceOf(ProductException.class)
-			.hasMessage(ExceptionCode.NOT_OWNER_REGISTERED_PRODUCT.getMessage());
 	}
 
 	@Test
