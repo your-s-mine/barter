@@ -44,4 +44,5 @@ out/
 application.properties
 application.yml
 application-local.yml
+docker-compose-local.yml
 .env

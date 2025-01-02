@@ -1,6 +1,9 @@
 package com.barter.domain.notification.service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -100,22 +103,33 @@ public class NotificationService implements MessageListener {
 		publishEvent("activity", publishMessage);
 	}
 
+	@Transactional
 	public void saveKeywordNotification(
 		EventKind eventKind, List<Long> memberIds, TradeType tradeType, Long tradeId
 	) {
 		String completedEventMessage = eventKind.getEventMessage();
 
-		for (Long memberId : memberIds) {
+		List<Notification> keywordNotifications = new ArrayList<>();
+		Set<PublishMessageDto> keywordMessages = new HashSet<>();
+
+		memberIds.parallelStream().forEach(memberId -> {
 			Notification createdNotification = Notification.createKeywordNotification(
 				completedEventMessage, tradeType, tradeId, memberId
 			);
-			Notification savedNotification = notificationRepository.save(createdNotification);
+			synchronized (keywordNotifications) {
+				keywordNotifications.add(createdNotification);
+			}
 
 			PublishMessageDto publishMessage = PublishMessageDto.from(
-				eventKind.getEventName(), SendEventResDto.from(savedNotification)
+				eventKind.getEventName(), SendEventResDto.from(createdNotification)
 			);
-			publishEvent("keyword", publishMessage);
-		}
+			synchronized (keywordMessages) {
+				keywordMessages.add(publishMessage);
+			}
+		});
+
+		notificationRepository.bulkInsert(keywordNotifications);
+		publishAllEvent("keyword", keywordMessages);
 	}
 
 	private void publishEvent(String channel, PublishMessageDto data) {
@@ -125,6 +139,17 @@ public class NotificationService implements MessageListener {
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private void publishAllEvent(String channel, Set<PublishMessageDto> data) {
+		data.parallelStream().forEach(message -> {
+			try {
+				String jsonData = objectMapper.writeValueAsString(message);
+				redisTemplate.convertAndSend(channel, jsonData);
+			} catch (JsonProcessingException e) {
+				throw new RuntimeException(e);
+			}
+		});
 	}
 
 	@Override

@@ -47,7 +47,6 @@ public class SseEmitters {
 		SseEmitter emitter = emitterMap.get(data.getData().getMemberId());
 		if (emitter == null) {
 			// 전달 대상 사용자의 SseEmitter 가 없다면 접속하지 않은 사용자이므로 이벤트 전달 중지
-			log.info("전달 대상 사용자 접속하지 않음");
 			return;
 		}
 
