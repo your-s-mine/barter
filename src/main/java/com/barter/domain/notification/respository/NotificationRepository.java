@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.barter.domain.notification.entity.Notification;
 
-public interface NotificationRepository extends JpaRepository<Notification, Long>, FlushNotificationRepository {
+public interface NotificationRepository extends JpaRepository<Notification, Long>, NotificationJdbcRepository {
 
 	@Query(value = "SELECT n FROM Notification AS n WHERE n.notificationType = 'ACTIVITY' AND n.memberId = :memberId")
 	Page<Notification> findAllActivityNotification(Pageable pageable, @Param("memberId") Long memberId);

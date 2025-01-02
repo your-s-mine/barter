@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.barter.domain.notification.entity.Notification;
 
-public interface FlushNotificationRepository {
+public interface NotificationJdbcRepository {
 
 	void bulkInsert(List<Notification> notifications);
 }

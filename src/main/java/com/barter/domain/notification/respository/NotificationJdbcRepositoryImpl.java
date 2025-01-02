@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 @Repository
 @RequiredArgsConstructor
-public class FlushNotificationRepositoryImpl implements FlushNotificationRepository {
+public class NotificationJdbcRepositoryImpl implements NotificationJdbcRepository {
 
 	private final JdbcTemplate jdbcTemplate;
 
