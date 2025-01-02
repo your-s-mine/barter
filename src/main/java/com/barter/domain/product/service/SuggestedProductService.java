@@ -13,12 +13,10 @@ import com.barter.common.s3.S3Service;
 import com.barter.domain.member.entity.Member;
 import com.barter.domain.product.dto.request.CreateSuggestedProductReqDto;
 import com.barter.domain.product.dto.request.UpdateSuggestedProductInfoReqDto;
-import com.barter.domain.product.dto.request.UpdateSuggestedProductStatusReqDto;
 import com.barter.domain.product.dto.response.CreateSuggestedProductResDto;
 import com.barter.domain.product.dto.response.FindAvailableSuggestedProductResDto;
 import com.barter.domain.product.dto.response.FindSuggestedProductResDto;
 import com.barter.domain.product.dto.response.UpdateSuggestedProductInfoResDto;
-import com.barter.domain.product.dto.response.UpdateSuggestedProductStatusResDto;
 import com.barter.domain.product.entity.SuggestedProduct;
 import com.barter.domain.product.repository.SuggestedProductRepository;
 import com.barter.domain.product.validator.ImageCountValidator;
@@ -87,20 +85,6 @@ public class SuggestedProductService {
 		foundProduct.updateInfo(request);
 		SuggestedProduct updatedProduct = suggestedProductRepository.save(foundProduct);
 		return UpdateSuggestedProductInfoResDto.from(updatedProduct);
-	}
-
-	@Transactional
-	public UpdateSuggestedProductStatusResDto updateSuggestedProductStatus(
-		UpdateSuggestedProductStatusReqDto request, Long verifiedMemberId
-	) {
-		SuggestedProduct foundProduct = suggestedProductRepository.findById(request.getId())
-			.orElseThrow(() -> new ProductException(ExceptionCode.NOT_FOUND_SUGGESTED_PRODUCT));
-
-		foundProduct.checkPermission(verifiedMemberId);
-
-		foundProduct.updateStatus(request.getStatus());
-		SuggestedProduct updatedProduct = suggestedProductRepository.save(foundProduct);
-		return UpdateSuggestedProductStatusResDto.from(updatedProduct);
 	}
 
 	@Transactional
