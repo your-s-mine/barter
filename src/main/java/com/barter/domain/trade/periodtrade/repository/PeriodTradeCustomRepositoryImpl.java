@@ -1,5 +1,6 @@
 package com.barter.domain.trade.periodtrade.repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -7,7 +8,6 @@ import org.springframework.stereotype.Repository;
 
 import com.barter.domain.trade.periodtrade.entity.PeriodTrade;
 import com.barter.domain.trade.periodtrade.entity.QPeriodTrade;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import jakarta.persistence.EntityManager;
@@ -25,48 +25,23 @@ public class PeriodTradeCustomRepositoryImpl implements PeriodTradeCustomReposit
 	@Override
 	public List<PeriodTrade> paginationCoveringIndex(Pageable pageable) {
 
-		if (pageable.getPageNumber() == 0) {
-			return jpaqUeryFactory
-				.selectFrom(qPeriodTrade)
-				.orderBy(qPeriodTrade.updatedAt.desc())
-				.limit(pageable.getPageSize())
-				.fetch();
-		}
-
-		Long lastId = getLastIdForPage(pageable);
-
-		if (lastId == null) {
-			return List.of();
-		}
-
-		System.out.println("lastId = " + lastId);
-
-		return jpaqUeryFactory
-			.selectFrom(qPeriodTrade)
-			.where(lastIdCondition(lastId))
-			.orderBy(qPeriodTrade.updatedAt.desc())
-			.limit(pageable.getPageSize())
-			.fetch();
-	}
-
-	private Long getLastIdForPage(Pageable pageable) {
-		int pageNumber = pageable.getPageNumber();
-		int pageSize = pageable.getPageSize();
-
-		return jpaqUeryFactory
+		List<Long> ids = jpaqUeryFactory
 			.select(qPeriodTrade.id)
 			.from(qPeriodTrade)
 			.orderBy(qPeriodTrade.updatedAt.desc())
-			.offset((long)pageNumber * pageSize)
-			.limit(1)
-			.fetchOne();
-	}
+			.limit(pageable.getPageSize())
+			.offset((long)pageable.getPageNumber() * pageable.getPageSize())
+			.fetch();
 
-	private BooleanExpression lastIdCondition(Long lastId) {
-		if (lastId == null) {
-			return null;
+		if (ids.isEmpty()) {
+			return new ArrayList<>();
 		}
-		return qPeriodTrade.id.lt(lastId);
+
+		return jpaqUeryFactory
+			.selectFrom(qPeriodTrade)
+			.where(qPeriodTrade.id.in(ids))
+			.orderBy(qPeriodTrade.updatedAt.desc())
+			.fetch();
 	}
 
 }
