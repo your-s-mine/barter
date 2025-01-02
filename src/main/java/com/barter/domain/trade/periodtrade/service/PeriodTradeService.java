@@ -202,7 +202,6 @@ public class PeriodTradeService {
 
 		if (reqDto.getTradeStatus().equals(TradeStatus.CLOSED)) {
 
-			// allTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changStatusPending());
 			// 기존 제안자들의 ID 값이 필요해 위의 코드를 아래와 같이 수정하였습니다.
 			Set<Long> suggesterIds = new HashSet<>();
 			for (TradeProduct tradeProduct : allTradeProducts) {
@@ -274,11 +273,10 @@ public class PeriodTradeService {
 		);
 		periodTrade.validateAuthority(member.getId());
 
-		// 아래 두 줄은 없어도 될 것 같긴 하다.
 		periodTrade.validateIsCompleted();
 		periodTrade.validateIsClosed();
 
-		// 해당하는 교환 id, 교환 타입 에 맞게 제안된 물품들을 조회 -> 추후 삭제 필요 (교환 완료, 만료 시)
+		// 해당하는 교환 id, 교환 타입 에 맞게 제안된 물품들을 조회
 		List<TradeProduct> tradeProducts = tradeProductRepository.findAllByTradeIdAndTradeType(id, TradeType.PERIOD);
 
 		Long canceledMemberId = 0L;
