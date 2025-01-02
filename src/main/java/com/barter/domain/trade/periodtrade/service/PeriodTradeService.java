@@ -202,7 +202,6 @@ public class PeriodTradeService {
 
 		if (reqDto.getTradeStatus().equals(TradeStatus.CLOSED)) {
 
-			// allTradeProducts.forEach(tradeProduct -> tradeProduct.getSuggestedProduct().changStatusPending());
 			// 기존 제안자들의 ID 값이 필요해 위의 코드를 아래와 같이 수정하였습니다.
 			Set<Long> suggesterIds = new HashSet<>();
 			for (TradeProduct tradeProduct : allTradeProducts) {
