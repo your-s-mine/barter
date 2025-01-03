@@ -66,15 +66,10 @@ public class DonationTradeController {
 	public ResponseEntity<SuggestDonationTradeResDto> suggestDonationTrade(
 		VerifiedMember verifiedMember,
 		@PathVariable("tradeId") Long tradeId
-	) throws Throwable {
+	) {
 		return ResponseEntity
 			.status(HttpStatus.OK)
-			.body(
-				redissonLockService.process(
-					"donationTrades",
-					tradeId,
-					10,
-					() -> donationTradeService.suggestDonationTrade(verifiedMember, tradeId)));
+			.body(donationTradeService.suggestDonationTrade(verifiedMember, tradeId));
 	}
 
 	@PatchMapping("/{tradeId}")
