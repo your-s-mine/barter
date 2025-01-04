@@ -103,7 +103,7 @@ public class DonationTradeService {
 		donationTradeRepository.delete(donationTrade);
 	}
 
-	@Transactional(timeout = 100)
+	@Transactional(timeout = 3)
 	public SuggestDonationTradeResDto suggestDonationTrade(VerifiedMember verifiedMember, Long tradeId) {
 		if (donationProductMemberRepository.existsByMemberIdAndDonationTradeId(verifiedMember.getId(), tradeId)) {
 			throw new IllegalStateException("이미 요청한 유저입니다.");
