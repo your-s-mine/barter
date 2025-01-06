@@ -104,7 +104,7 @@ public class DonationTradeService {
 		donationTradeRepository.delete(donationTrade);
 	}
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@Transactional(timeout = 5, propagation = Propagation.REQUIRES_NEW)
 	public SuggestDonationTradeResDto suggestDonationTrade(VerifiedMember verifiedMember, Long tradeId) {
 		if (donationProductMemberRepository.existsByMemberIdAndDonationTradeId(verifiedMember.getId(), tradeId)) {
 			throw new IllegalStateException("이미 요청한 유저입니다.");

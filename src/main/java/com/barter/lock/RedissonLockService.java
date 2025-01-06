@@ -11,12 +11,12 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class RedissonLockService {
+public class RedissonLockService implements DistributeLockService {
 
 	private final RedissonClient redissonClient;
 
-	public <T> T process(String methodName, Long tradeId, int timeoutSeconds, Supplier<T> supplier) throws Throwable {
-		final RLock lock = redissonClient.getLock(String.format(methodName, tradeId));
+	public <T> T process(String rockName, int timeoutSeconds, Supplier<T> supplier) throws Throwable {
+		final RLock lock = redissonClient.getLock(rockName);
 		try {
 			boolean available = lock.tryLock(timeoutSeconds, TimeUnit.SECONDS);
 			if (!available) {
