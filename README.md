@@ -26,7 +26,8 @@
 
 ## 아키텍처
 ### 서비스 구성도
-![image](https://github.com/user-attachments/assets/26f33a6c-b984-4381-a5cc-d7999bc75145)
+![image](https://github.com/user-attachments/assets/e1ab8bf9-b571-42c3-a997-f65c4ff86ef3)
+
 ### CI/CD 흐름도
 ![image](https://github.com/user-attachments/assets/464910cf-d602-4444-ae78-c60252f77ec9)
 
